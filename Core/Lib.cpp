@@ -1,7 +1,7 @@
 #ifndef RDK_UPyMachineLearningLib_CPP
 #define RDK_UPyMachineLearningLib_CPP
 
-#include "UPyMachineLearningLib.h"
+#include "Lib.h"
 
 namespace RDK {
 

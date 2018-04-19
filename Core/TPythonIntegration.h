@@ -7,9 +7,27 @@ namespace RDK {
 
 class TPythonIntegration: public RDK::UNet
 {
-protected: // Свойства           
+public: // Свойства
+/// Параметр
+ULProperty<int,TPythonIntegration> Param1;
+
+/// Входное изображение
+UPropertyInputData<UBitmap,TPythonIntegration> InputImage;
+
+/// Выходная матрица с рамками объектов
+UPropertyOutputData<MDMatrix<int>,TPythonIntegration> Detections;
+
+/// Выходная матрица с рамками объектов
+UPropertyOutputData<MDMatrix<int>,TPythonIntegration> DetectionClass;
+
+/// Выходная матрица с рамками объектов
+UPropertyOutputData<MDMatrix<double>,TPythonIntegration> DetectionReliability;
+
+UPropertyOutputData<UBitmap,TPythonIntegration> DebugImage;
 
 protected: // Переменные состояния
+
+UGraphics Graph;
 
 public: // Методы
 // --------------------------
@@ -34,12 +52,15 @@ virtual ~TPythonIntegration(void);
 // --------------------------
 // Выделяет память для новой чистой копии объекта этого класса
 virtual TPythonIntegration* New(void);
-// --------------------------        
+// --------------------------
 
 // --------------------------
-// Скрытые методы управления счетом 
+// Скрытые методы управления счетом
 // --------------------------
 protected:
+virtual void AInit(void);
+virtual void AUnInit(void);
+
 // Восстановление настроек по умолчанию и сброс процесса счета
 virtual bool ADefault(void);
 
