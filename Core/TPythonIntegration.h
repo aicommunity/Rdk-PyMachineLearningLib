@@ -2,6 +2,8 @@
 #define RDK_TPythonIntegrationH
 
 #include "../../../Rdk/Deploy/Include/rdk.h"
+#include <boost/python.hpp>
+#include <boost/python/detail/wrap_python.hpp>
 
 namespace RDK {
 
@@ -24,6 +26,8 @@ UPropertyOutputData<MDMatrix<int>,TPythonIntegration> DetectionClass;
 UPropertyOutputData<MDMatrix<double>,TPythonIntegration> DetectionReliability;
 
 UPropertyOutputData<UBitmap,TPythonIntegration> DebugImage;
+
+boost::python::object IntegrationInterfaceInstance;
 
 protected: // Переменные состояния
 

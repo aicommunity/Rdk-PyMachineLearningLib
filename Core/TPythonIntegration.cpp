@@ -2,6 +2,12 @@
 #define RDK_TPythonIntegrationCPP
 
 #include "TPythonIntegration.h"
+#include "TPythonIntegrationUtil.h"
+#include <iostream>
+#include <boost/python.hpp>
+#include <boost/python/detail/wrap_python.hpp>
+
+namespace py = boost::python;
 
 namespace RDK {
 
@@ -51,6 +57,44 @@ TPythonIntegration* TPythonIntegration::New(void)
 // --------------------------
 void TPythonIntegration::AInit(void)
 {
+    try
+    {
+        Py_Initialize();  // инициализаци€ интерпретатора
+        py::object MainModule = py::import("__main__");  // импортируем main-scope, см. https://docs.python.org/3/library/__main__.html
+        py::object MainNamespace = MainModule.attr("__dict__");  // извлекаем область имен
+
+        // TODO: путь дл€ импорта файла брать из конфига
+        // загрузка кода из файла в извлеченную область имен
+        py::object PythonIntegrationInterface = RDK::import("python_integration_interface",
+         "/home/arnold/dev/rtc/nmsdk2/nmsdk2/Libraries/Rdk-PyMachineLearningLib/PythonScripts/python_integration_interface.py",
+         MainNamespace);
+        // экземпл€р питоновского класса, через который можно выбрать virtualenv-среду
+        py::object VirtualEnvInitializer = PythonIntegrationInterface.attr("VirtualEnvInitializer")();
+        const char* TmpVirtualenv = std::getenv("VIRTUAL_ENV");  // провер€ем, задан ли путь до virtualenv-серды
+
+        // TODO: отрефакторить одинаковые куски
+        if (TmpVirtualenv) {
+            std::string VirtualEnvPath(TmpVirtualenv);
+            std::cout << "[CPP] Virtual env path: " << VirtualEnvPath << std::endl;
+            VirtualEnvInitializer.attr("activate_virtual_environment")(VirtualEnvPath);
+        }
+        else {
+            std::string VirtualEnvPath = "/home/arnold/dev/rtc/pythonintegr/pyintcb/helccb/pyintenv";  // TODO: брать из конфига
+            std::cout << "[CPP] Change interpreter to virtualenv" << std::endl;
+            VirtualEnvInitializer.attr("activate_virtual_environment")(VirtualEnvPath);  // активаци€ выбранной среды по пути
+        }
+
+        // инициализируем экземпл€р класса, через который будем вызывать нужные питоновские методы
+        IntegrationInterfaceInstance = PythonIntegrationInterface.attr("IntegrationInterface")();
+        std::cout << "Python init success!" << std::endl;
+    }
+    catch (py::error_already_set const &)
+    {
+        std::string perrorStr = RDK::parse_python_exception();
+        // TODO: логировать и выдавать ошибку с прекращением программы
+        std::cout << "Error occured:" << std::endl << perrorStr << std::endl;
+    }
+
 }
 
 void TPythonIntegration::AUnInit(void)
@@ -87,6 +131,8 @@ bool TPythonIntegration::ACalculate(void)
 
  Graph.SetCanvas(&*DebugImage);
  *DebugImage=*InputImage;
+ DebugImage->ReflectionX();
+ LogMessageEx(RDK_EX_INFO,__FUNCTION__,"test");
 
  RDK::UBitmap& input_img=*InputImage;
  MDMatrix<int> &detections=*Detections;
@@ -96,6 +142,17 @@ bool TPythonIntegration::ACalculate(void)
  /// “ут считаем
 
  /// ј теперь раскладываем результаты по выходам
+ try
+ {
+    IntegrationInterfaceInstance.attr("predict_with_keras")();
+ }
+ catch (py::error_already_set const &)
+ {
+    std::string perrorStr = RDK::parse_python_exception();
+    // TODO: логировать
+    std::cout << "Error occured:" << std::endl << perrorStr << std::endl;
+ }
+
 
  int num_objects(0);
  for(int i=0;i<num_objects;i++)
