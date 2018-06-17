@@ -1,0 +1,71 @@
+Шаги можно пропускать, если пакеты уже в наличии.
+
+Сначала устанавливаем зависимости питона:
+
+sudo apt-get install python3-dev
+
+Далее устанавливаем numpy
+
+sudo apt-get install python-numpy
+
+После этого устанавливаем Boost
+
+sudo apt-get install libboost-all-dev
+
+Если уже есть установленный Boost, но отсутствует связь с питоном, то ставим этот пакет:
+
+sudo apt-get install libboost-python-dev
+
+Если версия Boost'а < 1.63, то необходимо скачать и установить библиотеку Boost.NumPy
+
+https://github.com/ndarray/Boost.NumPy
+
+Как билдить: https://github.com/ndarray/Boost.NumPy/blob/master/libs/numpy/doc/cmakeBuild.rst
+
+ДЛЯ PYTHON 3
+*****
+
+Для форсирования сборки под Python3 добавляем цифру 3 в поиск питоновских либ для сборки, то есть меняем
+
+# find required python packages
+find_package(PythonInterp REQUIRED)
+find_package(PythonLibs REQUIRED)
+find_package(NumPy REQUIRED)
+
+на
+
+# find required python packages
+find_package(PythonInterp 3 REQUIRED)
+find_package(PythonLibs 3 REQUIRED)
+find_package(NumPy REQUIRED)
+
+*****
+
+Перед сборкой надо убедиться, что среди динамических библиотек Boost присутствует библиотека libboost_python3.so
+Если ее нет, то нужно поискать библиотеки libboost_python-py3*.so и сделать символьную ссылку
+
+ln /path/to/libboost_python-py3*.so /path/to/libboost_python3.so
+
+Как билдить, кратко. Создаем в корне репозитория папку build, переходим в нее, запускаем cmake:
+mkdir build
+cd build
+cmake ..
+make
+make install
+
+Возможно где-то потребуется выполнить команды от лица sudo-юзера.
+
+Для подключения Boost.Python в проект необходимо добавить соответствующие библиотеки в компоновщик:
+libboost_python3.so (или libboost_python-py3*.so)
+libpython-3.*.so
+Если BOOST_VERSION < 1.63, то ищем libboost_numpy.so
+
+Кроме этого компоновщику и компилятору нужно показать путь к библиотекам, сюда добавляем путь до библиотек питона, нампая, буста.
+
+Код инициализации интерпретатора есть в TPythonIntegration.cpp
+
+Частые ошибки при сборке проекта:
+
+- если ругается на _ARRAY_API, убедиться, что корректно подключен NumPy и вызван import_array()
+- если ругается на отсутствие PyConfig.h, то необходимо убедиться, что корректно прописан пусть к библиотекам Python
+
