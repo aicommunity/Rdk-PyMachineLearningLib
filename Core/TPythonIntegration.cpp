@@ -1,3 +1,4 @@
+#define PY_ARRAY_UNIQUE_SYMBOL pbcvt_ARRAY_API
 #ifndef RDK_TPythonIntegrationCPP
 #define RDK_TPythonIntegrationCPP
 
@@ -6,8 +7,11 @@
 #include <iostream>
 #include <boost/python.hpp>
 #include <boost/python/detail/wrap_python.hpp>
+#include <boost/numpy.hpp>
+#include "pyboostcvconverter.hpp"
 
 namespace py = boost::python;
+namespace np = boost::numpy;
 
 namespace RDK {
 
@@ -51,6 +55,18 @@ TPythonIntegration* TPythonIntegration::New(void)
 }
 // --------------------------
 
+#if (PY_VERSION_HEX >= 0x03000000)
+
+    static void *init_py() {
+#else
+        static void init_py(){
+#endif
+        Py_Initialize();
+
+        import_array();
+        np::initialize();
+        return NUMPY_IMPORT_ARRAY_RETVAL;
+    }
 
 // --------------------------
 // —крытые методы управлени€ счетом
@@ -59,40 +75,29 @@ void TPythonIntegration::AInit(void)
 {
     try
     {
-        Py_Initialize();  // инициализаци€ интерпретатора
+        init_py();
+        py::to_python_converter<cv::Mat, pbcvt::matToNDArrayBoostConverter>();
+        py::to_python_converter<RDK::UBitmap, pbcvt::uBitmapToNDArrayBoostConverter>();
         py::object MainModule = py::import("__main__");  // импортируем main-scope, см. https://docs.python.org/3/library/__main__.html
         py::object MainNamespace = MainModule.attr("__dict__");  // извлекаем область имен
 
         // TODO: путь дл€ импорта файла брать из конфига
         // загрузка кода из файла в извлеченную область имен
-        py::object PythonIntegrationInterface = RDK::import("python_integration_interface",
-         "/home/arnold/dev/rtc/nmsdk2/nmsdk2/Libraries/Rdk-PyMachineLearningLib/PythonScripts/python_integration_interface.py",
+        py::object ClassifierInterfaceModule = RDK::import("classifier_interface",
+         "/home/arnold/dev/rtc/nmsdk2/nmsdk2/Libraries/Rdk-PyMachineLearningLib/PythonScripts/classifier_interface.py",
          MainNamespace);
-        // экземпл€р питоновского класса, через который можно выбрать virtualenv-среду
-        py::object VirtualEnvInitializer = PythonIntegrationInterface.attr("VirtualEnvInitializer")();
-        const char* TmpVirtualenv = std::getenv("VIRTUAL_ENV");  // провер€ем, задан ли путь до virtualenv-серды
+        // экземпл€р питоновского класса, через который активируетс€ виртуальна€ среда и загружаетс€ модель
+        // TODO: пусть до среды брать из конфига
+        IntegrationInterfaceInstance = ClassifierInterfaceModule.attr("ClassifierEmbeddingInterface")("/home/arnold/.virtualenvs/cv");
 
-        // TODO: отрефакторить одинаковые куски
-        if (TmpVirtualenv) {
-            std::string VirtualEnvPath(TmpVirtualenv);
-            std::cout << "[CPP] Virtual env path: " << VirtualEnvPath << std::endl;
-            VirtualEnvInitializer.attr("activate_virtual_environment")(VirtualEnvPath);
-        }
-        else {
-            std::string VirtualEnvPath = "/home/arnold/dev/rtc/pythonintegr/pyintcb/helccb/pyintenv";  // TODO: брать из конфига
-            std::cout << "[CPP] Change interpreter to virtualenv" << std::endl;
-            VirtualEnvInitializer.attr("activate_virtual_environment")(VirtualEnvPath);  // активаци€ выбранной среды по пути
-        }
-
-        // инициализируем экземпл€р класса, через который будем вызывать нужные питоновские методы
-        IntegrationInterfaceInstance = PythonIntegrationInterface.attr("IntegrationInterface")();
-        std::cout << "Python init success!" << std::endl;
+        std::cout << "Python init successs" << std::endl;
     }
     catch (py::error_already_set const &)
     {
         std::string perrorStr = RDK::parse_python_exception();
         // TODO: логировать и выдавать ошибку с прекращением программы
         std::cout << "Error occured:" << std::endl << perrorStr << std::endl;
+        std::cout << "Python init fail" << std::endl;
     }
 
 }
@@ -144,7 +149,7 @@ bool TPythonIntegration::ACalculate(void)
  /// ј теперь раскладываем результаты по выходам
  try
  {
-    IntegrationInterfaceInstance.attr("predict_with_keras")();
+    IntegrationInterfaceInstance.attr("classify")(input_img);
  }
  catch (py::error_already_set const &)
  {
