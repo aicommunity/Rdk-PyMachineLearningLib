@@ -54,7 +54,6 @@
 		<Unit filename="../../Core/TPythonIntegration.h" />
 		<Unit filename="../../Core/TPythonIntegrationUtil.cpp" />
 		<Unit filename="../../Core/TPythonIntegrationUtil.h" />
-		<Unit filename="../../Core/pyboost_cv2_converter.cpp" />
 		<Unit filename="../../Core/pyboost_cv3_converter.cpp" />
 		<Unit filename="../../Core/pyboostcvconverter.hpp" />
 		<Extensions>
