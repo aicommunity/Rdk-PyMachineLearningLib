@@ -19,14 +19,14 @@ namespace RDK {
 // Методы
 // --------------------------
 // Конструкторы и деструкторы
-// --------------------------
+// --------------------------  //DetectionClass("DetectionClass",this),
 TPyAggregateClassifier::TPyAggregateClassifier(void)
-: Param1("Param1",this),
-  InputImage("InputImage",this),
+: InputImage("InputImage",this),
   Detections("Detections",this),
-  DetectionClass("DetectionClass",this),
-  DetectionReliability("DetectionReliability",this),
+  //DetectionReliability("DetectionReliability",this),
   DebugImage("DebugImage",this),
+  AggrRectsMatrix("AggrRectsMatrix", this),
+  AggrIdMatrix("AggrIdMatrix", this),
   InputFile("InputFile",this)
 {
 }
@@ -139,7 +139,6 @@ void TPyAggregateClassifier::AUnInit(void)
 // Восстановление настроек по умолчанию и сброс процесса счета
 bool TPyAggregateClassifier::ADefault(void)
 {
- Param1=0;
  return true;
 }
 
@@ -167,29 +166,61 @@ bool TPyAggregateClassifier::ACalculate(void)
  Graph.SetCanvas(&*DebugImage);
  *DebugImage=*InputImage;
  DebugImage->ReflectionX();
- LogMessageEx(RDK_EX_INFO,__FUNCTION__,"test");
+
+ Detections->Resize(AggrRectsMatrix->GetRows(), 6);
 
  RDK::UBitmap& input_img=*InputImage;
- MDMatrix<int> &detections=*Detections;
- MDMatrix<int> &detection_class=*DetectionClass;
- MDMatrix<double> &detection_reliability=*DetectionReliability;
+ //Пройти по всем агрегатам
+ for(int i = 0; i < AggrRectsMatrix->GetRows(); ++i)
+ {
+  (*Detections)(i, 0) = (*AggrIdMatrix)(i, 0);
+  (*Detections)(i, 1) = (*AggrRectsMatrix)(i, 0);
+  (*Detections)(i, 2) = (*AggrRectsMatrix)(i, 1);
+  (*Detections)(i, 3) = (*AggrRectsMatrix)(i, 2);
+  (*Detections)(i, 4) = (*AggrRectsMatrix)(i, 3);
+  int object_cls = -1;
 
- /// Тут считаем
+  UBitmap obj_rect;
+  int width = (*AggrRectsMatrix)(i, 2) - (*AggrRectsMatrix)(i, 0);
+  int height =(*AggrRectsMatrix)(i, 3) - (*AggrRectsMatrix)(i, 1);
+
+  obj_rect.SetRes(width, height, ubmY8);
+  input_img.CopyTo(0,0,(*AggrRectsMatrix)(i, 0), (*AggrRectsMatrix)(i, 1), width, height, obj_rect);
+
+  /// Тут считаем
+  try
+  {
+   py::object retval = IntegrationInterfaceInstance.attr("classify")(input_img);
+
+   object_cls = boost::python::extract<int>(retval);
+  }
+  catch (py::error_already_set const &)
+  {
+   std::string perrorStr = parse_python_exception();
+   // TODO: логировать
+   std::cout << "Error occured:" << std::endl << perrorStr << std::endl;
+   std::stringstream ss;
+   ss<<"Python ERROR:" << perrorStr;
+   LogMessageEx(RDK_EX_INFO,__FUNCTION__,ss.str());
+  }
+  if(object_cls!=-1)
+  {
+   Graph.SetPenColor(0x0000FF);
+   Graph.Rect((*AggrRectsMatrix)(i, 0),(*AggrRectsMatrix)(i, 1),(*AggrRectsMatrix)(i, 2),(*AggrRectsMatrix)(i, 3));
+  }
+  (*Detections)(i, 5) = object_cls;
+ }
+
+/*
+
+ //LogMessageEx(RDK_EX_INFO,__FUNCTION__,"test");
+ //MDMatrix<int> &detections=*Detections;
+ //MDMatrix<int> &detection_class=*DetectionClass;
+ //MDMatrix<double> &detection_reliability=*DetectionReliability;
+
 
  /// А теперь раскладываем результаты по выходам
- try
- {
-    py::object retval = IntegrationInterfaceInstance.attr("classify")(input_img);
 
-    int id = boost::python::extract<int>(retval);
-    int ooo=0;
- }
- catch (py::error_already_set const &)
- {
-    std::string perrorStr = parse_python_exception();
-    // TODO: логировать
-    std::cout << "Error occured:" << std::endl << perrorStr << std::endl;
- }
 
 
  int num_objects(0);
@@ -212,7 +243,7 @@ bool TPyAggregateClassifier::ACalculate(void)
 
   Graph.SetPenColor(0x0000FF);
   Graph.Rect(x,y,x+width,y+height);
- }
+ }*/
 
  return true;
 }

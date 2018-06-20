@@ -10,22 +10,24 @@ namespace RDK {
 class TPyAggregateClassifier: public RDK::UNet
 {
 public: // Свойства
-/// Параметр
-ULProperty<int,TPyAggregateClassifier> Param1;
-
 /// Входное изображение
 UPropertyInputData<UBitmap,TPyAggregateClassifier> InputImage;
 
 /// Входное изображение
 ULProperty<std::string,TPyAggregateClassifier, ptPubParameter> InputFile;
+
+//Входные матрицы с данными об обнаружениях
+/// строка матрицы содержит [Left Top Right Bottom] индексы и размеры симметричны с AggrIdMatrix
+UPropertyInputData<MDMatrix<int>, TPyAggregateClassifier, ptPubInput> AggrRectsMatrix;
+/// строка матрицы содержит [AggrID] индексы и размеры симметричны с AggrRectsMatrix
+UPropertyInputData<MDMatrix<int>, TPyAggregateClassifier, ptPubInput> AggrIdMatrix;
+
 /// Выходная матрица с рамками объектов
 UPropertyOutputData<MDMatrix<int>,TPyAggregateClassifier> Detections;
 
-/// Выходная матрица с рамками объектов
-UPropertyOutputData<MDMatrix<int>,TPyAggregateClassifier> DetectionClass;
 
 /// Выходная матрица с рамками объектов
-UPropertyOutputData<MDMatrix<double>,TPyAggregateClassifier> DetectionReliability;
+//UPropertyOutputData<MDMatrix<double>,TPyAggregateClassifier> DetectionReliability;
 
 UPropertyOutputData<UBitmap,TPyAggregateClassifier> DebugImage;
 
