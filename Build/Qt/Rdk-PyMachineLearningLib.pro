@@ -27,11 +27,11 @@ windows {
 HEADERS += \
     ../../Core/pyboostcvconverter.hpp \
     ../../Core/TPythonIntegrationUtil.h \
-    ../../Core/TPythonIntegration.h \
+    ../../Core/TPyAggregateClassifier.h \
     ../../Core/Lib.h
 
 SOURCES += \
     ../../Core/pyboost_cv3_converter.cpp \
     ../../Core/TPythonIntegrationUtil.cpp \
-    ../../Core/TPythonIntegration.cpp \
+    ../../Core/TPyAggregateClassifier.cpp \
     ../../Core/Lib.cpp

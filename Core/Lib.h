@@ -2,7 +2,8 @@
 #define RDK_UPyMachineLearningLib_H
 
 #include "../../../Rdk/Deploy/Include/rdk.h"
-#include "TPythonIntegration.h"
+//#include "TPythonIntegration.h"
+#include "TPyAggregateClassifier.h"
 
 namespace RDK {
 

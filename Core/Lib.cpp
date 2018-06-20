@@ -26,12 +26,15 @@ UPyMachineLearningLib::UPyMachineLearningLib(void)
 void UPyMachineLearningLib::CreateClassSamples(UStorage *storage)
 {
  //UploadClass<TPythonIntegration>("TPythonIntegration", "PythonIntegration");
- UContainer *cont=0;
+
+    /*UContainer *cont=0;
 
  cont=new TPythonIntegration;
  cont->Default();
  cont->SetName("PythonIntegration");
- UploadClass("TPythonIntegration",cont);
+ UploadClass("TPythonIntegration",cont);*/
+
+ UploadClass<TPyAggregateClassifier>("TPyAggregateClassifier","PyAggregateClassifier");
 }
 // --------------------------
 

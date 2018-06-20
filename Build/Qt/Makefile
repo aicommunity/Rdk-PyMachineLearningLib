@@ -47,11 +47,11 @@ OBJECTS_DIR   = ./
 
 SOURCES       = ../../Core/pyboost_cv3_converter.cpp \
 		../../Core/TPythonIntegrationUtil.cpp \
-		../../Core/TPythonIntegration.cpp \
+		../../Core/TPyAggregateClassifier.cpp \
 		../../Core/Lib.cpp 
 OBJECTS       = pyboost_cv3_converter.o \
 		TPythonIntegrationUtil.o \
-		TPythonIntegration.o \
+		TPyAggregateClassifier.o \
 		Lib.o
 DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/common/unix.conf \
@@ -140,10 +140,10 @@ DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/lex.prf \
 		Rdk-PyMachineLearningLib.pro ../../Core/pyboostcvconverter.hpp \
 		../../Core/TPythonIntegrationUtil.h \
-		../../Core/TPythonIntegration.h \
+		../../Core/TPyAggregateClassifier.h \
 		../../Core/Lib.h ../../Core/pyboost_cv3_converter.cpp \
 		../../Core/TPythonIntegrationUtil.cpp \
-		../../Core/TPythonIntegration.cpp \
+		../../Core/TPyAggregateClassifier.cpp \
 		../../Core/Lib.cpp
 QMAKE_TARGET  = Rdk-PyMachineLearningLib.qt
 DESTDIR       = ../../../../Bin/Platform/Linux/Lib.Qt/#avoid trailing-slash linebreak
@@ -371,8 +371,8 @@ dist: distdir FORCE
 distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
-	$(COPY_FILE) --parents ../../Core/pyboostcvconverter.hpp ../../Core/TPythonIntegrationUtil.h ../../Core/TPythonIntegration.h ../../Core/Lib.h $(DISTDIR)/
-	$(COPY_FILE) --parents ../../Core/pyboost_cv3_converter.cpp ../../Core/TPythonIntegrationUtil.cpp ../../Core/TPythonIntegration.cpp ../../Core/Lib.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents ../../Core/pyboostcvconverter.hpp ../../Core/TPythonIntegrationUtil.h ../../Core/TPyAggregateClassifier.h ../../Core/Lib.h $(DISTDIR)/
+	$(COPY_FILE) --parents ../../Core/pyboost_cv3_converter.cpp ../../Core/TPythonIntegrationUtil.cpp ../../Core/TPyAggregateClassifier.cpp ../../Core/Lib.cpp $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -515,7 +515,7 @@ pyboost_cv3_converter.o: ../../Core/pyboost_cv3_converter.cpp ../../Core/pyboost
 TPythonIntegrationUtil.o: ../../Core/TPythonIntegrationUtil.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o TPythonIntegrationUtil.o ../../Core/TPythonIntegrationUtil.cpp
 
-TPythonIntegration.o: ../../Core/TPythonIntegration.cpp ../../Core/TPythonIntegration.h \
+TPyAggregateClassifier.o: ../../Core/TPyAggregateClassifier.cpp ../../Core/TPyAggregateClassifier.h \
 		../../../../Rdk/Deploy/Include/rdk.h \
 		../../../../Rdk/Deploy/Include/myrdk.h \
 		../../../../Rdk/Deploy/Include/initdll_defs.h \
@@ -618,7 +618,7 @@ TPythonIntegration.o: ../../Core/TPythonIntegration.cpp ../../Core/TPythonIntegr
 		../../../../Rdk/Core/Engine/UEnvException.h \
 		../../Core/TPythonIntegrationUtil.h \
 		../../Core/pyboostcvconverter.hpp
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o TPythonIntegration.o ../../Core/TPythonIntegration.cpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o TPyAggregateClassifier.o ../../Core/TPyAggregateClassifier.cpp
 
 Lib.o: ../../Core/Lib.cpp ../../Core/Lib.h \
 		../../../../Rdk/Deploy/Include/rdk.h \
@@ -721,7 +721,7 @@ Lib.o: ../../Core/Lib.cpp ../../Core/Lib.h \
 		../../../../Rdk/Core/Engine/UNet.h \
 		../../../../Rdk/Core/Engine/UEngine.h \
 		../../../../Rdk/Core/Engine/UEnvException.h \
-		../../Core/TPythonIntegration.h
+		../../Core/TPyAggregateClassifier.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o Lib.o ../../Core/Lib.cpp
 
 ####### Install

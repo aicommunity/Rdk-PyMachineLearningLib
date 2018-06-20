@@ -1,8 +1,8 @@
 #define PY_ARRAY_UNIQUE_SYMBOL pbcvt_ARRAY_API
-#ifndef RDK_TPythonIntegrationCPP
-#define RDK_TPythonIntegrationCPP
+#ifndef RDK_TPyAggregateClassifierCPP
+#define RDK_TPyAggregateClassifierCPP
 
-#include "TPythonIntegration.h"
+#include "TPyAggregateClassifier.h"
 #include "TPythonIntegrationUtil.h"
 #include <iostream>
 #include <boost/python.hpp>
@@ -20,7 +20,7 @@ namespace RDK {
 // --------------------------
 // Конструкторы и деструкторы
 // --------------------------
-TPythonIntegration::TPythonIntegration(void)
+TPyAggregateClassifier::TPyAggregateClassifier(void)
 : Param1("Param1",this),
   InputImage("InputImage",this),
   Detections("Detections",this),
@@ -31,7 +31,7 @@ TPythonIntegration::TPythonIntegration(void)
 {
 }
 
-TPythonIntegration::~TPythonIntegration(void)
+TPyAggregateClassifier::~TPyAggregateClassifier(void)
 {
 }
 // --------------------------
@@ -51,9 +51,9 @@ TPythonIntegration::~TPythonIntegration(void)
 // Системные методы управления объектом
 // --------------------------
 // Выделяет память для новой чистой копии объекта этого класса
-TPythonIntegration* TPythonIntegration::New(void)
+TPyAggregateClassifier* TPyAggregateClassifier::New(void)
 {
- return new TPythonIntegration;
+ return new TPyAggregateClassifier;
 }
 // --------------------------
 
@@ -73,7 +73,7 @@ TPythonIntegration* TPythonIntegration::New(void)
 // --------------------------
 // Скрытые методы управления счетом
 // --------------------------
-void TPythonIntegration::AInit(void)
+void TPyAggregateClassifier::AInit(void)
 {
     /*Py_Initialize();
     bool res = np::initialize();
@@ -132,12 +132,12 @@ void TPythonIntegration::AInit(void)
 
 }
 
-void TPythonIntegration::AUnInit(void)
+void TPyAggregateClassifier::AUnInit(void)
 {
 }
 
 // Восстановление настроек по умолчанию и сброс процесса счета
-bool TPythonIntegration::ADefault(void)
+bool TPyAggregateClassifier::ADefault(void)
 {
  Param1=0;
  return true;
@@ -147,19 +147,19 @@ bool TPythonIntegration::ADefault(void)
 // после настройки параметров
 // Автоматически вызывает метод Reset() и выставляет Ready в true
 // в случае успешной сборки
-bool TPythonIntegration::ABuild(void)
+bool TPyAggregateClassifier::ABuild(void)
 {
  return true;
 }
 
 // Сброс процесса счета без потери настроек
-bool TPythonIntegration::AReset(void)
+bool TPyAggregateClassifier::AReset(void)
 {
  return true;
 }
 
 // Выполняет расчет этого объекта
-bool TPythonIntegration::ACalculate(void)
+bool TPyAggregateClassifier::ACalculate(void)
 {
  if(!InputImage.IsConnected())
   return true;
