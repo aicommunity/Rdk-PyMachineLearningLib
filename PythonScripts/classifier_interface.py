@@ -13,10 +13,10 @@ class ClassifierEmbeddingInterface(object):
 
 	def __init__(self, environment_root=None):
 		if not environment_root:
-			environment_root = self.resolve_virtual_environment()
+		    environment_root = self.resolve_virtual_environment()
 
 		if environment_root:
-			self.activate_virtual_environment(environment_root)
+		    self.activate_virtual_environment(environment_root)
 
 		current_dir = os.path.dirname(os.path.realpath(__file__))
 		sys.path.append(current_dir)

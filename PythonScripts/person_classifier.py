@@ -1,7 +1,7 @@
-import cv2
-import os
+#import cv2
+#import os
 from keras.models import load_model
-from scipy import misc
+#from scipy import misc
 
 
 __all__ = ('classifier_model',)
@@ -10,7 +10,7 @@ __all__ = ('classifier_model',)
 class PersonClassifer(object):
 
 	def __init__(self):
-		try:
+		'''try:
 			self.model = load_model('peoples.h5')
 		except OSError:
 			os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -23,7 +23,7 @@ class PersonClassifer(object):
 		img_cv = img.reshape(1, 1, 96, 96)
 		pred = self.model.predict(img_cv)
 		print('[PY CL] Prediction is {}'.format(pred))
-		return pred
+		return pred'''
 
 
 classifier_model = PersonClassifer()

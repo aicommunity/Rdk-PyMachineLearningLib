@@ -25,7 +25,8 @@ TPythonIntegration::TPythonIntegration(void)
   Detections("Detections",this),
   DetectionClass("DetectionClass",this),
   DetectionReliability("DetectionReliability",this),
-  DebugImage("DebugImage",this)
+  DebugImage("DebugImage",this),
+  InputFile("InputFile",this)
 {
 }
 
@@ -73,22 +74,51 @@ TPythonIntegration* TPythonIntegration::New(void)
 // --------------------------
 void TPythonIntegration::AInit(void)
 {
+    /*Py_Initialize();
+    bool res = np::initialize();
     try
     {
-        init_py();
+        py::object main_module = py::import("__main__");
+        py::object main_namespace = main_module.attr("__dict__");
+
+        py::object ignored = py::exec("hello = open('/home/ivan/hello.txt', 'w')\n"
+                          "hello.write('Hello world!')\n"
+                          "hello.close()",
+                          main_namespace);
+    }
+    catch (py::error_already_set const &)
+    {
+        std::string perrorStr = RDK::parse_python_exception();
+        // TODO: логировать и выдавать ошибку с прекращением программы
+        std::cout << "Error occured:" << std::endl << perrorStr << std::endl;
+        std::cout << "Python init fail" << std::endl;
+    }*/
+
+    try
+    {
+        //init_py();
+        Py_Initialize();
         py::to_python_converter<cv::Mat, pbcvt::matToNDArrayBoostConverter>();
         py::to_python_converter<RDK::UBitmap, pbcvt::uBitmapToNDArrayBoostConverter>();
         py::object MainModule = py::import("__main__");  // импортируем main-scope, см. https://docs.python.org/3/library/__main__.html
         py::object MainNamespace = MainModule.attr("__dict__");  // извлекаем область имен
 
-        // TODO: путь для импорта файла брать из конфига
+         py::object pycv2 = py::import("cv2");
+
+        // TODO: путь для импорта файла брать из конфига"../../../../Libraries/Rdk-PyMachineLearningLib/PythonScripts/classifier_interface.py"
         // загрузка кода из файла в извлеченную область имен
-        py::object ClassifierInterfaceModule = RDK::import("classifier_interface",
-         "/home/arnold/dev/rtc/nmsdk2/nmsdk2/Libraries/Rdk-PyMachineLearningLib/PythonScripts/classifier_interface.py",
-         MainNamespace);
+        std::string s = (*InputFile);
+        py::object ClassifierInterfaceModule = RDK::import("test_class",s,MainNamespace);
         // экземпляр питоновского класса, через который активируется виртуальная среда и загружается модель
         // TODO: пусть до среды брать из конфига
-        IntegrationInterfaceInstance = ClassifierInterfaceModule.attr("ClassifierEmbeddingInterface")("/home/arnold/.virtualenvs/cv");
+        IntegrationInterface = ClassifierInterfaceModule.attr("ClassifierEmbeddingInterface");
+        if(!IntegrationInterface.is_none())
+            IntegrationInterfaceInstance = IntegrationInterface(); ///home/arnold/.virtualenvs/cv
+
+        //boost::python::object rand_mod = boost::python::import("random");
+        //boost::python::object rand_func = rand_mod.attr("random");
+        //boost::python::object rand2 = rand_func();
+        //std::cout << boost::python::extract<int>(rand2) << std::endl;
 
         std::cout << "Python init successs" << std::endl;
     }
@@ -131,7 +161,7 @@ bool TPythonIntegration::AReset(void)
 // Выполняет расчет этого объекта
 bool TPythonIntegration::ACalculate(void)
 {
- if(!InputImage.IsConnected())
+ /*if(!InputImage.IsConnected())
   return true;
 
  Graph.SetCanvas(&*DebugImage);
@@ -179,7 +209,7 @@ bool TPythonIntegration::ACalculate(void)
 
   Graph.SetPenColor(0x0000FF);
   Graph.Rect(x,y,x+width,y+height);
- }
+ }*/
 
  return true;
 }

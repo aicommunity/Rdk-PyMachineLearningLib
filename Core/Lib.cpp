@@ -13,7 +13,7 @@ UPyMachineLearningLib PyMachineLearningLib;
 // Конструкторы и деструкторы
 // --------------------------
 UPyMachineLearningLib::UPyMachineLearningLib(void)
- : RDK::ULibrary("PyMachineLearningLib","1.0")
+ : ULibrary("PyMachineLearningLib","1.0")
 {
 }
 // --------------------------
@@ -23,9 +23,15 @@ UPyMachineLearningLib::UPyMachineLearningLib(void)
 // --------------------------
 // Заполняет массив ClassSamples готовыми экземплярами образцов и их именами.
 // Не требуется предварительная очистка массива и уборка памяти.
-void UPyMachineLearningLib::CreateClassSamples(RDK::UStorage *storage)
+void UPyMachineLearningLib::CreateClassSamples(UStorage *storage)
 {
- UploadClass<TPythonIntegration>("TPythonIntegration", "PythonIntegration");
+ //UploadClass<TPythonIntegration>("TPythonIntegration", "PythonIntegration");
+ UContainer *cont=0;
+
+ cont=new TPythonIntegration;
+ cont->Default();
+ cont->SetName("PythonIntegration");
+ UploadClass("TPythonIntegration",cont);
 }
 // --------------------------
 
