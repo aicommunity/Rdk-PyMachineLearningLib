@@ -37,6 +37,7 @@ boost::python::object IntegrationInterfaceInstance;
 protected: // Переменные состояния
 
 UGraphics Graph;
+UBitmap Canvas;
 
 public: // Методы
 // --------------------------

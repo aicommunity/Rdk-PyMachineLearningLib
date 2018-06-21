@@ -163,9 +163,10 @@ bool TPyAggregateClassifier::ACalculate(void)
  if(!InputImage.IsConnected())
   return true;
 
- Graph.SetCanvas(&*DebugImage);
- *DebugImage=*InputImage;
- DebugImage->ReflectionX();
+ DebugImage->SetColorModel(ubmRGB24,false);
+ InputImage->ConvertTo(*DebugImage);
+
+ Graph.SetCanvas(DebugImage);
 
  Detections->Resize(AggrRectsMatrix->GetRows(), 6);
 
@@ -178,11 +179,15 @@ bool TPyAggregateClassifier::ACalculate(void)
   (*Detections)(i, 2) = (*AggrRectsMatrix)(i, 1);
   (*Detections)(i, 3) = (*AggrRectsMatrix)(i, 2);
   (*Detections)(i, 4) = (*AggrRectsMatrix)(i, 3);
+  (*Detections)(i, 5) = -1;
   int object_cls = -1;
 
   UBitmap obj_rect;
   int width = (*AggrRectsMatrix)(i, 2) - (*AggrRectsMatrix)(i, 0);
-  int height =(*AggrRectsMatrix)(i, 3) - (*AggrRectsMatrix)(i, 1);
+  int height = (*AggrRectsMatrix)(i, 3) - (*AggrRectsMatrix)(i, 1);
+
+  if((width<=3)||(height<=3))
+    continue;
 
   obj_rect.SetRes(width, height, ubmY8);
   input_img.CopyTo(0,0,(*AggrRectsMatrix)(i, 0), (*AggrRectsMatrix)(i, 1), width, height, obj_rect);
@@ -190,7 +195,7 @@ bool TPyAggregateClassifier::ACalculate(void)
   /// Тут считаем
   try
   {
-   py::object retval = IntegrationInterfaceInstance.attr("classify")(input_img);
+   py::object retval = IntegrationInterfaceInstance.attr("classify")(obj_rect);
 
    object_cls = boost::python::extract<int>(retval);
   }
@@ -203,14 +208,22 @@ bool TPyAggregateClassifier::ACalculate(void)
    ss<<"Python ERROR:" << perrorStr;
    LogMessageEx(RDK_EX_INFO,__FUNCTION__,ss.str());
   }
-  if(object_cls!=-1)
+  if(object_cls==0)
   {
    Graph.SetPenColor(0x0000FF);
+  }
+  else if(object_cls==1)
+  {
+   Graph.SetPenColor(0x00FF00);
+  }
+  if(object_cls!=-1)
+  {
    Graph.Rect((*AggrRectsMatrix)(i, 0),(*AggrRectsMatrix)(i, 1),(*AggrRectsMatrix)(i, 2),(*AggrRectsMatrix)(i, 3));
   }
+
+
   (*Detections)(i, 5) = object_cls;
  }
-
 /*
 
  //LogMessageEx(RDK_EX_INFO,__FUNCTION__,"test");

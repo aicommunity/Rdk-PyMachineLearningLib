@@ -28,7 +28,7 @@ class PersonClassifer(object):
         img = np.array(img_pil)
         img_rs = img.reshape(1, 1, 96, 96)
         pred = self.model.predict(img_rs)
-        pred_list = pred.tolist()
+        pred_list = pred.tolist()[0]
         logging.debug('[PY CL] Prediction is {}'.format(pred))
         logging.debug('{}, {}'.format(pred_list, type(pred_list)))
         return pred_list.index(max(pred_list))
