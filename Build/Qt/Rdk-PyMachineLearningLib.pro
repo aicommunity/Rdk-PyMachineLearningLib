@@ -14,14 +14,18 @@ DEFINES += LIBRDK_LIBRARY_EXPORT
 DEFINES += RDK_UNICODE_RUN
 DEFINES += RDK_QT
 INCLUDEPATH += $$PWD/../../../../Rdk/Deploy/Include
-INCLUDEPATH += /usr/include/python3.5
 
 unix {
+    INCLUDEPATH += /usr/include/python3.5
     DESTDIR = $$PWD/../../../../Bin/Platform/Linux/Lib.Qt
 }
 
 windows {
     DESTDIR = $$PWD/../../../../Bin/Platform/Win/Lib.Qt
+    INCLUDEPATH += d:/Anaconda3/include/
+    INCLUDEPATH += $$(BOOST_PATH)
+    INCLUDEPATH += $$(OPENCV3_PATH)/build/include
+    INCLUDEPATH += d:/Anaconda3/Lib/site-packages/numpy/core/include/numpy
 }
 
 HEADERS += \

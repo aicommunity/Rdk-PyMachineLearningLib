@@ -2,6 +2,7 @@
 #define RDK_TPythonIntegrationUtilH
 
 #include "../../../Rdk/Deploy/Include/rdk.h"
+#define BOOST_PYTHON_STATIC_LIB
 #include <boost/python.hpp>
 #include <vector>
 

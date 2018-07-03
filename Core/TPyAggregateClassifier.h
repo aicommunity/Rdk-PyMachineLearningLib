@@ -2,6 +2,7 @@
 #define RDK_TPyAggregateClassifierH
 
 #include "../../../Rdk/Deploy/Include/rdk.h"
+#define BOOST_PYTHON_STATIC_LIB
 #include <boost/python.hpp>
 #include <boost/python/detail/wrap_python.hpp>
 

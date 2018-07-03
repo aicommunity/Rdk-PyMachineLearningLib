@@ -2,6 +2,7 @@
 #ifndef RDK_TPythonIntegrationUtilCPP
 #define RDK_TPythonIntegrationUtilCPP
 
+#define BOOST_PYTHON_STATIC_LIB
 #include <boost/python.hpp>
 #include "boost/python/stl_iterator.hpp"
 #include <boost/python/detail/wrap_python.hpp>
