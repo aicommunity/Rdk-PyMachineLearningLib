@@ -44,14 +44,14 @@ find_package(NumPy REQUIRED)
 Перед сборкой надо убедиться, что среди динамических библиотек Boost присутствует библиотека libboost_python3.so
 Если ее нет, то нужно поискать библиотеки libboost_python-py3*.so и сделать символьную ссылку
 
-ln /path/to/libboost_python-py3*.so /path/to/libboost_python3.so
+sudo ln /path/to/libboost_python-py3*.so /path/to/libboost_python3.so
 
 Как билдить, кратко. Создаем в корне репозитория папку build, переходим в нее, запускаем cmake:
 mkdir build
 cd build
 cmake ..
 make
-make install
+sudo make install
 
 Возможно где-то потребуется выполнить команды от лица sudo-юзера.
 
