@@ -25,10 +25,10 @@ unix {
 
 windows {
     DESTDIR = $$PWD/../../../../Bin/Platform/Win/Lib.Qt
-    INCLUDEPATH += d:/Anaconda3/include/
+    INCLUDEPATH += $$(ANACONDA_PATH)/include/
     INCLUDEPATH += $$(BOOST_PATH)
     INCLUDEPATH += $$(OPENCV3_PATH)/build/include
-    INCLUDEPATH += d:/Anaconda3/Lib/site-packages/numpy/core/include/numpy
+    INCLUDEPATH += $$(ANACONDA_PATH)/Lib/site-packages/numpy/core/include/numpy
 }
 
 HEADERS += \
