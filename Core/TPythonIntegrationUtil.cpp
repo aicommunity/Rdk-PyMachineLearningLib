@@ -2,7 +2,9 @@
 #ifndef RDK_TPythonIntegrationUtilCPP
 #define RDK_TPythonIntegrationUtilCPP
 
+#ifndef BOOST_PYTHON_STATIC_LIB
 #define BOOST_PYTHON_STATIC_LIB
+#endif
 #include <boost/python.hpp>
 #include "boost/python/stl_iterator.hpp"
 #include <boost/python/detail/wrap_python.hpp>
@@ -11,10 +13,11 @@
 
 namespace py = boost::python;
 
-std::string parse_python_exception() {
-    PyObject *type_ptr = NULL, *value_ptr = NULL, *traceback_ptr = NULL;
-    PyErr_Fetch(&type_ptr, &value_ptr, &traceback_ptr);
-    std::string ret("Unfetchable Python error");
+namespace RDK {
+    std::string parse_python_exception() {
+        PyObject *type_ptr = NULL, *value_ptr = NULL, *traceback_ptr = NULL;
+        PyErr_Fetch(&type_ptr, &value_ptr, &traceback_ptr);
+        std::string ret("Unfetchable Python error");
 
     if (type_ptr != NULL) {
         py::handle<> h_type(type_ptr);
@@ -82,11 +85,12 @@ py::list stdvector2pylist(const std::vector<T>& v)
     return l;
 }
 
-template<typename T>
-inline
-std::vector<T> pyiterable2stdvector(const py::object& iterable)
-{
-    return std::vector<T>(py::stl_input_iterator<T>(iterable), py::stl_input_iterator<T>());
+    template<typename T>
+    inline
+    std::vector<T> pyiterable2stdvector(const py::object& iterable)
+    {
+        return std::vector<T>(py::stl_input_iterator<T>(iterable), py::stl_input_iterator<T>());
+    }
 }
 
 #endif
