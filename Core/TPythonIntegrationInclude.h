@@ -7,7 +7,7 @@
 #endif
 #include <boost/python.hpp>
 #include <ndarrayobject.h>
-#ifdef __WIN32__
+#ifdef WIN32
 #include <boost/python/numpy.hpp>
 #include <boost/python/numpy/dtype.hpp>
 #include <boost/python/numpy/ndarray.hpp>
@@ -20,7 +20,7 @@
 
 namespace py = boost::python;
 
-#ifdef __WIN32__
+#ifdef WIN32
 namespace np = boost::python::numpy;
 #else
 namespace np = boost::numpy;
