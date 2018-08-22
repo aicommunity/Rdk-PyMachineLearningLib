@@ -17,6 +17,7 @@
 #include <boost/numpy/ndarray.hpp>
 #endif
 #include <boost/python.hpp>
+#include <boost/python/detail/wrap_python.hpp>
 
 namespace py = boost::python;
 

@@ -1,3 +1,4 @@
+#define PY_ARRAY_UNIQUE_SYMBOL pbcvt_ARRAY_API
 #ifndef RDK_TPythonIntegrationUtilCPP
 #define RDK_TPythonIntegrationUtilCPP
 
