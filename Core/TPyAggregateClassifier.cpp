@@ -1,21 +1,12 @@
-#define PY_ARRAY_UNIQUE_SYMBOL pbcvt_ARRAY_API
 #ifndef RDK_TPyAggregateClassifierCPP
 #define RDK_TPyAggregateClassifierCPP
 
 #include "TPyAggregateClassifier.h"
 #include "TPythonIntegrationUtil.h"
 #include <iostream>
-#ifndef BOOST_PYTHON_STATIC_LIB
-#define BOOST_PYTHON_STATIC_LIB
-#endif
-#include <boost/python.hpp>
-#include <boost/python/detail/wrap_python.hpp>
-#include <boost/python/numpy.hpp>
 #include "pyboostcvconverter.hpp"
 #include "boost/python/stl_iterator.hpp"
 
-namespace py = boost::python;
-namespace np = boost::python::numpy;
 
 namespace RDK {
 

@@ -1,17 +1,10 @@
-#define PY_ARRAY_UNIQUE_SYMBOL pbcvt_ARRAY_API
 #ifndef RDK_TPythonIntegrationUtilCPP
 #define RDK_TPythonIntegrationUtilCPP
 
-#ifndef BOOST_PYTHON_STATIC_LIB
-#define BOOST_PYTHON_STATIC_LIB
-#endif
-#include <boost/python.hpp>
+#include "TPythonIntegrationInclude.h"
 #include "boost/python/stl_iterator.hpp"
-#include <boost/python/detail/wrap_python.hpp>
 #include <vector>
 #include <iostream>
-
-namespace py = boost::python;
 
 namespace RDK {
     std::string parse_python_exception() {

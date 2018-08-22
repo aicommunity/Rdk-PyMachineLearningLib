@@ -20,6 +20,8 @@ INCLUDEPATH += $$PWD/../../../../Rdk/Deploy/Include
 
 unix {
     INCLUDEPATH += /usr/include/python3.5
+    INCLUDEPATH += /usr/lib/python3/dist-packages/numpy/core/include/numpy/
+    INCLUDEPATH += /usr/local/include
     DESTDIR = $$PWD/../../../../Bin/Platform/Linux/Lib.Qt
 }
 
@@ -35,7 +37,8 @@ HEADERS += \
     ../../Core/pyboostcvconverter.hpp \
     ../../Core/TPythonIntegrationUtil.h \
     ../../Core/TPyAggregateClassifier.h \
-    ../../Core/Lib.h
+    ../../Core/Lib.h \
+    ../../Core/TPythonIntegrationInclude.h
 
 SOURCES += \
     ../../Core/pyboost_cv3_converter.cpp \
