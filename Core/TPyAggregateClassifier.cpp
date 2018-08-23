@@ -5,22 +5,7 @@
 #include "TPyAggregateClassifier.h"
 #include "TPythonIntegrationUtil.h"
 #include <iostream>
-//#ifndef BOOST_PYTHON_STATIC_LIB
-//#define BOOST_PYTHON_STATIC_LIB
-//#endif
-//#include <boost/python.hpp>
-//#include <boost/python/detail/wrap_python.hpp>
-//#include <boost/python/numpy.hpp>
 #include "pyboostcvconverter.hpp"
-//#include "boost/python/stl_iterator.hpp"
-
-//namespace py = boost::python;
-
-//#ifdef WIN32
-//namespace np = boost::python::numpy;
-//#else
-//namespace np = boost::numpy;
-//#endif
 
 namespace RDK {
 

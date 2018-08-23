@@ -2,12 +2,6 @@
 #define RDK_TPythonIntegrationUtilH
 
 #include "../../../Rdk/Deploy/Include/rdk.h"
-//#ifndef BOOST_PYTHON_STATIC_LIB
-//#define BOOST_PYTHON_STATIC_LIB
-//#endif
-//#include <boost/python.hpp>
-
-//namespace py = boost::python;
 #include "TPythonIntegrationInclude.h"
 
 #include <vector>
