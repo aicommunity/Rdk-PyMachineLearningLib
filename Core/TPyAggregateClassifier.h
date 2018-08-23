@@ -2,6 +2,10 @@
 #define RDK_TPyAggregateClassifierH
 
 #include "../../../Rdk/Deploy/Include/rdk.h"
+#ifndef BOOST_PYTHON_STATIC_LIB
+#define BOOST_PYTHON_STATIC_LIB
+#endif
+#include <boost/python.hpp>
 #include "TPythonIntegrationInclude.h"
 #include <boost/python/detail/wrap_python.hpp>
 
@@ -14,7 +18,7 @@ public: // —войства
 UPropertyInputData<UBitmap,TPyAggregateClassifier> InputImage;
 
 /// ¬ходное изображение
-ULProperty<std::string,TPyAggregateClassifier, ptPubParameter> InputFile;
+ULProperty<std::string,TPyAggregateClassifier, ptPubParameter> PythonScriptFileName;
 
 //¬ходные матрицы с данными об обнаружени€х
 /// строка матрицы содержит [Left Top Right Bottom] индексы и размеры симметричны с AggrIdMatrix

@@ -1,14 +1,42 @@
+#define PY_ARRAY_UNIQUE_SYMBOL pbcvt_ARRAY_API
 #ifndef RDK_TPyAggregateClassifierCPP
 #define RDK_TPyAggregateClassifierCPP
 
 #include "TPyAggregateClassifier.h"
 #include "TPythonIntegrationUtil.h"
 #include <iostream>
+#ifndef BOOST_PYTHON_STATIC_LIB
+#define BOOST_PYTHON_STATIC_LIB
+#endif
+#include <boost/python.hpp>
+#include <boost/python/detail/wrap_python.hpp>
+#include <boost/python/numpy.hpp>
 #include "pyboostcvconverter.hpp"
 #include "boost/python/stl_iterator.hpp"
 
+namespace py = boost::python;
+
+#ifdef WIN32
+namespace np = boost::python::numpy;
+#else
+namespace np = boost::numpy;
+#endif
 
 namespace RDK {
+
+#if (PY_VERSION_HEX >= 0x03000000)
+    void *init_py() {
+#else
+    void init_py(){
+#endif
+        if(Py_IsInitialized())
+            return NUMPY_IMPORT_ARRAY_RETVAL;
+        Py_Initialize();
+
+        import_array();
+        np::initialize();
+        return NUMPY_IMPORT_ARRAY_RETVAL;
+    }
 
 // ћетоды
 // --------------------------
@@ -21,7 +49,7 @@ TPyAggregateClassifier::TPyAggregateClassifier(void)
   DebugImage("DebugImage",this),
   AggrRectsMatrix("AggrRectsMatrix", this),
   AggrIdMatrix("AggrIdMatrix", this),
-  InputFile("InputFile",this)
+  PythonScriptFileName("PythonScriptFileName",this)
 {
 }
 
@@ -51,19 +79,6 @@ TPyAggregateClassifier* TPyAggregateClassifier::New(void)
 }
 // --------------------------
 
-#if (PY_VERSION_HEX >= 0x03000000)
-
-    static void *init_py() {
-#else
-        static void init_py(){
-#endif
-        Py_Initialize();
-
-        import_array();
-        np::initialize();
-        return NUMPY_IMPORT_ARRAY_RETVAL;
-    }
-
 // --------------------------
 // —крытые методы управлени€ счетом
 // --------------------------
@@ -91,6 +106,7 @@ void TPyAggregateClassifier::AInit(void)
 
     try
     {
+        LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("Python init started..."));
         init_py();
         py::to_python_converter<cv::Mat, pbcvt::matToNDArrayBoostConverter>();
         py::to_python_converter<RDK::UBitmap, pbcvt::uBitmapToNDArrayBoostConverter>();
@@ -101,7 +117,7 @@ void TPyAggregateClassifier::AInit(void)
 
         // TODO: путь дл€ импорта файла брать из конфига"../../../../Libraries/Rdk-PyMachineLearningLib/PythonScripts/classifier_interface.py"
         // загрузка кода из файла в извлеченную область имен
-        std::string s = (*InputFile);
+        std::string s = this->GetEnvironment()->GetCurrentDataDir()+*PythonScriptFileName;
         py::object ClassifierInterfaceModule = import("test_class",s,MainNamespace);
         // экземпл€р питоновского класса, через который активируетс€ виртуальна€ среда и загружаетс€ модель
         // TODO: пусть до среды брать из конфига
@@ -119,11 +135,9 @@ void TPyAggregateClassifier::AInit(void)
     catch (py::error_already_set const &)
     {
         std::string perrorStr = parse_python_exception();
-        // TODO: логировать и выдавать ошибку с прекращением программы
-        std::cout << "Error occured:" << std::endl << perrorStr << std::endl;
-        std::cout << "Python init fail" << std::endl;
+        LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Python init fail: ")+perrorStr);
     }
-
+ LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("...Python init finished successful!"));
 }
 
 void TPyAggregateClassifier::AUnInit(void)
@@ -157,10 +171,24 @@ bool TPyAggregateClassifier::ACalculate(void)
  if(!InputImage.IsConnected())
   return true;
 
+ if (InputImage->GetColorModel() != RDK::ubmY8)
+ {
+     LogMessageEx(RDK_EX_WARNING, __FUNCTION__, std::string("Incorrect image color model. Need ubmY8 got: ")+sntoa(InputImage->GetColorModel()));
+     return true;
+ }
+
  DebugImage->SetColorModel(ubmRGB24,false);
  InputImage->ConvertTo(*DebugImage);
 
  Graph.SetCanvas(DebugImage);
+
+ Detections->Resize(0, 6);
+
+ if(AggrRectsMatrix->GetRows() != AggrIdMatrix->GetRows())
+ {
+  LogMessageEx(RDK_EX_WARNING, __FUNCTION__, std::string("Rows count not equals: AggrRectsMatrix(")+sntoa(AggrRectsMatrix->GetRows())+std::string(") != AggrIdMatrix(")+sntoa(AggrIdMatrix->GetRows())+")");
+  return true;
+ }
 
  Detections->Resize(AggrRectsMatrix->GetRows(), 6);
 
@@ -196,11 +224,7 @@ bool TPyAggregateClassifier::ACalculate(void)
   catch (py::error_already_set const &)
   {
    std::string perrorStr = parse_python_exception();
-   // TODO: логировать
-   std::cout << "Error occured:" << std::endl << perrorStr << std::endl;
-   std::stringstream ss;
-   ss<<"Python ERROR:" << perrorStr;
-   LogMessageEx(RDK_EX_INFO,__FUNCTION__,ss.str());
+   LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Python error: ")+perrorStr);
   }
   if(object_cls==0)
   {

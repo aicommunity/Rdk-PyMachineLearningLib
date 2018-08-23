@@ -1,6 +1,8 @@
 #define NO_IMPORT_ARRAY
 #define PY_ARRAY_UNIQUE_SYMBOL pbcvt_ARRAY_API
+
 #include "pyboostcvconverter.hpp"
+
 #if CV_VERSION_MAJOR == 3
 namespace pbcvt {
 using namespace cv;
@@ -110,6 +112,8 @@ public:
 			_sizes[i] = sizes[i];
 		if (cn > 1)
 			_sizes[dims++] = cn;
+        void* p1=PyArray_New;
+        //void* pp1=PyArray_SimpleNew;
 		PyObject* o = PyArray_SimpleNew(dims, _sizes, typenum); // SEGFAULT
 		if (!o)
 			CV_Error_(Error::StsError,
