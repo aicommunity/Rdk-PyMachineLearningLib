@@ -35,6 +35,7 @@ void UPyMachineLearningLib::CreateClassSamples(UStorage *storage)
  UploadClass("TPythonIntegration",cont);*/
 
  UploadClass<TPyAggregateClassifier>("TPyAggregateClassifier","PyAggregateClassifier");
+ UploadClass<TPyUBitmapClassifier>("TPyUBitmapClassifier","PyUBitmapClassifier");
 }
 // --------------------------
 

@@ -112,7 +112,7 @@ public:
 			_sizes[i] = sizes[i];
 		if (cn > 1)
 			_sizes[dims++] = cn;
-        void* p1=PyArray_New;
+        //void* p1=PyArray_New;
         //void* pp1=PyArray_SimpleNew;
 		PyObject* o = PyArray_SimpleNew(dims, _sizes, typenum); // SEGFAULT
 		if (!o)
