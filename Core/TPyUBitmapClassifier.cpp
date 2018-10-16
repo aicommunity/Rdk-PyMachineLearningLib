@@ -30,7 +30,7 @@ namespace RDK {
 // Конструкторы и деструкторы
 // --------------------------  //DetectionClass("DetectionClass",this),
 TPyUBitmapClassifier::TPyUBitmapClassifier(void)
-: InputImages("InputImage",this),
+: InputImages("InputImages",this),
   Initialized(false),
   OutputClasses("OutputClasses",this),
   PythonScriptFileName("PythonScriptFileName",this)
@@ -121,8 +121,10 @@ void TPyUBitmapClassifier::AInit(void)
     {
         std::string perrorStr = parse_python_exception();
         LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Python init fail: ")+perrorStr);
+        Initialized=false;
+        return;
     }
- LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("...Python init finished successful!"));
+    LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("...Python init finished successful!"));
 }
 
 void TPyUBitmapClassifier::AUnInit(void)
@@ -148,6 +150,7 @@ bool TPyUBitmapClassifier::ABuild(void)
 // Сброс процесса счета без потери настроек
 bool TPyUBitmapClassifier::AReset(void)
 {
+ Initialized = false;
  return true;
 }
 
@@ -156,7 +159,7 @@ bool TPyUBitmapClassifier::ACalculate(void)
 {
  if(!Initialized)
  {
-     Init();
+    AInit();
  }
  if(!InputImages.IsConnected())
   return true;
@@ -168,25 +171,36 @@ bool TPyUBitmapClassifier::ACalculate(void)
      for(int i=0; i<InputImages->size(); i++)
      {
          UBitmap &bmp = (*InputImages)[i];
+         bool nu = bmp.GetData()!=NULL;
+         RDK::SaveBitmapToFile("/home/ivan/testBmp.bmp", bmp);
          if (bmp.GetColorModel() != RDK::ubmY8)
          {
              LogMessageEx(RDK_EX_WARNING, __FUNCTION__, std::string("Incorrect image ["+sntoa(i)+"] color model. Need ubmY8 got: ")+sntoa(bmp.GetColorModel()));
              return true;
          }
 
+         UBitmap b;
+         b.SetRes(96,96,ubmY8);
+         bmp.CopyTo(0,0,b);
+
+
+         RDK::SaveBitmapToFile("/home/ivan/testB.bmp", b);
+
          int object_cls = -1;
          /// Тут считаем
          try
          {
-          py::object retval = IntegrationInterfaceInstance.attr("classify")(bmp);
+          import_array();
+          py::object retval = IntegrationInterfaceInstance.attr("classify")(b);
 
           object_cls = boost::python::extract<int>(retval);
+          (*OutputClasses)[i] = object_cls;
          }
          catch (py::error_already_set const &)
          {
           std::string perrorStr = parse_python_exception();
           LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Python error: ")+perrorStr);
-         }
+         } 
      }
  }
 

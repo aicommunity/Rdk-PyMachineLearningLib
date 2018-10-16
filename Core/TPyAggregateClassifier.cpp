@@ -1,4 +1,6 @@
-#define PY_ARRAY_UNIQUE_SYMBOL pbcvt_ARRAY_API
+//#ifndef PY_ARRAY_UNIQUE_SYMBOL
+//#define PY_ARRAY_UNIQUE_SYMBOL pbcvt_ARRAY_API
+//#endif
 #ifndef RDK_TPyAggregateClassifierCPP
 #define RDK_TPyAggregateClassifierCPP
 

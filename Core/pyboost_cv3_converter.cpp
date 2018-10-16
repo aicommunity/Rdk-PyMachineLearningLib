@@ -305,8 +305,8 @@ PyObject* uBitmapToNDArrayBoostConverter::convert(RDK::UBitmap const& bmp) {
     Mat temp, *p = (Mat*) &m;
 	if (!p->u || p->allocator != &g_numpyAllocator)
     {
-		temp.allocator = &g_numpyAllocator;
-		ERRWRAP2(m.copyTo(temp));
+        temp.allocator = &g_numpyAllocator;
+        ERRWRAP2(m.copyTo(temp));
 		p = &temp;
 	}
 	PyObject* o = (PyObject*) p->u->userdata;

@@ -1,8 +1,11 @@
+#ifndef PY_ARRAY_UNIQUE_SYMBOL
+#define PY_ARRAY_UNIQUE_SYMBOL pbcvt_ARRAY_API
+#endif
 #ifndef RDK_TPyUBitmapClassifierH
 #define RDK_TPyUBitmapClassifierH
 
-#include "TPythonIntegrationInclude.h"
 #include "../../../Rdk/Deploy/Include/rdk.h"
+#include "TPythonIntegrationInclude.h"
 
 
 namespace RDK {

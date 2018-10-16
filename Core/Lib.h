@@ -3,8 +3,9 @@
 
 #include "../../../Rdk/Deploy/Include/rdk.h"
 //#include "TPythonIntegration.h"
-#include "TPyAggregateClassifier.h"
 #include "TPyUBitmapClassifier.h"
+#include "TPyAggregateClassifier.h"
+
 
 namespace RDK {
 
