@@ -4,6 +4,7 @@
 #include "TPythonIntegrationInclude.h"
 #include <vector>
 #include <iostream>
+#include <boost/python/stl_iterator.hpp>
 
 namespace RDK {
     std::string parse_python_exception() {

@@ -37,11 +37,14 @@ HEADERS += \
     ../../Core/pyboostcvconverter.hpp \
     ../../Core/TPythonIntegrationUtil.h \
     ../../Core/TPyAggregateClassifier.h \
-    ../../Core/Lib.h \
-    ../../Core/TPythonIntegrationInclude.h
+    ../../Core/TPyUBitmapClassifier.h \
+    ../../Core/TPythonIntegrationInclude.h \
+    ../../Core/Lib.h
+
 
 SOURCES += \
     ../../Core/pyboost_cv3_converter.cpp \
     ../../Core/TPythonIntegrationUtil.cpp \
     ../../Core/TPyAggregateClassifier.cpp \
+    ../../Core/TPyUBitmapClassifier.cpp \
     ../../Core/Lib.cpp

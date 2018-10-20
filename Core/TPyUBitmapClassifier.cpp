@@ -1,10 +1,10 @@
-//#ifndef PY_ARRAY_UNIQUE_SYMBOL
-//#define PY_ARRAY_UNIQUE_SYMBOL pbcvt_ARRAY_API
-//#endif
-#ifndef RDK_TPyAggregateClassifierCPP
-#define RDK_TPyAggregateClassifierCPP
+/*#ifndef PY_ARRAY_UNIQUE_SYMBOL
+#define PY_ARRAY_UNIQUE_SYMBOL pbcvt_ARRAY_API
+#endif*/
+#ifndef RDK_TPyUBitmapClassifierCPP
+#define RDK_TPyUBitmapClassifierCPP
 
-#include "TPyAggregateClassifier.h"
+#include "TPyUBitmapClassifier.h"
 #include "TPythonIntegrationUtil.h"
 #include <iostream>
 #include "pyboostcvconverter.hpp"
@@ -12,9 +12,9 @@
 namespace RDK {
 
 #if (PY_VERSION_HEX >= 0x03000000)
-    void *init_py() {
+    void *init_py_pyubclsfr() {
 #else
-    void init_py(){
+    void init_py_pyubclsfr(){
 #endif
         if(Py_IsInitialized())
             return NUMPY_IMPORT_ARRAY_RETVAL;
@@ -29,18 +29,15 @@ namespace RDK {
 // --------------------------
 // Конструкторы и деструкторы
 // --------------------------  //DetectionClass("DetectionClass",this),
-TPyAggregateClassifier::TPyAggregateClassifier(void)
-: InputImage("InputImage",this),
-  Detections("Detections",this),
-  //DetectionReliability("DetectionReliability",this),
-  DebugImage("DebugImage",this),
-  AggrRectsMatrix("AggrRectsMatrix", this),
-  AggrIdMatrix("AggrIdMatrix", this),
+TPyUBitmapClassifier::TPyUBitmapClassifier(void)
+: InputImages("InputImages",this),
+  Initialized(false),
+  OutputClasses("OutputClasses",this),
   PythonScriptFileName("PythonScriptFileName",this)
 {
 }
 
-TPyAggregateClassifier::~TPyAggregateClassifier(void)
+TPyUBitmapClassifier::~TPyUBitmapClassifier(void)
 {
 }
 // --------------------------
@@ -60,16 +57,16 @@ TPyAggregateClassifier::~TPyAggregateClassifier(void)
 // Системные методы управления объектом
 // --------------------------
 // Выделяет память для новой чистой копии объекта этого класса
-TPyAggregateClassifier* TPyAggregateClassifier::New(void)
+TPyUBitmapClassifier* TPyUBitmapClassifier::New(void)
 {
- return new TPyAggregateClassifier;
+ return new TPyUBitmapClassifier;
 }
 // --------------------------
 
 // --------------------------
 // Скрытые методы управления счетом
 // --------------------------
-void TPyAggregateClassifier::AInit(void)
+void TPyUBitmapClassifier::AInit(void)
 {
     /*Py_Initialize();
     bool res = np::initialize();
@@ -94,7 +91,7 @@ void TPyAggregateClassifier::AInit(void)
     try
     {
         LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("Python init started..."));
-        init_py();
+        init_py_pyubclsfr();
         py::to_python_converter<cv::Mat, pbcvt::matToNDArrayBoostConverter>();
         py::to_python_converter<RDK::UBitmap, pbcvt::uBitmapToNDArrayBoostConverter>();
         py::object MainModule = py::import("__main__");  // импортируем main-scope, см. https://docs.python.org/3/library/__main__.html
@@ -118,22 +115,26 @@ void TPyAggregateClassifier::AInit(void)
         //std::cout << boost::python::extract<int>(rand2) << std::endl;
 
         std::cout << "Python init successs" << std::endl;
+        Initialized = true;
     }
     catch (py::error_already_set const &)
     {
         std::string perrorStr = parse_python_exception();
         LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Python init fail: ")+perrorStr);
+        Initialized=false;
+        return;
     }
- LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("...Python init finished successful!"));
+    LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("...Python init finished successful!"));
 }
 
-void TPyAggregateClassifier::AUnInit(void)
+void TPyUBitmapClassifier::AUnInit(void)
 {
 }
 
 // Восстановление настроек по умолчанию и сброс процесса счета
-bool TPyAggregateClassifier::ADefault(void)
+bool TPyUBitmapClassifier::ADefault(void)
 {
+ Initialized=false;
  return true;
 }
 
@@ -141,66 +142,72 @@ bool TPyAggregateClassifier::ADefault(void)
 // после настройки параметров
 // Автоматически вызывает метод Reset() и выставляет Ready в true
 // в случае успешной сборки
-bool TPyAggregateClassifier::ABuild(void)
+bool TPyUBitmapClassifier::ABuild(void)
 {
  return true;
 }
 
 // Сброс процесса счета без потери настроек
-bool TPyAggregateClassifier::AReset(void)
+bool TPyUBitmapClassifier::AReset(void)
 {
+ Initialized = false;
  return true;
 }
 
 // Выполняет расчет этого объекта
-bool TPyAggregateClassifier::ACalculate(void)
+bool TPyUBitmapClassifier::ACalculate(void)
 {
- if(!InputImage.IsConnected())
+ if(!Initialized)
+ {
+    AInit();
+ }
+ if(!InputImages.IsConnected())
   return true;
 
- if (InputImage->GetColorModel() != RDK::ubmY8)
+ if(InputImages->size()>0)
  {
-     LogMessageEx(RDK_EX_WARNING, __FUNCTION__, std::string("Incorrect image color model. Need ubmY8 got: ")+sntoa(InputImage->GetColorModel()));
-     return true;
+     OutputClasses->clear();
+     OutputClasses->resize(InputImages->size(), -1);
+     for(int i=0; i<InputImages->size(); i++)
+     {
+         UBitmap &bmp = (*InputImages)[i];
+         bool nu = bmp.GetData()!=NULL;
+         RDK::SaveBitmapToFile("/home/ivan/testBmp.bmp", bmp);
+         if (bmp.GetColorModel() != RDK::ubmY8)
+         {
+             LogMessageEx(RDK_EX_WARNING, __FUNCTION__, std::string("Incorrect image ["+sntoa(i)+"] color model. Need ubmY8 got: ")+sntoa(bmp.GetColorModel()));
+             return true;
+         }
+
+         UBitmap b;
+         b.SetRes(96,96,ubmY8);
+         bmp.CopyTo(0,0,b);
+
+
+         RDK::SaveBitmapToFile("/home/ivan/testB.bmp", b);
+
+         int object_cls = -1;
+         /// Тут считаем
+         try
+         {
+          import_array();
+          py::object retval = IntegrationInterfaceInstance.attr("classify")(b);
+
+          object_cls = boost::python::extract<int>(retval);
+          (*OutputClasses)[i] = object_cls;
+         }
+         catch (py::error_already_set const &)
+         {
+          std::string perrorStr = parse_python_exception();
+          LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Python error: ")+perrorStr);
+         } 
+     }
  }
 
- DebugImage->SetColorModel(ubmRGB24,false);
- InputImage->ConvertTo(*DebugImage);
-
- Graph.SetCanvas(DebugImage);
-
- Detections->Resize(0, 6);
-
- if(AggrRectsMatrix->GetRows() != AggrIdMatrix->GetRows())
- {
-  LogMessageEx(RDK_EX_WARNING, __FUNCTION__, std::string("Rows count not equals: AggrRectsMatrix(")+sntoa(AggrRectsMatrix->GetRows())+std::string(") != AggrIdMatrix(")+sntoa(AggrIdMatrix->GetRows())+")");
-  return true;
- }
-
- Detections->Resize(AggrRectsMatrix->GetRows(), 6);
-
- RDK::UBitmap& input_img=*InputImage;
  //Пройти по всем агрегатам
- for(int i = 0; i < AggrRectsMatrix->GetRows(); ++i)
+ /*for(int i = 0; i < AggrRectsMatrix->GetRows(); ++i)
  {
-  (*Detections)(i, 0) = (*AggrIdMatrix)(i, 0);
-  (*Detections)(i, 1) = (*AggrRectsMatrix)(i, 0);
-  (*Detections)(i, 2) = (*AggrRectsMatrix)(i, 1);
-  (*Detections)(i, 3) = (*AggrRectsMatrix)(i, 2);
-  (*Detections)(i, 4) = (*AggrRectsMatrix)(i, 3);
-  (*Detections)(i, 5) = -1;
   int object_cls = -1;
-
-  UBitmap obj_rect;
-  int width = (*AggrRectsMatrix)(i, 2) - (*AggrRectsMatrix)(i, 0);
-  int height = (*AggrRectsMatrix)(i, 3) - (*AggrRectsMatrix)(i, 1);
-
-  if((width<=3)||(height<=3))
-    continue;
-
-  obj_rect.SetRes(width, height, ubmY8);
-  input_img.CopyTo(0,0,(*AggrRectsMatrix)(i, 0), (*AggrRectsMatrix)(i, 1), width, height, obj_rect);
-
   /// Тут считаем
   try
   {
@@ -221,14 +228,7 @@ bool TPyAggregateClassifier::ACalculate(void)
   {
    Graph.SetPenColor(0x00FF00);
   }
-  if(object_cls!=-1)
-  {
-   Graph.Rect((*AggrRectsMatrix)(i, 0),(*AggrRectsMatrix)(i, 1),(*AggrRectsMatrix)(i, 2),(*AggrRectsMatrix)(i, 3));
-  }
-
-
-  (*Detections)(i, 5) = object_cls;
- }
+ }*/
 /*
 
  //LogMessageEx(RDK_EX_INFO,__FUNCTION__,"test");

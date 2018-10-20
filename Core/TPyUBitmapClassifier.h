@@ -1,30 +1,30 @@
-#ifndef RDK_TPyAggregateClassifierH
-#define RDK_TPyAggregateClassifierH
+#ifndef PY_ARRAY_UNIQUE_SYMBOL
+#define PY_ARRAY_UNIQUE_SYMBOL pbcvt_ARRAY_API
+#endif
+#ifndef RDK_TPyUBitmapClassifierH
+#define RDK_TPyUBitmapClassifierH
 
 #include "../../../Rdk/Deploy/Include/rdk.h"
 #include "TPythonIntegrationInclude.h"
 
+
 namespace RDK {
 
-class TPyAggregateClassifier: public RDK::UNet
+class TPyUBitmapClassifier: public RDK::UNet
 {
 public: // Свойства
 /// Входное изображение
-UPropertyInputData<UBitmap,TPyAggregateClassifier> InputImage;
+/// UPropertyInputData<UBitmap,TPyUBitmapClassifier> InputImage;
 
-/// Входной файл
-ULProperty<std::string,TPyAggregateClassifier, ptPubParameter> PythonScriptFileName;
+/// Входное изображение
+ULProperty<std::string,TPyUBitmapClassifier, ptPubParameter> PythonScriptFileName;
 
 //Входные матрицы с данными об обнаружениях
-/// строка матрицы содержит [Left Top Right Bottom] индексы и размеры симметричны с AggrIdMatrix
-UPropertyInputData<MDMatrix<int>, TPyAggregateClassifier, ptPubInput> AggrRectsMatrix;
-/// строка матрицы содержит [AggrID] индексы и размеры симметричны с AggrRectsMatrix
-UPropertyInputData<MDMatrix<int>, TPyAggregateClassifier, ptPubInput> AggrIdMatrix;
+/// Содержит изображения (обработанные) для классификации
+UPropertyInputData<std::vector<UBitmap>, TPyUBitmapClassifier, ptPubInput> InputImages;
 
-/// Выходная матрица с рамками объектов
-UPropertyOutputData<MDMatrix<int>,TPyAggregateClassifier> Detections;
-
-UPropertyOutputData<UBitmap,TPyAggregateClassifier> DebugImage;
+/// Выходная матрица с классами объектов
+UPropertyOutputData<std::vector<int>,TPyUBitmapClassifier, ptPubOutput> OutputClasses;
 
 boost::python::object IntegrationInterface;
 boost::python::object IntegrationInterfaceInstance;
@@ -33,13 +33,14 @@ protected: // Переменные состояния
 
 UGraphics Graph;
 UBitmap Canvas;
+bool Initialized;
 
 public: // Методы
 // --------------------------
 // Конструкторы и деструкторы
 // --------------------------
-TPyAggregateClassifier(void);
-virtual ~TPyAggregateClassifier(void);
+TPyUBitmapClassifier(void);
+virtual ~TPyUBitmapClassifier(void);
 // --------------------------
 
 // ---------------------
@@ -56,7 +57,7 @@ virtual ~TPyAggregateClassifier(void);
 // Системные методы управления объектом
 // --------------------------
 // Выделяет память для новой чистой копии объекта этого класса
-virtual TPyAggregateClassifier* New(void);
+virtual TPyUBitmapClassifier* New(void);
 // --------------------------
 
 // --------------------------
