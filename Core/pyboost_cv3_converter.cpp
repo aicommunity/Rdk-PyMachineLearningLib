@@ -293,11 +293,20 @@ PyObject* uBitmapToNDArrayBoostConverter::convert(RDK::UBitmap const& bmp) {
     {
         Py_RETURN_NONE;
     }
-    if (bmp.GetColorModel() != RDK::ubmY8)
+    Mat m;
+    if (bmp.GetColorModel() == RDK::ubmRGB24)
+    {
+        m=Mat(bmp.GetHeight(), bmp.GetWidth(), CV_8UC3, bmp.GetData());
+    }
+    else if(bmp.GetColorModel() == RDK::ubmY8)
+    {
+        m=Mat(bmp.GetHeight(), bmp.GetWidth(), CV_8U, bmp.GetData());
+    }
+    else
     {
         Py_RETURN_NONE;
     }
-	Mat m(bmp.GetHeight(), bmp.GetWidth(), CV_8U, bmp.GetData());
+
 	if (!m.data)
 	{
         Py_RETURN_NONE;

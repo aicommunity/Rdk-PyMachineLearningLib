@@ -17,14 +17,26 @@ public: // Свойства
 /// UPropertyInputData<UBitmap,TPyUBitmapClassifier> InputImage;
 
 /// Входное изображение
-ULProperty<std::string,TPyUBitmapClassifier, ptPubParameter> PythonScriptFileName;
+//ULProperty<std::string,TPyUBitmapClassifier, ptPubParameter> PythonScriptFileName;
 
 //Входные матрицы с данными об обнаружениях
 /// Содержит изображения (обработанные) для классификации
 UPropertyInputData<std::vector<UBitmap>, TPyUBitmapClassifier, ptPubInput> InputImages;
 
+/// Целое число, определяющее цветовую модель, на которую рассчитана сеть
+/// ubmRGB24=3 - цветное изображение
+/// umbY8=400 - черно-белое изображение
+ULProperty<int,TPyUBitmapClassifier, ptPubParameter> ImageColorModel;
+
+/// Количество классов объектов (какой размер будет у вектора
+ULProperty<int,TPyUBitmapClassifier, ptPubParameter> NumClasses;
+
 /// Выходная матрица с классами объектов
 UPropertyOutputData<std::vector<int>,TPyUBitmapClassifier, ptPubOutput> OutputClasses;
+
+/// Выходная матрица. Количество столбцов по числу объектов, количество строк в столбце по числу классов
+/// Каждое значение - уверенность класса
+UPropertyOutputData<MDMatrix<double>, TPyUBitmapClassifier> OutputConfidences;
 
 boost::python::object IntegrationInterface;
 boost::python::object IntegrationInterfaceInstance;
@@ -34,6 +46,7 @@ protected: // Переменные состояния
 UGraphics Graph;
 UBitmap Canvas;
 bool Initialized;
+std::string PythonScriptFileName;
 
 public: // Методы
 // --------------------------
@@ -47,6 +60,9 @@ virtual ~TPyUBitmapClassifier(void);
 // Методы управления параметрами
 // ---------------------
 // ---------------------
+
+bool SetPythonClassifierScriptPath(const std::string& path);
+const std::string &GetPythonClassifierScriptPath(void) const;
 
 // ---------------------
 // Методы управления переменными состояния

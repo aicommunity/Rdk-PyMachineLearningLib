@@ -33,8 +33,24 @@ TPyUBitmapClassifier::TPyUBitmapClassifier(void)
 : InputImages("InputImages",this),
   Initialized(false),
   OutputClasses("OutputClasses",this),
-  PythonScriptFileName("PythonScriptFileName",this)
+  ImageColorModel("ImageColorModel",this),
+  NumClasses("NumClasses",this),
+  OutputConfidences("OutputConfidences", this)
+  //PythonScriptFileName("PythonScriptFileName",this)
 {
+    AddLookupProperty("PythonScriptPath",ptPubParameter, new UVProperty<std::string,TPyUBitmapClassifier>(this,
+                 &TPyUBitmapClassifier::SetPythonClassifierScriptPath,&TPyUBitmapClassifier::GetPythonClassifierScriptPath));
+
+}
+
+bool TPyUBitmapClassifier::SetPythonClassifierScriptPath(const std::string& path)
+{
+    PythonScriptFileName = path;
+    Initialized=false;
+}
+const std::string & TPyUBitmapClassifier::GetPythonClassifierScriptPath(void) const
+{
+    return PythonScriptFileName;
 }
 
 TPyUBitmapClassifier::~TPyUBitmapClassifier(void)
@@ -101,8 +117,8 @@ void TPyUBitmapClassifier::AInit(void)
 
         // TODO: путь для импорта файла брать из конфига"../../../../Libraries/Rdk-PyMachineLearningLib/PythonScripts/classifier_interface.py"
         // загрузка кода из файла в извлеченную область имен
-        std::string s = this->GetEnvironment()->GetCurrentDataDir()+*PythonScriptFileName;
-        py::object ClassifierInterfaceModule = import("test_class",s,MainNamespace);
+        std::string s = this->GetEnvironment()->GetCurrentDataDir()+PythonScriptFileName;
+        py::object ClassifierInterfaceModule = import("classifier_interface",s,MainNamespace);
         // экземпляр питоновского класса, через который активируется виртуальная среда и загружается модель
         // TODO: пусть до среды брать из конфига
         IntegrationInterface = ClassifierInterfaceModule.attr("ClassifierEmbeddingInterface");
@@ -135,6 +151,7 @@ void TPyUBitmapClassifier::AUnInit(void)
 bool TPyUBitmapClassifier::ADefault(void)
 {
  Initialized=false;
+ NumClasses=4;
  return true;
 }
 
@@ -168,23 +185,28 @@ bool TPyUBitmapClassifier::ACalculate(void)
  {
      OutputClasses->clear();
      OutputClasses->resize(InputImages->size(), -1);
+     OutputConfidences->Resize(InputImages->size(), NumClasses);
      for(int i=0; i<InputImages->size(); i++)
      {
          UBitmap &bmp = (*InputImages)[i];
-         bool nu = bmp.GetData()!=NULL;
-         RDK::SaveBitmapToFile("/home/ivan/testBmp.bmp", bmp);
-         if (bmp.GetColorModel() != RDK::ubmY8)
+         if(bmp.GetData()==NULL)
+            continue;
+
+         if(ImageColorModel!=bmp.GetColorModel())
          {
-             LogMessageEx(RDK_EX_WARNING, __FUNCTION__, std::string("Incorrect image ["+sntoa(i)+"] color model. Need ubmY8 got: ")+sntoa(bmp.GetColorModel()));
+             LogMessageEx(RDK_EX_WARNING, __FUNCTION__, std::string("Incorrect image ["+sntoa(i)+"] color model. Need "+sntoa(*ImageColorModel)+" got: ")+sntoa(bmp.GetColorModel()));
              return true;
          }
 
+         int w = bmp.GetWidth();
+         int h = bmp.GetHeight();
+
          UBitmap b;
-         b.SetRes(96,96,ubmY8);
+         b.SetRes(w, h, bmp.GetColorModel());
          bmp.CopyTo(0,0,b);
 
 
-         RDK::SaveBitmapToFile("/home/ivan/testB.bmp", b);
+         //RDK::SaveBitmapToFile("/home/ivan/testB.bmp", b);
 
          int object_cls = -1;
          /// Тут считаем
@@ -193,13 +215,59 @@ bool TPyUBitmapClassifier::ACalculate(void)
           import_array();
           py::object retval = IntegrationInterfaceInstance.attr("classify")(b);
 
-          object_cls = boost::python::extract<int>(retval);
-          (*OutputClasses)[i] = object_cls;
+          //std::vector<float> res = boost::python::extract<std::vector<float> >(retval);
+          boost::numpy::ndarray ndarr = boost::python::extract< boost::numpy::ndarray  >(retval);
+          int dms = ndarr.get_nd();
+
+          if(dms>2)
+          {
+              LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPyUBitmapClassifier error: Returned array with incorrect dimensions"));
+              return true;
+          }
+
+          const long* shp = ndarr.get_shape();
+          long height = shp[0];
+          long width  = shp[1];
+
+          const long *strides = ndarr.get_strides();
+          long str0 = ndarr.strides(0);
+          long str1 = ndarr.strides(1);
+
+          std::vector<float> result;
+          float *data = reinterpret_cast<float*>(ndarr.get_data());
+          for(int y=0; y<height; y++)
+          {
+              for(int x=0; x<width;x++)
+              {
+                  float val = data[y*width+x];
+                  result.push_back(val);
+              }
+          }
+          //Если не совпадает то ничего не записываем и выдать ошибку!
+          if(result.size()!=NumClasses)
+          {
+              LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPyUBitmapClassifier error: NumClasses not equals to returned confidences count"));
+              return true;
+          }
+
+          int max_id = -1;
+          double max_conf = -100;
+          for(int k=0; k<result.size(); k++)
+          {
+              (*OutputConfidences)(i, k) = result[k];
+              if(result[k]>max_conf)
+              {
+                  max_conf = result[k];
+                  max_id = k;
+              }
+          }
+          (*OutputClasses)[i] = max_id;
+
          }
          catch (py::error_already_set const &)
          {
           std::string perrorStr = parse_python_exception();
-          LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Python error: ")+perrorStr);
+          LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPyUBitmapClassifier error: ")+perrorStr);
          } 
      }
  }
