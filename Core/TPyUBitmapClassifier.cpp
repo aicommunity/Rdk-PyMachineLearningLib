@@ -1,8 +1,12 @@
+#define NO_IMPORT_ARRAY
+#define PY_ARRAY_UNIQUE_SYMBOL pbcvt_ARRAY_API
 /*#ifndef PY_ARRAY_UNIQUE_SYMBOL
 #define PY_ARRAY_UNIQUE_SYMBOL pbcvt_ARRAY_API
 #endif*/
 #ifndef RDK_TPyUBitmapClassifierCPP
 #define RDK_TPyUBitmapClassifierCPP
+
+//#define NO_IMPORT_ARRAY
 
 #include "TPyUBitmapClassifier.h"
 #include "TPythonIntegrationUtil.h"
@@ -10,7 +14,7 @@
 #include "pyboostcvconverter.hpp"
 
 namespace RDK {
-
+/*
 #if (PY_VERSION_HEX >= 0x03000000)
     void *init_py_pyubclsfr() {
 #else
@@ -23,7 +27,7 @@ namespace RDK {
         import_array();
         np::initialize();
         return NUMPY_IMPORT_ARRAY_RETVAL;
-    }
+    }*/
 
 // Методы
 // --------------------------
@@ -107,7 +111,7 @@ void TPyUBitmapClassifier::AInit(void)
     try
     {
         LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("Python init started..."));
-        init_py_pyubclsfr();
+        init_py();
         py::to_python_converter<cv::Mat, pbcvt::matToNDArrayBoostConverter>();
         py::to_python_converter<RDK::UBitmap, pbcvt::uBitmapToNDArrayBoostConverter>();
         py::object MainModule = py::import("__main__");  // импортируем main-scope, см. https://docs.python.org/3/library/__main__.html
@@ -212,7 +216,7 @@ bool TPyUBitmapClassifier::ACalculate(void)
          /// Тут считаем
          try
          {
-          import_array();
+ //         import_array();
           py::object retval = IntegrationInterfaceInstance.attr("classify")(b);
 
           //std::vector<float> res = boost::python::extract<std::vector<float> >(retval);

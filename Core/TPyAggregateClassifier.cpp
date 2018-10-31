@@ -1,8 +1,12 @@
+#define NO_IMPORT_ARRAY
+#define PY_ARRAY_UNIQUE_SYMBOL pbcvt_ARRAY_API
 //#ifndef PY_ARRAY_UNIQUE_SYMBOL
 //#define PY_ARRAY_UNIQUE_SYMBOL pbcvt_ARRAY_API
 //#endif
 #ifndef RDK_TPyAggregateClassifierCPP
 #define RDK_TPyAggregateClassifierCPP
+
+//#define NO_IMPORT_ARRAY
 
 #include "TPyAggregateClassifier.h"
 #include "TPythonIntegrationUtil.h"
@@ -10,7 +14,7 @@
 #include "pyboostcvconverter.hpp"
 
 namespace RDK {
-
+/*
 #if (PY_VERSION_HEX >= 0x03000000)
     void *init_py() {
 #else
@@ -24,7 +28,7 @@ namespace RDK {
         np::initialize();
         return NUMPY_IMPORT_ARRAY_RETVAL;
     }
-
+*/
 // Методы
 // --------------------------
 // Конструкторы и деструкторы

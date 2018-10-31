@@ -1,6 +1,3 @@
-#ifndef PY_ARRAY_UNIQUE_SYMBOL
-#define PY_ARRAY_UNIQUE_SYMBOL pbcvt_ARRAY_API
-#endif
 #ifndef RDK_TPyUBitmapClassifierH
 #define RDK_TPyUBitmapClassifierH
 
