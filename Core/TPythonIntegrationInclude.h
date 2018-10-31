@@ -1,9 +1,11 @@
 #ifndef TPYTHONINTEGRATION_H
 #define TPYTHONINTEGRATION_H
 
-#ifndef PY_ARRAY_UNIQUE_SYMBOL
-#define PY_ARRAY_UNIQUE_SYMBOL pbcvt_ARRAY_API
-#endif
+//#ifndef PY_ARRAY_UNIQUE_SYMBOL
+//#define PY_ARRAY_UNIQUE_SYMBOL pbcvt_ARRAY_API
+//#endif
+
+#include "../../../Rdk/Deploy/Include/rdk.h"
 
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #ifndef BOOST_PYTHON_STATIC_LIB
@@ -22,6 +24,7 @@
 #include <boost/python.hpp>
 #include <boost/python/detail/wrap_python.hpp>
 
+
 namespace py = boost::python;
 
 #ifdef WIN32
@@ -35,5 +38,7 @@ namespace np = boost::numpy;
 #else
     extern void init_py();
 #endif
+
+
 
 #endif // TPYTHONINTEGRATION_H

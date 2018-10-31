@@ -1,9 +1,8 @@
 #ifndef RDK_TPyUBitmapClassifierH
 #define RDK_TPyUBitmapClassifierH
 
-#include "../../../Rdk/Deploy/Include/rdk.h"
 #include "TPythonIntegrationInclude.h"
-
+#include "TPythonIntegrationUtil.h"
 
 namespace RDK {
 

@@ -1,8 +1,9 @@
 #ifndef RDK_TPythonIntegrationUtilH
 #define RDK_TPythonIntegrationUtilH
 
-#include "../../../Rdk/Deploy/Include/rdk.h"
+//#include "../../../Rdk/Deploy/Include/rdk.h"
 #include "TPythonIntegrationInclude.h"
+#include "pyboostcvconverter.hpp"
 
 #include <vector>
 

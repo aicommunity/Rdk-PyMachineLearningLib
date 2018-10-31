@@ -1,17 +1,10 @@
 #define NO_IMPORT_ARRAY
-#define PY_ARRAY_UNIQUE_SYMBOL pbcvt_ARRAY_API
-/*#ifndef PY_ARRAY_UNIQUE_SYMBOL
-#define PY_ARRAY_UNIQUE_SYMBOL pbcvt_ARRAY_API
-#endif*/
+
 #ifndef RDK_TPyUBitmapClassifierCPP
 #define RDK_TPyUBitmapClassifierCPP
 
-//#define NO_IMPORT_ARRAY
-
 #include "TPyUBitmapClassifier.h"
-#include "TPythonIntegrationUtil.h"
 #include <iostream>
-#include "pyboostcvconverter.hpp"
 
 namespace RDK {
 /*

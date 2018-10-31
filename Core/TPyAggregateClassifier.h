@@ -1,12 +1,8 @@
 #ifndef RDK_TPyAggregateClassifierH
 #define RDK_TPyAggregateClassifierH
 
-#ifndef PY_ARRAY_UNIQUE_SYMBOL
-#define PY_ARRAY_UNIQUE_SYMBOL pbcvt_ARRAY_API
-#endif
-
-#include "../../../Rdk/Deploy/Include/rdk.h"
 #include "TPythonIntegrationInclude.h"
+#include "TPythonIntegrationUtil.h"
 
 namespace RDK {
 
