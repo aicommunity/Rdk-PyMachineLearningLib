@@ -44,6 +44,7 @@ bool TPyUBitmapClassifier::SetPythonClassifierScriptPath(const std::string& path
 {
     PythonScriptFileName = path;
     Initialized=false;
+    return true;
 }
 const std::string & TPyUBitmapClassifier::GetPythonClassifierScriptPath(void) const
 {
@@ -213,7 +214,7 @@ bool TPyUBitmapClassifier::ACalculate(void)
           py::object retval = IntegrationInterfaceInstance.attr("classify")(b);
 
           //std::vector<float> res = boost::python::extract<std::vector<float> >(retval);
-          boost::numpy::ndarray ndarr = boost::python::extract< boost::numpy::ndarray  >(retval);
+          np::ndarray ndarr = boost::python::extract< np::ndarray  >(retval);
           int dms = ndarr.get_nd();
 
           if(dms>2)
@@ -222,11 +223,11 @@ bool TPyUBitmapClassifier::ACalculate(void)
               return true;
           }
 
-          const long* shp = ndarr.get_shape();
+          const Py_intptr_t* shp = ndarr.get_shape();
           long height = shp[0];
           long width  = shp[1];
 
-          const long *strides = ndarr.get_strides();
+          const Py_intptr_t *strides = ndarr.get_strides();
           long str0 = ndarr.strides(0);
           long str1 = ndarr.strides(1);
 

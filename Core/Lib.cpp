@@ -21,7 +21,12 @@
 #endif
 #include <boost/python.hpp>
 #include <boost/python/detail/wrap_python.hpp>
+
+#ifdef WIN32
+#include <ndarrayobject.h>
+#else
 #include <numpy/ndarrayobject.h>
+#endif
 
 namespace py = boost::python;
 

@@ -2,7 +2,11 @@
 #define CVBOOSTCONVERTER_HPP_
 
 #include "TPythonIntegrationInclude.h"
+#ifdef WIN32
+#include <ndarrayobject.h>
+#else
 #include <numpy/ndarrayobject.h>
+#endif
 #include <opencv2/core/core.hpp>
 #include "opencv2/imgproc/imgproc.hpp"
 #include <cstdio>
