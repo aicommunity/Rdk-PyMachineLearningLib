@@ -39,6 +39,7 @@ HEADERS += \
     ../../Core/TPyAggregateClassifier.h \
     ../../Core/TPyUBitmapClassifier.h \
     ../../Core/TPythonIntegrationInclude.h \
+    ../../Core/TPyObjectDetector.h \
     ../../Core/Lib.h
 
 
@@ -47,4 +48,5 @@ SOURCES += \
     ../../Core/TPythonIntegrationUtil.cpp \
     ../../Core/TPyAggregateClassifier.cpp \
     ../../Core/TPyUBitmapClassifier.cpp \
+    ../../Core/TPyObjectDetector.cpp \
     ../../Core/Lib.cpp

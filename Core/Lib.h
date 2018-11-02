@@ -5,6 +5,7 @@
 //#include "TPythonIntegration.h"
 #include "TPyUBitmapClassifier.h"
 #include "TPyAggregateClassifier.h"
+#include "TPyObjectDetector.h"
 
 
 namespace RDK {

@@ -87,6 +87,7 @@ void UPyMachineLearningLib::CreateClassSamples(UStorage *storage)
 
  UploadClass<TPyUBitmapClassifier>("TPyUBitmapClassifier","PyUBitmapClassifier");
  UploadClass<TPyAggregateClassifier>("TPyAggregateClassifier","PyAggregateClassifier");
+ UploadClass<TPyObjectDetector>("TPyObjectDetector","PyObjectDetector");
 
 }
 // --------------------------
