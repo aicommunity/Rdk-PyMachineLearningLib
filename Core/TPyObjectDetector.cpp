@@ -82,25 +82,6 @@ TPyObjectDetector* TPyObjectDetector::New(void)
 // --------------------------
 void TPyObjectDetector::AInit(void)
 {
-    /*Py_Initialize();
-    bool res = np::initialize();
-    try
-    {
-        py::object main_module = py::import("__main__");
-        py::object main_namespace = main_module.attr("__dict__");
-
-        py::object ignored = py::exec("hello = open('/home/ivan/hello.txt', 'w')\n"
-                          "hello.write('Hello world!')\n"
-                          "hello.close()",
-                          main_namespace);
-    }
-    catch (py::error_already_set const &)
-    {
-        std::string perrorStr = RDK::parse_python_exception();
-        // TODO: логировать и выдавать ошибку с прекращением программы
-        std::cout << "Error occured:" << std::endl << perrorStr << std::endl;
-        std::cout << "Python init fail" << std::endl;
-    }*/
 
     try
     {
@@ -111,15 +92,12 @@ void TPyObjectDetector::AInit(void)
         py::object MainModule = py::import("__main__");  // импортируем main-scope, см. https://docs.python.org/3/library/__main__.html
         py::object MainNamespace = MainModule.attr("__dict__");  // извлекаем область имен
 
-        //py::object pycv2 = py::import("cv2");
-
-        // TODO: путь дл€ импорта файла брать из конфига"../../../../Libraries/Rdk-PyMachineLearningLib/PythonScripts/classifier_interface.py"
         // загрузка кода из файла в извлеченную область имен
         std::string s = this->GetEnvironment()->GetCurrentDataDir()+PythonScriptFileName;
-        py::object ClassifierInterfaceModule = import("classifier_interface",s,MainNamespace);
+        py::object DetectorInterfaceModule = import("detector_interface",s,MainNamespace);
         // экземпл€р питоновского класса, через который активируетс€ виртуальна€ среда и загружаетс€ модель
         // TODO: пусть до среды брать из конфига
-        IntegrationInterface = ClassifierInterfaceModule.attr("ClassifierEmbeddingInterface");
+        IntegrationInterface = DetectorInterfaceModule.attr("DetectorEmbeddingInterface");
         if(!IntegrationInterface.is_none())
             IntegrationInterfaceInstance = IntegrationInterface(); ///home/arnold/.virtualenvs/cv
 
@@ -128,6 +106,7 @@ void TPyObjectDetector::AInit(void)
         //boost::python::object rand2 = rand_func();
         //std::cout << boost::python::extract<int>(rand2) << std::endl;
 
+        py::object test_res = IntegrationInterfaceInstance.attr("_debug_call")("2012&", "&666");
         std::cout << "Python init successs" << std::endl;
         Initialized = true;
     }
