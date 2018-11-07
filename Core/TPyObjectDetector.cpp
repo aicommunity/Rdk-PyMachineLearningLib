@@ -66,6 +66,7 @@ bool TPyObjectDetector::SetNumTargetClassesYOLO(const int& num)
 {
     NumTargetClassesYOLO = num;
     TargetClassesYOLO->resize(num);
+    return true;
 }
 const int& TPyObjectDetector::GetNumTargetClassesYOLO(void) const
 {
@@ -76,6 +77,7 @@ bool TPyObjectDetector::SetNumChangeClassesYOLO(const int& num)
 {
     NumChangeClassesYOLO = num;
     ChangeClassesYOLO->resize(num);
+    return true;
 }
 const int& TPyObjectDetector::GetNumChangeClassesYOLO(void) const
 {
