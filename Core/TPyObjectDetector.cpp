@@ -30,13 +30,24 @@ TPyObjectDetector::TPyObjectDetector(void)
 : InputImage("InputImage",this),
   Initialized(false),
   OutputObjects("OutputObjects",this),
-  ImageColorModel("ImageColorModel",this)//,
-  //NumClasses("NumClasses",this),
+  ImageColorModel("ImageColorModel",this),
+  ModelPathYOLO("ModelPathYOLO",this),
+  AnchorsPathYOLO("AnchorsPathYOLO",this),
+  ClassesPathYOLO("ClassesPathYOLO",this),
+  TargetClassesYOLO("TargetClassesYOLO",this),
+  ChangeClassesYOLO("ChangeClassesYOLO",this),
+  OutputImage("OutputImage",this)
   //OutputConfidences("OutputConfidences", this)
   //PythonScriptFileName("PythonScriptFileName",this)
 {
     AddLookupProperty("PythonScriptPath",ptPubParameter, new UVProperty<std::string,TPyObjectDetector>(this,
                  &TPyObjectDetector::SetPythonClassifierScriptPath,&TPyObjectDetector::GetPythonClassifierScriptPath));
+
+    AddLookupProperty("NumTargetClassesYOLO",ptPubParameter, new UVProperty<int,TPyObjectDetector>(this,
+                 &TPyObjectDetector::SetNumTargetClassesYOLO,&TPyObjectDetector::GetNumTargetClassesYOLO));
+
+    AddLookupProperty("NumChangeClassesYOLO",ptPubParameter, new UVProperty<int,TPyObjectDetector>(this,
+                 &TPyObjectDetector::SetNumChangeClassesYOLO,&TPyObjectDetector::GetNumChangeClassesYOLO));
 
 }
 
@@ -49,6 +60,26 @@ bool TPyObjectDetector::SetPythonClassifierScriptPath(const std::string& path)
 const std::string & TPyObjectDetector::GetPythonClassifierScriptPath(void) const
 {
     return PythonScriptFileName;
+}
+
+bool TPyObjectDetector::SetNumTargetClassesYOLO(const int& num)
+{
+    NumTargetClassesYOLO = num;
+    TargetClassesYOLO->resize(num);
+}
+const int& TPyObjectDetector::GetNumTargetClassesYOLO(void) const
+{
+    return NumTargetClassesYOLO;
+}
+
+bool TPyObjectDetector::SetNumChangeClassesYOLO(const int& num)
+{
+    NumChangeClassesYOLO = num;
+    ChangeClassesYOLO->resize(num);
+}
+const int& TPyObjectDetector::GetNumChangeClassesYOLO(void) const
+{
+    return NumChangeClassesYOLO;
 }
 
 TPyObjectDetector::~TPyObjectDetector(void)
@@ -106,7 +137,26 @@ void TPyObjectDetector::AInit(void)
         //boost::python::object rand2 = rand_func();
         //std::cout << boost::python::extract<int>(rand2) << std::endl;
 
-        py::object test_res = IntegrationInterfaceInstance.attr("_debug_call")("2012&", "&666");
+        py::list target_classes = py::list();
+        for(int i=0; i<TargetClassesYOLO->size(); i++)
+        {
+            target_classes.insert(i, (*TargetClassesYOLO)[i]);
+        }
+
+        py::list change_classes = py::list();
+        if(ChangeClassesYOLO->size()>0)
+        {
+            for(int i=0; i<ChangeClassesYOLO->size(); i++)
+            {
+                change_classes.insert(i, (*ChangeClassesYOLO)[i]);
+            }
+        }
+
+        py::object initialize = IntegrationInterfaceInstance.attr("initialize_predictor")(*ModelPathYOLO,
+                                                                                          *AnchorsPathYOLO,
+                                                                                          *ClassesPathYOLO,
+                                                                                          target_classes,
+                                                                                          change_classes);
         std::cout << "Python init successs" << std::endl;
         Initialized = true;
     }
@@ -130,7 +180,6 @@ bool TPyObjectDetector::ADefault(void)
  Initialized=false;
  return true;
 }
-
 // Обеспечивает сборку внутренней структуры объекта
 // после настройки параметров
 // Автоматически вызывает метод Reset() и выставляет Ready в true
@@ -167,6 +216,7 @@ bool TPyObjectDetector::ACalculate(void)
      return true;
  }
 
+
  int w = bmp.GetWidth();
  int h = bmp.GetHeight();
 
@@ -174,7 +224,14 @@ bool TPyObjectDetector::ACalculate(void)
  b.SetRes(w, h, bmp.GetColorModel());
  bmp.CopyTo(0,0,b);
 
+ OutputImage->SetColorModel(ubmRGB24,false);
+ InputImage->ConvertTo(*OutputImage);
+
+ Graph.SetCanvas(OutputImage);
+
+
  /// Тут считаем
+ std::vector<std::vector<double> > result;
  try
  {
   //import_array();
@@ -198,16 +255,33 @@ bool TPyObjectDetector::ACalculate(void)
   long str0 = ndarr.strides(0);
   long str1 = ndarr.strides(1);
 
-  std::vector<float> result;
-  float *data = reinterpret_cast<float*>(ndarr.get_data());
+
+  result.resize(height);
+
+  double *data = reinterpret_cast<double*>(ndarr.get_data());
   for(int y=0; y<height; y++)
   {
+      result[y].resize(width);
       for(int x=0; x<width;x++)
       {
-          float val = data[y*width+x];
-          result.push_back(val);
+          double val = data[y*width+x];
+          result[y][x] = val;
       }
   }
+
+  for(int i=0; i<result.size(); i++)
+  {
+      int xmin, ymin, xmax, ymax;
+      ymin = (int)(result[i][0]);
+      xmin = (int)(result[i][1]);
+      ymax = (int)(result[i][2]);
+      xmax = (int)(result[i][3]);
+
+      Graph.SetPenColor(0x00FF00);
+      Graph.Rect(xmin, ymin, xmax, ymax);
+  }
+
+  //int k=1+21;
   //Если не совпадает то ничего не записываем и выдать ошибку!
   //if(result.size()!=NumClasses)
   //{

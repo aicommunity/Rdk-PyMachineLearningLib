@@ -11,6 +11,7 @@ class TPyObjectDetector: public RDK::UNet
 public: // Свойства
 /// Входное изображение
 UPropertyInputData<UBitmap, TPyObjectDetector, ptPubInput> InputImage;
+UPropertyInputData<UBitmap, TPyObjectDetector, ptPubOutput> OutputImage;
 
 /// Целое число, определяющее цветовую модель, на которую рассчитана сеть
 /// ubmRGB24=3 - цветное изображение
@@ -18,7 +19,19 @@ UPropertyInputData<UBitmap, TPyObjectDetector, ptPubInput> InputImage;
 ULProperty<int,TPyObjectDetector, ptPubParameter> ImageColorModel;
 
 /// Количество классов объектов (какой размер будет у вектора
-//ULProperty<int,TPyObjectDetector, ptPubParameter> NumClasses;
+//ULProperty<int,TPyObjectDetector, ptPubParameter> NumClasses;model_path
+
+///Путь к модели Йолы
+ULProperty<std::string,TPyObjectDetector, ptPubParameter> ModelPathYOLO;
+///Путь к файлу с якорями (оставить пустым если используем стандарт)
+ULProperty<std::string,TPyObjectDetector, ptPubParameter> AnchorsPathYOLO;
+///Путь к файлу с перечнем классов для используемой сети
+ULProperty<std::string,TPyObjectDetector, ptPubParameter> ClassesPathYOLO;
+///Список целевых классов
+ULProperty<std::vector<std::string>,TPyObjectDetector, ptPubParameter> TargetClassesYOLO;
+///Список замен классов (изменить список классов в файле ClassesPathYOLO на свои имена)
+///ВНИМАНИЕ!!! Число классов должно соответствовать числу классов в ClassesPathYOLO
+ULProperty<std::vector<std::string>,TPyObjectDetector, ptPubParameter> ChangeClassesYOLO;
 
 
 /// Выходная матрица с классами объектов
@@ -40,6 +53,9 @@ UBitmap Canvas;
 bool Initialized;
 std::string PythonScriptFileName;
 
+int NumTargetClassesYOLO;
+int NumChangeClassesYOLO;
+
 public: // Методы
 // --------------------------
 // Конструкторы и деструкторы
@@ -55,6 +71,12 @@ virtual ~TPyObjectDetector(void);
 
 bool SetPythonClassifierScriptPath(const std::string& path);
 const std::string &GetPythonClassifierScriptPath(void) const;
+
+bool SetNumTargetClassesYOLO(const int& num);
+const int& GetNumTargetClassesYOLO(void) const;
+
+bool SetNumChangeClassesYOLO(const int& num);
+const int& GetNumChangeClassesYOLO(void) const;
 
 // ---------------------
 // Методы управления переменными состояния
