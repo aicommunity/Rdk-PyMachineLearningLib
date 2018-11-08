@@ -269,6 +269,17 @@ bool TPyObjectDetector::ACalculate(void)
       }
   }
 
+  OutputObjects->Resize(height, width);
+
+  for(int y=0; y<height; y++)
+  {
+      result[y].resize(width);
+      for(int x=0; x<width;x++)
+      {
+          (*OutputObjects)(y, x) = result[y][x];
+      }
+  }
+
   for(int i=0; i<result.size(); i++)
   {
       int xmin, ymin, xmax, ymax;
