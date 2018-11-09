@@ -21,6 +21,17 @@ ULProperty<int,TPyObjectDetector, ptPubParameter> ImageColorModel;
 /// Количество классов объектов (какой размер будет у вектора
 //ULProperty<int,TPyObjectDetector, ptPubParameter> NumClasses;model_path
 
+///Тип инициализации: 1 - упрощенный, стандартный, через пути к модели, якорям, перечню классов, целевыми и заменами
+///                   2 - инициализация через файл с конфигурацией и файл весов
+ULProperty<int,TPyObjectDetector, ptPubParameter> InitializationTypeYOLO;
+
+///Путь к файлу конфигурации Йолы
+ULProperty<std::string,TPyObjectDetector, ptPubParameter> ConfigPathYOLO;
+///Путь к файлу весов Йолы
+ULProperty<std::string,TPyObjectDetector, ptPubParameter> WeightsPathYOLO;
+
+
+
 ///Путь к модели Йолы
 ULProperty<std::string,TPyObjectDetector, ptPubParameter> ModelPathYOLO;
 ///Путь к файлу с якорями (оставить пустым если используем стандарт)
@@ -29,9 +40,14 @@ ULProperty<std::string,TPyObjectDetector, ptPubParameter> AnchorsPathYOLO;
 ULProperty<std::string,TPyObjectDetector, ptPubParameter> ClassesPathYOLO;
 ///Список целевых классов
 ULProperty<std::vector<std::string>,TPyObjectDetector, ptPubParameter> TargetClassesYOLO;
+///Загружать список классов из соответствующего файла
+ULProperty<bool,TPyObjectDetector, ptPubParameter> LoadTargetClassesYOLO;
 ///Список замен классов (изменить список классов в файле ClassesPathYOLO на свои имена)
 ///ВНИМАНИЕ!!! Число классов должно соответствовать числу классов в ClassesPathYOLO
 ULProperty<std::vector<std::string>,TPyObjectDetector, ptPubParameter> ChangeClassesYOLO;
+
+///Замена классов по значениям
+///ULProperty<std::map<int, int>,TPyObjectDetector, ptPubParameter> ClassIndicesExchange;
 
 
 /// Выходная матрица с классами объектов
@@ -55,6 +71,8 @@ std::string PythonScriptFileName;
 
 int NumTargetClassesYOLO;
 int NumChangeClassesYOLO;
+
+std::vector<std::string> ClassedList;
 
 public: // Методы
 // --------------------------
@@ -94,7 +112,8 @@ virtual TPyObjectDetector* New(void);
 // Скрытые методы управления счетом
 // --------------------------
 protected:
-virtual void AInit(void);
+bool Initialize(void);
+//virtual void AInit(void);
 virtual void AUnInit(void);
 
 // Восстановление настроек по умолчанию и сброс процесса счета

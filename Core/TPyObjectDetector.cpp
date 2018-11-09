@@ -36,7 +36,11 @@ TPyObjectDetector::TPyObjectDetector(void)
   ClassesPathYOLO("ClassesPathYOLO",this),
   TargetClassesYOLO("TargetClassesYOLO",this),
   ChangeClassesYOLO("ChangeClassesYOLO",this),
-  OutputImage("OutputImage",this)
+  OutputImage("OutputImage",this),
+  InitializationTypeYOLO("InitializationTypeYOLO",this),
+  ConfigPathYOLO("ConfigPathYOLO",this),
+  WeightsPathYOLO("WeightsPathYOLO",this),
+  LoadTargetClassesYOLO("LoadTargetClassesYOLO",this)
   //OutputConfidences("OutputConfidences", this)
   //PythonScriptFileName("PythonScriptFileName",this)
 {
@@ -113,7 +117,7 @@ TPyObjectDetector* TPyObjectDetector::New(void)
 // --------------------------
 // Скрытые методы управления счетом
 // --------------------------
-void TPyObjectDetector::AInit(void)
+bool TPyObjectDetector::Initialize(void)
 {
 
     try
@@ -153,23 +157,47 @@ void TPyObjectDetector::AInit(void)
                 change_classes.insert(i, (*ChangeClassesYOLO)[i]);
             }
         }
+        py::object initialize;
+        switch(*(InitializationTypeYOLO))
+        {
+            case 1:
+                initialize = IntegrationInterfaceInstance.attr("initialize_predictor")(*ModelPathYOLO,
+                                                                                     *AnchorsPathYOLO,
+                                                                                     *ClassesPathYOLO,
+                                                                                     target_classes,
+                                                                                     change_classes);
+            break;
+            case 2:
+                initialize = IntegrationInterfaceInstance.attr("initialize_config")(*ConfigPathYOLO, *WeightsPathYOLO);
+            break;
+            default:
+                LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Wrong initialization type, check parameters"));
+            break;
 
-        py::object initialize = IntegrationInterfaceInstance.attr("initialize_predictor")(*ModelPathYOLO,
-                                                                                          *AnchorsPathYOLO,
-                                                                                          *ClassesPathYOLO,
-                                                                                          target_classes,
-                                                                                          change_classes);
-        std::cout << "Python init successs" << std::endl;
-        Initialized = true;
+        }
+
+        if(!initialize.is_none())
+        {
+            LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Python init success"));
+            Initialized = true;
+            return true;
+        }
+        else
+        {
+            LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Chosen initialization type not supported by selected detector interface file"));
+            Initialized = false;
+            return false;
+        }
     }
     catch (py::error_already_set const &)
     {
         std::string perrorStr = parse_python_exception();
         LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Python init fail: ")+perrorStr);
         Initialized=false;
-        return;
+        return false;
     }
     LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("...Python init finished successful!"));
+    return true;
 }
 
 void TPyObjectDetector::AUnInit(void)
@@ -180,6 +208,7 @@ void TPyObjectDetector::AUnInit(void)
 bool TPyObjectDetector::ADefault(void)
 {
  Initialized=false;
+ InitializationTypeYOLO = 1;
  return true;
 }
 // Обеспечивает сборку внутренней структуры объекта
@@ -203,8 +232,35 @@ bool TPyObjectDetector::ACalculate(void)
 {
  if(!Initialized)
  {
-    AInit();
+    if(!Initialize())
+        return true;
  }
+
+ if(LoadTargetClassesYOLO)
+ {
+     if(ClassedList.size()==0)
+     {
+        std::ifstream fl;
+        fl.open(ClassesPathYOLO);
+        if(!fl.is_open())
+        {
+            std::string s = this->GetEnvironment()->GetCurrentDataDir()+*ClassesPathYOLO;
+            fl.open(s);
+        }
+
+        if(fl.is_open())
+        {
+            while(!fl.eof())
+            {
+                std::string str;
+                std::getline(fl, str);
+                ClassedList.insert(ClassedList.end(), str);
+            }
+        }
+     }
+ }
+
+
  if(!InputImage.IsConnected())
   return true;
 
@@ -282,6 +338,8 @@ bool TPyObjectDetector::ACalculate(void)
       }
   }
 
+  UAFont *class_font=GetFont("Tahoma",14);
+
   for(int i=0; i<result.size(); i++)
   {
       int xmin, ymin, xmax, ymax;
@@ -292,6 +350,32 @@ bool TPyObjectDetector::ACalculate(void)
 
       Graph.SetPenColor(0x00FF00);
       Graph.Rect(xmin, ymin, xmax, ymax);
+
+      double conf = result[i][4];
+      int cls = static_cast<int>(result[i][5]);
+
+      std::stringstream ss;
+      ss<<"[";
+      if(conf>0)
+      {
+          ss<<"P="<<conf;
+      }
+
+      if(ClassedList.size()>cls)
+      {
+          ss<<"; C="<<ClassedList[cls].c_str();
+      }
+      else
+      {
+          ss<<"; C="<<cls;
+      }
+      ss<<"]";
+
+      if(class_font)
+      {
+        Graph.SetFont(class_font);
+        Graph.Text(ss.str(),xmin, ymax+3);
+      }
   }
 
   //int k=1+21;
