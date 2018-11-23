@@ -31,28 +31,28 @@ TPyObjectDetector::TPyObjectDetector(void)
   Initialized(false),
   OutputObjects("OutputObjects",this),
   ImageColorModel("ImageColorModel",this),
-  ModelPathYOLO("ModelPathYOLO",this),
-  AnchorsPathYOLO("AnchorsPathYOLO",this),
-  ClassesPathYOLO("ClassesPathYOLO",this),
-  TargetClassesYOLO("TargetClassesYOLO",this),
-  ChangeClassesYOLO("ChangeClassesYOLO",this),
+  //ModelPathYOLO("ModelPathYOLO",this),
+  //AnchorsPathYOLO("AnchorsPathYOLO",this),
+  //ClassesPathYOLO("ClassesPathYOLO",this),
+  //TargetClassesYOLO("TargetClassesYOLO",this),
+  //ChangeClassesYOLO("ChangeClassesYOLO",this),
   OutputImage("OutputImage",this),
   InitializationTypeYOLO("InitializationTypeYOLO",this),
   ConfigPathYOLO("ConfigPathYOLO",this),
-  WeightsPathYOLO("WeightsPathYOLO",this),
-  LoadTargetClassesYOLO("LoadTargetClassesYOLO",this)
+  WeightsPathYOLO("WeightsPathYOLO",this)
+  //LoadTargetClassesYOLO("LoadTargetClassesYOLO",this)
   //OutputConfidences("OutputConfidences", this)
   //PythonScriptFileName("PythonScriptFileName",this)
 {
     AddLookupProperty("PythonScriptPath",ptPubParameter, new UVProperty<std::string,TPyObjectDetector>(this,
                  &TPyObjectDetector::SetPythonClassifierScriptPath,&TPyObjectDetector::GetPythonClassifierScriptPath));
 
-    AddLookupProperty("NumTargetClassesYOLO",ptPubParameter, new UVProperty<int,TPyObjectDetector>(this,
+    /*AddLookupProperty("NumTargetClassesYOLO",ptPubParameter, new UVProperty<int,TPyObjectDetector>(this,
                  &TPyObjectDetector::SetNumTargetClassesYOLO,&TPyObjectDetector::GetNumTargetClassesYOLO));
 
     AddLookupProperty("NumChangeClassesYOLO",ptPubParameter, new UVProperty<int,TPyObjectDetector>(this,
                  &TPyObjectDetector::SetNumChangeClassesYOLO,&TPyObjectDetector::GetNumChangeClassesYOLO));
-
+*/
 }
 
 bool TPyObjectDetector::SetPythonClassifierScriptPath(const std::string& path)
@@ -65,7 +65,7 @@ const std::string & TPyObjectDetector::GetPythonClassifierScriptPath(void) const
 {
     return PythonScriptFileName;
 }
-
+/*
 bool TPyObjectDetector::SetNumTargetClassesYOLO(const int& num)
 {
     NumTargetClassesYOLO = num;
@@ -87,6 +87,7 @@ const int& TPyObjectDetector::GetNumChangeClassesYOLO(void) const
 {
     return NumChangeClassesYOLO;
 }
+*/
 
 TPyObjectDetector::~TPyObjectDetector(void)
 {
@@ -113,6 +114,11 @@ TPyObjectDetector* TPyObjectDetector::New(void)
  return new TPyObjectDetector;
 }
 // --------------------------
+
+void TPyObjectDetector::AInit(void)
+{
+    //Initialize();
+}
 
 // --------------------------
 // Скрытые методы управления счетом
@@ -143,6 +149,7 @@ bool TPyObjectDetector::Initialize(void)
         //boost::python::object rand2 = rand_func();
         //std::cout << boost::python::extract<int>(rand2) << std::endl;
 
+        /*
         py::list target_classes = py::list();
         for(int i=0; i<TargetClassesYOLO->size(); i++)
         {
@@ -157,24 +164,26 @@ bool TPyObjectDetector::Initialize(void)
                 change_classes.insert(i, (*ChangeClassesYOLO)[i]);
             }
         }
+        */
+
         py::object initialize;
-        switch(*(InitializationTypeYOLO))
+        switch(InitializationTypeYOLO)
         {
-            case 1:
-                initialize = IntegrationInterfaceInstance.attr("initialize_predictor")(*ModelPathYOLO,
-                                                                                     *AnchorsPathYOLO,
-                                                                                     *ClassesPathYOLO,
-                                                                                     target_classes,
-                                                                                     change_classes);
-            break;
-            case 2:
+            case YOLOV2_INITTYPE:
                 initialize = IntegrationInterfaceInstance.attr("initialize_config")(*ConfigPathYOLO, *WeightsPathYOLO);
             break;
-            default:
-                LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Wrong initialization type, check parameters"));
+            case YOLOV3_INITTYPE:
+                initialize = IntegrationInterfaceInstance.attr("initialize_config")(*ConfigPathYOLO);
+            break;
+        default:
+            LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Chosen initialization type not supported by selected detector interface file"));
+            Initialized = false;
+            return false;
             break;
 
         }
+
+
 
         if(!initialize.is_none())
         {
@@ -208,7 +217,7 @@ void TPyObjectDetector::AUnInit(void)
 bool TPyObjectDetector::ADefault(void)
 {
  Initialized=false;
- InitializationTypeYOLO = 1;
+ //InitializationTypeYOLO = 1;
  return true;
 }
 // Обеспечивает сборку внутренней структуры объекта
@@ -223,7 +232,7 @@ bool TPyObjectDetector::ABuild(void)
 // Сброс процесса счета без потери настроек
 bool TPyObjectDetector::AReset(void)
 {
- Initialized = false;
+ //Initialized = false;
  return true;
 }
 
@@ -236,7 +245,7 @@ bool TPyObjectDetector::ACalculate(void)
         return true;
  }
 
- if(LoadTargetClassesYOLO)
+ /*if(LoadTargetClassesYOLO)
  {
      if(ClassedList.size()==0)
      {
@@ -259,21 +268,25 @@ bool TPyObjectDetector::ACalculate(void)
         }
      }
  }
-
+*/
 
  if(!InputImage.IsConnected())
   return true;
 
- UBitmap &bmp = *InputImage;
- if(bmp.GetData()==NULL)
-  return true;
 
- if(ImageColorModel!=bmp.GetColorModel())
+
+ /*if(ImageColorModel!=bmp.GetColorModel())
  {
      LogMessageEx(RDK_EX_WARNING, __FUNCTION__, std::string("Incorrect input image color model. Need "+sntoa(*ImageColorModel)+" got: ")+sntoa(bmp.GetColorModel()));
      return true;
- }
+ }*/
 
+ OutputImage->SetColorModel(ubmRGB24,false);
+ InputImage->ConvertTo(*OutputImage);
+
+ UBitmap &bmp = *OutputImage;
+ if(bmp.GetData()==NULL)
+  return true;
 
  int w = bmp.GetWidth();
  int h = bmp.GetHeight();
@@ -282,11 +295,7 @@ bool TPyObjectDetector::ACalculate(void)
  b.SetRes(w, h, bmp.GetColorModel());
  bmp.CopyTo(0,0,b);
 
- OutputImage->SetColorModel(ubmRGB24,false);
- InputImage->ConvertTo(*OutputImage);
-
  Graph.SetCanvas(OutputImage);
-
 
  /// Тут считаем
  std::vector<std::vector<double> > result;
@@ -309,6 +318,9 @@ bool TPyObjectDetector::ACalculate(void)
   long height = shp[0];
   long width  = shp[1];
 
+  if(width!=6)
+      LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPyObjectDetector error: Output matrix WIDTH!=6!!! must be in [x y w h conf class] format!!!"));
+
   const Py_intptr_t *strides = ndarr.get_strides();
   long str0 = ndarr.strides(0);
   long str1 = ndarr.strides(1);
@@ -327,6 +339,7 @@ bool TPyObjectDetector::ACalculate(void)
       }
   }
 
+  /*
   OutputObjects->Resize(height, width);
 
   for(int y=0; y<height; y++)
@@ -337,16 +350,18 @@ bool TPyObjectDetector::ACalculate(void)
           (*OutputObjects)(y, x) = result[y][x];
       }
   }
+  */
 
   UAFont *class_font=GetFont("Tahoma",14);
 
   for(int i=0; i<result.size(); i++)
   {
       int xmin, ymin, xmax, ymax;
-      ymin = (int)(result[i][0]);
-      xmin = (int)(result[i][1]);
-      ymax = (int)(result[i][2]);
-      xmax = (int)(result[i][3]);
+      xmin = (int)(result[i][0]);
+      ymin = (int)(result[i][1]);
+      xmax = (int)(result[i][2]);
+      ymax = (int)(result[i][3]);
+
 
       Graph.SetPenColor(0x00FF00);
       Graph.Rect(xmin, ymin, xmax, ymax);
@@ -361,14 +376,14 @@ bool TPyObjectDetector::ACalculate(void)
           ss<<"P="<<conf;
       }
 
-      if(ClassedList.size()>cls)
+      /*if(ClassedList.size()>cls)
       {
           ss<<"; C="<<ClassedList[cls].c_str();
       }
       else
-      {
+      {*/
           ss<<"; C="<<cls;
-      }
+      //}
       ss<<"]";
 
       if(class_font)

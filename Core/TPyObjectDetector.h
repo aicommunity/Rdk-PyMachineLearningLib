@@ -6,6 +6,9 @@
 
 namespace RDK {
 
+#define YOLOV2_INITTYPE 2
+#define YOLOV3_INITTYPE 3
+
 class TPyObjectDetector: public RDK::UNet
 {
 public: // Свойства
@@ -21,8 +24,8 @@ ULProperty<int,TPyObjectDetector, ptPubParameter> ImageColorModel;
 /// Количество классов объектов (какой размер будет у вектора
 //ULProperty<int,TPyObjectDetector, ptPubParameter> NumClasses;model_path
 
-///Тип инициализации: 1 - упрощенный, стандартный, через пути к модели, якорям, перечню классов, целевыми и заменами
-///                   2 - инициализация через файл с конфигурацией и файл весов
+///Тип инициализации: 2 - YOLOV2
+///                   3 - YOLOV3
 ULProperty<int,TPyObjectDetector, ptPubParameter> InitializationTypeYOLO;
 
 ///Путь к файлу конфигурации Йолы
@@ -33,18 +36,18 @@ ULProperty<std::string,TPyObjectDetector, ptPubParameter> WeightsPathYOLO;
 
 
 ///Путь к модели Йолы
-ULProperty<std::string,TPyObjectDetector, ptPubParameter> ModelPathYOLO;
+//ULProperty<std::string,TPyObjectDetector, ptPubParameter> ModelPathYOLO;
 ///Путь к файлу с якорями (оставить пустым если используем стандарт)
-ULProperty<std::string,TPyObjectDetector, ptPubParameter> AnchorsPathYOLO;
+//ULProperty<std::string,TPyObjectDetector, ptPubParameter> AnchorsPathYOLO;
 ///Путь к файлу с перечнем классов для используемой сети
-ULProperty<std::string,TPyObjectDetector, ptPubParameter> ClassesPathYOLO;
+//ULProperty<std::string,TPyObjectDetector, ptPubParameter> ClassesPathYOLO;
 ///Список целевых классов
-ULProperty<std::vector<std::string>,TPyObjectDetector, ptPubParameter> TargetClassesYOLO;
+//ULProperty<std::vector<std::string>,TPyObjectDetector, ptPubParameter> TargetClassesYOLO;
 ///Загружать список классов из соответствующего файла
-ULProperty<bool,TPyObjectDetector, ptPubParameter> LoadTargetClassesYOLO;
+//ULProperty<bool,TPyObjectDetector, ptPubParameter> LoadTargetClassesYOLO;
 ///Список замен классов (изменить список классов в файле ClassesPathYOLO на свои имена)
 ///ВНИМАНИЕ!!! Число классов должно соответствовать числу классов в ClassesPathYOLO
-ULProperty<std::vector<std::string>,TPyObjectDetector, ptPubParameter> ChangeClassesYOLO;
+//ULProperty<std::vector<std::string>,TPyObjectDetector, ptPubParameter> ChangeClassesYOLO;
 
 ///Замена классов по значениям
 ///ULProperty<std::map<int, int>,TPyObjectDetector, ptPubParameter> ClassIndicesExchange;
@@ -90,12 +93,13 @@ virtual ~TPyObjectDetector(void);
 bool SetPythonClassifierScriptPath(const std::string& path);
 const std::string &GetPythonClassifierScriptPath(void) const;
 
+/*
 bool SetNumTargetClassesYOLO(const int& num);
 const int& GetNumTargetClassesYOLO(void) const;
 
 bool SetNumChangeClassesYOLO(const int& num);
 const int& GetNumChangeClassesYOLO(void) const;
-
+*/
 // ---------------------
 // Методы управления переменными состояния
 // ---------------------
@@ -108,12 +112,13 @@ const int& GetNumChangeClassesYOLO(void) const;
 virtual TPyObjectDetector* New(void);
 // --------------------------
 
+
 // --------------------------
 // Скрытые методы управления счетом
 // --------------------------
 protected:
 bool Initialize(void);
-//virtual void AInit(void);
+virtual void AInit(void);
 virtual void AUnInit(void);
 
 // Восстановление настроек по умолчанию и сброс процесса счета
