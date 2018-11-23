@@ -15,16 +15,23 @@ DEFINES += RDK_UNICODE_RUN
 DEFINES += RDK_QT
 DEFINES += BOOST_PYTHON_STATIC_LIB
 DEFINES += BOOST_NUMPY_STATIC_LIB
-DEFINES += GPU
 
 INCLUDEPATH += $$PWD/../../../../Rdk/Deploy/Include
 
 unix {
+    DEFINES += GPU
     INCLUDEPATH += /usr/include/python3.5
     INCLUDEPATH += /usr/lib/python3/dist-packages/numpy/core/include/numpy/
     INCLUDEPATH += /usr/local/include
     INCLUDEPATH += /usr/local/cuda-8.0/include
     DESTDIR = $$PWD/../../../../Bin/Platform/Linux/Lib.Qt
+
+    HEADERS += ../../ThirdParty/darknet/include/darknet.h \
+    ../../Core/TDarknetObjectDetector.h \
+    ../../ThirdParty/darknet/include/darknet_utils.h
+
+    SOURCES += ../../ThirdParty/darknet/include/darknet_utils.cpp \
+    ../../Core/TDarknetObjectDetector.cpp
 }
 
 windows {
@@ -33,6 +40,11 @@ windows {
     INCLUDEPATH += $$(BOOST_PATH)
     INCLUDEPATH += $$(OPENCV3_PATH)/build/include
     INCLUDEPATH += $$(ANACONDA_PATH)/Lib/site-packages/numpy/core/include/numpy
+
+    @
+    contains(DEFINES, GPU) {
+    INCLUDEPATH += $$(CUDA_PATH)/include
+}
 }
 
 HEADERS += \
@@ -43,9 +55,6 @@ HEADERS += \
     ../../Core/TPythonIntegrationInclude.h \
     ../../Core/TPyObjectDetector.h \
     ../../Core/TPyObjectDetectorBasic.h \
-    ../../Core/TDarknetObjectDetector.h \
-    ../../ThirdParty/darknet/include/darknet.h \
-    ../../ThirdParty/darknet/include/darknet_utils.h \
     ../../Core/Lib.h
 
 
@@ -56,6 +65,4 @@ SOURCES += \
     ../../Core/TPyUBitmapClassifier.cpp \
     ../../Core/TPyObjectDetector.cpp \
     ../../Core/TPyObjectDetectorBasic.cpp \
-    ../../Core/TDarknetObjectDetector.cpp \
-    ../../ThirdParty/darknet/include/darknet_utils.cpp \
     ../../Core/Lib.cpp

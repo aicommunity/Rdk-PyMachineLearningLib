@@ -7,7 +7,9 @@
 #include "TPyAggregateClassifier.h"
 #include "TPyObjectDetectorBasic.h"
 #include "TPyObjectDetector.h"
+#ifdef __GNUC__
 #include "TDarknetObjectDetector.h"
+#endif
 
 namespace RDK {
 
