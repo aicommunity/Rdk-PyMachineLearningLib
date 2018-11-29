@@ -119,11 +119,10 @@ TPyObjectDetectorBasic* TPyObjectDetectorBasic::New(void)
 // --------------------------
 bool TPyObjectDetectorBasic::Initialize(void)
 {
-return true;
     try
     {
         LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("Python init started..."));
-        init_py();
+//        init_py();
         py::to_python_converter<cv::Mat, pbcvt::matToNDArrayBoostConverter>();
         py::to_python_converter<RDK::UBitmap, pbcvt::uBitmapToNDArrayBoostConverter>();
         py::object MainModule = py::import("__main__");  // импортируем main-scope, см. https://docs.python.org/3/library/__main__.html
@@ -243,7 +242,6 @@ bool TPyObjectDetectorBasic::AReset(void)
 // Выполняет расчет этого объекта
 bool TPyObjectDetectorBasic::ACalculate(void)
 {
-return true;
  if(LoadTargetClassesYOLO)
  {
      if(ClassedList.size()==0)

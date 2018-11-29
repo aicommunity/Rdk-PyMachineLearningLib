@@ -68,7 +68,6 @@ TPyAggregateClassifier* TPyAggregateClassifier::New(void)
 // --------------------------
 void TPyAggregateClassifier::AInit(void)
 {
- return;
     /*Py_Initialize();
     bool res = np::initialize();
     try
@@ -92,7 +91,7 @@ void TPyAggregateClassifier::AInit(void)
     try
     {
         LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("Python init started..."));
-        init_py();
+//        init_py();
         py::to_python_converter<cv::Mat, pbcvt::matToNDArrayBoostConverter>();
         py::to_python_converter<RDK::UBitmap, pbcvt::uBitmapToNDArrayBoostConverter>();
         py::object MainModule = py::import("__main__");  // импортируем main-scope, см. https://docs.python.org/3/library/__main__.html
@@ -153,7 +152,6 @@ bool TPyAggregateClassifier::AReset(void)
 // Выполняет расчет этого объекта
 bool TPyAggregateClassifier::ACalculate(void)
 {
- return true;
  if(!InputImage.IsConnected())
   return true;
 

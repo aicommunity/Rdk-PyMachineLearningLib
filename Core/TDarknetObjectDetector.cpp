@@ -183,7 +183,6 @@ bool TDarknetObjectDetector::AReset(void)
 // Выполняет расчет этого объекта
 bool TDarknetObjectDetector::ACalculate(void)
 {
-return true;
 // if(!Initialized)
 // {
 //    if(!Initialize())
