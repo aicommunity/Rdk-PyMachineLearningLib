@@ -123,7 +123,11 @@ TDarknetObjectDetector* TDarknetObjectDetector::New(void)
 
 void TDarknetObjectDetector::AInit(void)
 {
-    //Initialize();
+    if(!Initialized)
+    {
+       if(!Initialize())
+           return true;
+    }
 }
 
 // --------------------------
@@ -179,11 +183,12 @@ bool TDarknetObjectDetector::AReset(void)
 // Выполняет расчет этого объекта
 bool TDarknetObjectDetector::ACalculate(void)
 {
- if(!Initialized)
- {
-    if(!Initialize())
-        return true;
- }
+return true;
+// if(!Initialized)
+// {
+//    if(!Initialize())
+//        return true;
+// }
 
  if(!InputImage.IsConnected())
   return true;

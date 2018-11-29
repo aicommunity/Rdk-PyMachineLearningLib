@@ -113,7 +113,7 @@ virtual TPyObjectDetectorBasic* New(void);
 // --------------------------
 protected:
 bool Initialize(void);
-//virtual void AInit(void);
+virtual void AInit(void);
 virtual void AUnInit(void);
 
 // Восстановление настроек по умолчанию и сброс процесса счета

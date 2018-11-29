@@ -68,6 +68,7 @@ TPyAggregateClassifier* TPyAggregateClassifier::New(void)
 // --------------------------
 void TPyAggregateClassifier::AInit(void)
 {
+ return;
     /*Py_Initialize();
     bool res = np::initialize();
     try
@@ -152,6 +153,7 @@ bool TPyAggregateClassifier::AReset(void)
 // Выполняет расчет этого объекта
 bool TPyAggregateClassifier::ACalculate(void)
 {
+ return true;
  if(!InputImage.IsConnected())
   return true;
 

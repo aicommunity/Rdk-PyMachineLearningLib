@@ -105,7 +105,7 @@ void TPyUBitmapClassifier::AInit(void)
     try
     {
         LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("Python init started..."));
-        init_py();
+//        init_py();
         py::to_python_converter<cv::Mat, pbcvt::matToNDArrayBoostConverter>();
         py::to_python_converter<RDK::UBitmap, pbcvt::uBitmapToNDArrayBoostConverter>();
         py::object MainModule = py::import("__main__");  // импортируем main-scope, см. https://docs.python.org/3/library/__main__.html
@@ -143,6 +143,7 @@ void TPyUBitmapClassifier::AInit(void)
 
 void TPyUBitmapClassifier::AUnInit(void)
 {
+ Initialized=false;
 }
 
 // Восстановление настроек по умолчанию и сброс процесса счета
@@ -165,17 +166,17 @@ bool TPyUBitmapClassifier::ABuild(void)
 // Сброс процесса счета без потери настроек
 bool TPyUBitmapClassifier::AReset(void)
 {
- Initialized = false;
+// Initialized = false;
  return true;
 }
 
 // Выполняет расчет этого объекта
 bool TPyUBitmapClassifier::ACalculate(void)
 {
- if(!Initialized)
- {
-    AInit();
- }
+// if(!Initialized)
+// {
+//    Init();
+// }
  if(!InputImages.IsConnected())
   return true;
 
@@ -203,6 +204,20 @@ bool TPyUBitmapClassifier::ACalculate(void)
          b.SetRes(w, h, bmp.GetColorModel());
          bmp.CopyTo(0,0,b);
 
+         cv::Mat m;
+         if (b.GetColorModel() == RDK::ubmRGB24)
+         {
+             m=cv::Mat(b.GetHeight(), b.GetWidth(), CV_8UC3, b.GetData());
+         }
+         else if(b.GetColorModel() == RDK::ubmY8)
+         {
+             m=cv::Mat(b.GetHeight(), b.GetWidth(), CV_8U, b.GetData());
+         }
+         else
+         {
+             return true;
+         }
+
 
          //RDK::SaveBitmapToFile("/home/ivan/testB.bmp", b);
 
@@ -211,7 +226,7 @@ bool TPyUBitmapClassifier::ACalculate(void)
          try
          {
  //         import_array();
-          py::object retval = IntegrationInterfaceInstance.attr("classify")(b);
+          py::object retval = IntegrationInterfaceInstance.attr("classify")(m);
 
           //std::vector<float> res = boost::python::extract<std::vector<float> >(retval);
           np::ndarray ndarr = boost::python::extract< np::ndarray  >(retval);
@@ -267,6 +282,10 @@ bool TPyUBitmapClassifier::ACalculate(void)
           std::string perrorStr = parse_python_exception();
           LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPyUBitmapClassifier error: ")+perrorStr);
          } 
+         catch(...)
+         {
+             LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Unknown exception"));
+         }
      }
  }
 

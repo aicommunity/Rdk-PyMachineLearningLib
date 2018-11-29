@@ -2,6 +2,7 @@
 #define PY_ARRAY_UNIQUE_SYMBOL pbcvt_ARRAY_API
 
 #include "pyboostcvconverter.hpp"
+#include <boost/thread/thread.hpp>
 
 #if CV_VERSION_MAJOR == 3
 namespace pbcvt {
@@ -47,15 +48,21 @@ private:
 
 class PyEnsureGIL {
 public:
-	PyEnsureGIL() :
-			_state(PyGILState_Ensure()) {
+    PyEnsureGIL() : _state(PyGILState_Ensure())
+//            guard(mutex)
+    {
 	}
-	~PyEnsureGIL() {
+    ~PyEnsureGIL()
+    {
 		PyGILState_Release(_state);
 	}
 private:
-	PyGILState_STATE _state;
+//    static boost::mutex mutex;
+//    boost::unique_lock<boost::mutex> guard;
+    PyGILState_STATE _state;
 };
+
+//boost::mutex PyEnsureGIL::mutex;
 
 enum {
 	ARG_NONE = 0, ARG_MAT = 1, ARG_SCALAR = 2
@@ -128,7 +135,7 @@ public:
 
 	void deallocate(UMatData* u) const {
 		if (u) {
-			PyEnsureGIL gil;
+            PyEnsureGIL gil;
 			PyObject* o = (PyObject*) u->userdata;
 			Py_XDECREF(o);
 			delete u;
@@ -277,7 +284,8 @@ PyObject* matToNDArrayBoostConverter::convert(Mat const& m) {
 		Py_RETURN_NONE;
 		Mat temp,
 	*p = (Mat*) &m;
-	if (!p->u || p->allocator != &g_numpyAllocator)
+
+        if (!p->u || p->allocator != &g_numpyAllocator)
 			{
 		temp.allocator = &g_numpyAllocator;
 		ERRWRAP2(m.copyTo(temp));
@@ -311,6 +319,9 @@ PyObject* uBitmapToNDArrayBoostConverter::convert(RDK::UBitmap const& bmp) {
 	{
         Py_RETURN_NONE;
 	}
+
+    return matToNDArrayBoostConverter::convert(m);
+    /*
     Mat temp, *p = (Mat*) &m;
 	if (!p->u || p->allocator != &g_numpyAllocator)
     {
@@ -320,7 +331,7 @@ PyObject* uBitmapToNDArrayBoostConverter::convert(RDK::UBitmap const& bmp) {
 	}
 	PyObject* o = (PyObject*) p->u->userdata;
 	Py_INCREF(o);
-	return o;
+    return o;*/
 }
 
 matFromNDArrayBoostConverter::matFromNDArrayBoostConverter() {

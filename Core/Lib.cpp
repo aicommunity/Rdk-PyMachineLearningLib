@@ -50,9 +50,13 @@ namespace np = boost::numpy;
         if(Py_IsInitialized())
             return NUMPY_IMPORT_ARRAY_RETVAL;
         Py_Initialize();
-
+//        if (!PyEval_ThreadsInitialized())
+//        {
+            PyEval_InitThreads();
+//        }
         import_array();
         np::initialize();
+
         return NUMPY_IMPORT_ARRAY_RETVAL;
     }
 
@@ -71,6 +75,7 @@ UPyMachineLearningLib PyMachineLearningLib;
 UPyMachineLearningLib::UPyMachineLearningLib(void)
  : ULibrary("PyMachineLearningLib","1.0")
 {
+ init_py();
 }
 // --------------------------
 

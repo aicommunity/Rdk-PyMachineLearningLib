@@ -117,7 +117,11 @@ TPyObjectDetector* TPyObjectDetector::New(void)
 
 void TPyObjectDetector::AInit(void)
 {
-    //Initialize();
+    if(!Initialized)
+    {
+       if(!Initialize())
+           return;
+    }
 }
 
 // --------------------------
@@ -125,7 +129,7 @@ void TPyObjectDetector::AInit(void)
 // --------------------------
 bool TPyObjectDetector::Initialize(void)
 {
-
+return true;
     try
     {
         LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("Python init started..."));
@@ -211,6 +215,7 @@ bool TPyObjectDetector::Initialize(void)
 
 void TPyObjectDetector::AUnInit(void)
 {
+ Initialized=false;
 }
 
 // Восстановление настроек по умолчанию и сброс процесса счета
@@ -239,11 +244,12 @@ bool TPyObjectDetector::AReset(void)
 // Выполняет расчет этого объекта
 bool TPyObjectDetector::ACalculate(void)
 {
- if(!Initialized)
- {
-    if(!Initialize())
-        return true;
- }
+return true;
+// if(!Initialized)
+// {
+//    if(!Initialize())
+//        return true;
+// }
 
  /*if(LoadTargetClassesYOLO)
  {
