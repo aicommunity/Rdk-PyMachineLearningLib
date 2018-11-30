@@ -1,15 +1,14 @@
 #ifndef RDK_TPyObjectDetectorH
 #define RDK_TPyObjectDetectorH
 
-#include "TPythonIntegrationInclude.h"
-#include "TPythonIntegrationUtil.h"
+#include "TPyComponent.h"
 
 namespace RDK {
 
 #define YOLOV2_INITTYPE 2
 #define YOLOV3_INITTYPE 3
 
-class TPyObjectDetector: public RDK::UNet
+class TPyObjectDetector: public TPyComponent
 {
 public: // Свойства
 /// Входное изображение
@@ -30,6 +29,7 @@ ULProperty<int,TPyObjectDetector, ptPubParameter> InitializationTypeYOLO;
 
 ///Путь к файлу конфигурации Йолы
 ULProperty<std::string,TPyObjectDetector, ptPubParameter> ConfigPathYOLO;
+
 ///Путь к файлу весов Йолы
 ULProperty<std::string,TPyObjectDetector, ptPubParameter> WeightsPathYOLO;
 
@@ -37,14 +37,19 @@ ULProperty<std::string,TPyObjectDetector, ptPubParameter> WeightsPathYOLO;
 
 ///Путь к модели Йолы
 //ULProperty<std::string,TPyObjectDetector, ptPubParameter> ModelPathYOLO;
+
 ///Путь к файлу с якорями (оставить пустым если используем стандарт)
 //ULProperty<std::string,TPyObjectDetector, ptPubParameter> AnchorsPathYOLO;
+
 ///Путь к файлу с перечнем классов для используемой сети
 //ULProperty<std::string,TPyObjectDetector, ptPubParameter> ClassesPathYOLO;
+
 ///Список целевых классов
 //ULProperty<std::vector<std::string>,TPyObjectDetector, ptPubParameter> TargetClassesYOLO;
+
 ///Загружать список классов из соответствующего файла
 //ULProperty<bool,TPyObjectDetector, ptPubParameter> LoadTargetClassesYOLO;
+
 ///Список замен классов (изменить список классов в файле ClassesPathYOLO на свои имена)
 ///ВНИМАНИЕ!!! Число классов должно соответствовать числу классов в ClassesPathYOLO
 //ULProperty<std::vector<std::string>,TPyObjectDetector, ptPubParameter> ChangeClassesYOLO;
@@ -62,15 +67,10 @@ ULProperty<std::string,TPyObjectDetector, ptPubParameter> WeightsPathYOLO;
 /// Ширина 4+1=Left; Top; Right; Bottom; ClassNumber
 UPropertyOutputData<MDMatrix<double>, TPyObjectDetector> OutputObjects;
 
-boost::python::object IntegrationInterface;
-boost::python::object IntegrationInterfaceInstance;
-
 protected: // Переменные состояния
 
 UGraphics Graph;
 UBitmap Canvas;
-bool Initialized;
-std::string PythonScriptFileName;
 
 int NumTargetClassesYOLO;
 int NumChangeClassesYOLO;
@@ -85,26 +85,6 @@ TPyObjectDetector(void);
 virtual ~TPyObjectDetector(void);
 // --------------------------
 
-// ---------------------
-// Методы управления параметрами
-// ---------------------
-// ---------------------
-
-bool SetPythonClassifierScriptPath(const std::string& path);
-const std::string &GetPythonClassifierScriptPath(void) const;
-
-/*
-bool SetNumTargetClassesYOLO(const int& num);
-const int& GetNumTargetClassesYOLO(void) const;
-
-bool SetNumChangeClassesYOLO(const int& num);
-const int& GetNumChangeClassesYOLO(void) const;
-*/
-// ---------------------
-// Методы управления переменными состояния
-// ---------------------
-// ---------------------
-
 // --------------------------
 // Системные методы управления объектом
 // --------------------------
@@ -117,24 +97,23 @@ virtual TPyObjectDetector* New(void);
 // Скрытые методы управления счетом
 // --------------------------
 protected:
-bool Initialize(void);
-virtual void AInit(void);
-virtual void AUnInit(void);
+bool APythonInitialize(void);
+
 
 // Восстановление настроек по умолчанию и сброс процесса счета
-virtual bool ADefault(void);
+virtual bool APyDefault(void);
 
 // Обеспечивает сборку внутренней структуры объекта
 // после настройки параметров
 // Автоматически вызывает метод Reset() и выставляет Ready в true
 // в случае успешной сборки
-virtual bool ABuild(void);
+virtual bool APyBuild(void);
 
 // Сброс процесса счета без потери настроек
-virtual bool AReset(void);
+virtual bool APyReset(void);
 
 // Выполняет расчет этого объекта
-virtual bool ACalculate(void);
+virtual bool APyCalculate(void);
 // --------------------------
 };
 

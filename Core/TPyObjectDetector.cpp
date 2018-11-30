@@ -28,7 +28,6 @@ namespace RDK {
 // --------------------------  //DetectionClass("DetectionClass",this),
 TPyObjectDetector::TPyObjectDetector(void)
 : InputImage("InputImage",this),
-  Initialized(false),
   OutputObjects("OutputObjects",this),
   ImageColorModel("ImageColorModel",this),
   //ModelPathYOLO("ModelPathYOLO",this),
@@ -44,66 +43,14 @@ TPyObjectDetector::TPyObjectDetector(void)
   //OutputConfidences("OutputConfidences", this)
   //PythonScriptFileName("PythonScriptFileName",this)
 {
-    AddLookupProperty("PythonScriptPath",ptPubParameter, new UVProperty<std::string,TPyObjectDetector>(this,
-                 &TPyObjectDetector::SetPythonClassifierScriptPath,&TPyObjectDetector::GetPythonClassifierScriptPath));
 
-    /*AddLookupProperty("NumTargetClassesYOLO",ptPubParameter, new UVProperty<int,TPyObjectDetector>(this,
-                 &TPyObjectDetector::SetNumTargetClassesYOLO,&TPyObjectDetector::GetNumTargetClassesYOLO));
-
-    AddLookupProperty("NumChangeClassesYOLO",ptPubParameter, new UVProperty<int,TPyObjectDetector>(this,
-                 &TPyObjectDetector::SetNumChangeClassesYOLO,&TPyObjectDetector::GetNumChangeClassesYOLO));
-*/
 }
 
-bool TPyObjectDetector::SetPythonClassifierScriptPath(const std::string& path)
-{
-    PythonScriptFileName = path;
-    Initialized=false;
-    return true;
-}
-const std::string & TPyObjectDetector::GetPythonClassifierScriptPath(void) const
-{
-    return PythonScriptFileName;
-}
-/*
-bool TPyObjectDetector::SetNumTargetClassesYOLO(const int& num)
-{
-    NumTargetClassesYOLO = num;
-    TargetClassesYOLO->resize(num);
-    return true;
-}
-const int& TPyObjectDetector::GetNumTargetClassesYOLO(void) const
-{
-    return NumTargetClassesYOLO;
-}
-
-bool TPyObjectDetector::SetNumChangeClassesYOLO(const int& num)
-{
-    NumChangeClassesYOLO = num;
-    ChangeClassesYOLO->resize(num);
-    return true;
-}
-const int& TPyObjectDetector::GetNumChangeClassesYOLO(void) const
-{
-    return NumChangeClassesYOLO;
-}
-*/
 
 TPyObjectDetector::~TPyObjectDetector(void)
 {
 }
 // --------------------------
-
-
-// ---------------------
-// Методы управления параметрами
-// ---------------------
-// ---------------------
-
-// ---------------------
-// Методы управления переменными состояния
-// ---------------------
-// ---------------------
 
 // --------------------------
 // Системные методы управления объектом
@@ -115,38 +62,13 @@ TPyObjectDetector* TPyObjectDetector::New(void)
 }
 // --------------------------
 
-void TPyObjectDetector::AInit(void)
-{
-}
-
 // --------------------------
 // Скрытые методы управления счетом
 // --------------------------
-bool TPyObjectDetector::Initialize(void)
+bool TPyObjectDetector::APythonInitialize(void)
 {
     try
     {
-        LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("Python init started..."));
-//        init_py();
-//        py::to_python_converter<cv::Mat, pbcvt::matToNDArrayBoostConverter>();
-//        py::to_python_converter<RDK::UBitmap, pbcvt::uBitmapToNDArrayBoostConverter>();
-        py::object MainModule = py::import("__main__");  // импортируем main-scope, см. https://docs.python.org/3/library/__main__.html
-        py::object MainNamespace = MainModule.attr("__dict__");  // извлекаем область имен
-
-        // загрузка кода из файла в извлеченную область имен
-        std::string s = this->GetEnvironment()->GetCurrentDataDir()+PythonScriptFileName;
-        py::object DetectorInterfaceModule = import("detector_interface",s,MainNamespace);
-        // экземпляр питоновского класса, через который активируется виртуальная среда и загружается модель
-        // TODO: пусть до среды брать из конфига
-        IntegrationInterface = DetectorInterfaceModule.attr("DetectorEmbeddingInterface");
-        if(!IntegrationInterface.is_none())
-            IntegrationInterfaceInstance = IntegrationInterface(); ///home/arnold/.virtualenvs/cv
-
-        //boost::python::object rand_mod = boost::python::import("random");
-        //boost::python::object rand_func = rand_mod.attr("random");
-        //boost::python::object rand2 = rand_func();
-        //std::cout << boost::python::extract<int>(rand2) << std::endl;
-
         /*
         py::list target_classes = py::list();
         for(int i=0; i<TargetClassesYOLO->size(); i++)
@@ -175,24 +97,19 @@ bool TPyObjectDetector::Initialize(void)
             break;
         default:
             LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Chosen initialization type not supported by selected detector interface file"));
-            Initialized = false;
             return false;
             break;
 
         }
 
-
-
         if(!initialize.is_none())
         {
             LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Python init success"));
-            Initialized = true;
             return true;
         }
         else
         {
             LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Chosen initialization type not supported by selected detector interface file"));
-            Initialized = false;
             return false;
         }
     }
@@ -200,27 +117,23 @@ bool TPyObjectDetector::Initialize(void)
     {
         std::string perrorStr = parse_python_exception();
         LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Python init fail: ")+perrorStr);
-        Initialized=false;
         return false;
     }
     catch(...)
     {
         LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Python init fail: Undandled exception"));
+        return false;
     }
 
     LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("...Python init finished successful!"));
     return true;
 }
 
-void TPyObjectDetector::AUnInit(void)
-{
- Initialized=false;
-}
-
 // Восстановление настроек по умолчанию и сброс процесса счета
-bool TPyObjectDetector::ADefault(void)
+bool TPyObjectDetector::APyDefault(void)
 {
- Initialized=false;
+ PythonModuleName="detector_interface";
+ PythonClassName="DetectorEmbeddingInterface";
  //InitializationTypeYOLO = 1;
  return true;
 }
@@ -228,67 +141,22 @@ bool TPyObjectDetector::ADefault(void)
 // после настройки параметров
 // Автоматически вызывает метод Reset() и выставляет Ready в true
 // в случае успешной сборки
-bool TPyObjectDetector::ABuild(void)
+bool TPyObjectDetector::APyBuild(void)
 {
- if(IsInit())
-  Initialize();
  return true;
 }
 
 // Сброс процесса счета без потери настроек
-bool TPyObjectDetector::AReset(void)
+bool TPyObjectDetector::APyReset(void)
 {
- if(!Initialized)
-  Initialize();
  return true;
 }
 
 // Выполняет расчет этого объекта
-bool TPyObjectDetector::ACalculate(void)
+bool TPyObjectDetector::APyCalculate(void)
 {
- if(!Initialized)
-  return true;
-// if(!Initialized)
-// {
-//    if(!Initialize())
-//        return true;
-// }
-
- /*if(LoadTargetClassesYOLO)
- {
-     if(ClassedList.size()==0)
-     {
-        std::ifstream fl;
-        fl.open(ClassesPathYOLO);
-        if(!fl.is_open())
-        {
-            std::string s = this->GetEnvironment()->GetCurrentDataDir()+*ClassesPathYOLO;
-            fl.open(s);
-        }
-
-        if(fl.is_open())
-        {
-            while(!fl.eof())
-            {
-                std::string str;
-                std::getline(fl, str);
-                ClassedList.insert(ClassedList.end(), str);
-            }
-        }
-     }
- }
-*/
-
  if(!InputImage.IsConnected())
   return true;
-
-
-
- /*if(ImageColorModel!=bmp.GetColorModel())
- {
-     LogMessageEx(RDK_EX_WARNING, __FUNCTION__, std::string("Incorrect input image color model. Need "+sntoa(*ImageColorModel)+" got: ")+sntoa(bmp.GetColorModel()));
-     return true;
- }*/
 
  OutputImage->SetColorModel(ubmRGB24,false);
  InputImage->ConvertTo(*OutputImage);

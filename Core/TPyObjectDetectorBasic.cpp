@@ -152,6 +152,7 @@ bool TPyObjectDetectorBasic::APythonInitialize(void)
     catch(...)
     {
         LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Python init fail: Undandled exception"));
+        return false;
     }
     LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("...Python init finished successful!"));
     return true;

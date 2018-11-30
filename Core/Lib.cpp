@@ -15,9 +15,9 @@
 #include <boost/python/numpy/dtype.hpp>
 #include <boost/python/numpy/ndarray.hpp>
 #else
-#include <boost/numpy.hpp>
-#include <boost/numpy/dtype.hpp>
-#include <boost/numpy/ndarray.hpp>
+#include <boost/python/numpy.hpp>
+#include <boost/python/numpy/dtype.hpp>
+#include <boost/python/numpy/ndarray.hpp>
 #endif
 #include <boost/python.hpp>
 #include <boost/python/detail/wrap_python.hpp>
