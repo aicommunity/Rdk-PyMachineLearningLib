@@ -66,34 +66,14 @@ TPyAggregateClassifier* TPyAggregateClassifier::New(void)
 // --------------------------
 // Скрытые методы управления счетом
 // --------------------------
-void TPyAggregateClassifier::AInit(void)
+bool TPyAggregateClassifier::Initialize(void)
 {
-    /*Py_Initialize();
-    bool res = np::initialize();
-    try
-    {
-        py::object main_module = py::import("__main__");
-        py::object main_namespace = main_module.attr("__dict__");
-
-        py::object ignored = py::exec("hello = open('/home/ivan/hello.txt', 'w')\n"
-                          "hello.write('Hello world!')\n"
-                          "hello.close()",
-                          main_namespace);
-    }
-    catch (py::error_already_set const &)
-    {
-        std::string perrorStr = RDK::parse_python_exception();
-        // TODO: логировать и выдавать ошибку с прекращением программы
-        std::cout << "Error occured:" << std::endl << perrorStr << std::endl;
-        std::cout << "Python init fail" << std::endl;
-    }*/
-
     try
     {
         LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("Python init started..."));
 //        init_py();
-        py::to_python_converter<cv::Mat, pbcvt::matToNDArrayBoostConverter>();
-        py::to_python_converter<RDK::UBitmap, pbcvt::uBitmapToNDArrayBoostConverter>();
+//        py::to_python_converter<cv::Mat, pbcvt::matToNDArrayBoostConverter>();
+//        py::to_python_converter<RDK::UBitmap, pbcvt::uBitmapToNDArrayBoostConverter>();
         py::object MainModule = py::import("__main__");  // импортируем main-scope, см. https://docs.python.org/3/library/__main__.html
         py::object MainNamespace = MainModule.attr("__dict__");  // извлекаем область имен
 
@@ -115,17 +95,25 @@ void TPyAggregateClassifier::AInit(void)
         //std::cout << boost::python::extract<int>(rand2) << std::endl;
 
         std::cout << "Python init successs" << std::endl;
+        Initialized = true;
     }
     catch (py::error_already_set const &)
     {
+        Initialized = false;
         std::string perrorStr = parse_python_exception();
         LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Python init fail: ")+perrorStr);
     }
     catch(...)
     {
+        Initialized = false;
         LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Python init fail: Undandled exception"));
     }
  LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("...Python init finished successful!"));
+ return true;
+}
+
+void TPyAggregateClassifier::AInit(void)
+{
 }
 
 void TPyAggregateClassifier::AUnInit(void)
@@ -135,6 +123,7 @@ void TPyAggregateClassifier::AUnInit(void)
 // Восстановление настроек по умолчанию и сброс процесса счета
 bool TPyAggregateClassifier::ADefault(void)
 {
+ Initialized=false;
  return true;
 }
 
@@ -144,18 +133,25 @@ bool TPyAggregateClassifier::ADefault(void)
 // в случае успешной сборки
 bool TPyAggregateClassifier::ABuild(void)
 {
+ if(IsInit())
+  Initialize();
  return true;
 }
 
 // Сброс процесса счета без потери настроек
 bool TPyAggregateClassifier::AReset(void)
 {
+ if(!Initialized)
+  Initialize();
  return true;
 }
 
 // Выполняет расчет этого объекта
 bool TPyAggregateClassifier::ACalculate(void)
 {
+ if(!Initialized)
+  return true;
+
  if(!InputImage.IsConnected())
   return true;
 

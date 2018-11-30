@@ -33,6 +33,7 @@ protected: // Переменные состояния
 
 UGraphics Graph;
 UBitmap Canvas;
+bool Initialized;
 
 public: // Методы
 // --------------------------

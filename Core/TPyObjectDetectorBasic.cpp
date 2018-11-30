@@ -208,16 +208,12 @@ bool TPyObjectDetectorBasic::Initialize(void)
 
 void TPyObjectDetectorBasic::AInit(void)
 {
-    if(!Initialized)
-    {
-       if(!Initialize())
-           return;
-    }
+
 }
 
 void TPyObjectDetectorBasic::AUnInit(void)
 {
-    Initialized=false;
+    //Initialized=false;
 }
 
 // Восстановление настроек по умолчанию и сброс процесса счета
@@ -233,19 +229,25 @@ bool TPyObjectDetectorBasic::ADefault(void)
 // в случае успешной сборки
 bool TPyObjectDetectorBasic::ABuild(void)
 {
+    if(IsInit())
+     Initialize();
  return true;
 }
 
 // Сброс процесса счета без потери настроек
 bool TPyObjectDetectorBasic::AReset(void)
 {
-// Initialized = false;
+    if(!Initialized)
+     Initialize();
  return true;
 }
 
 // Выполняет расчет этого объекта
 bool TPyObjectDetectorBasic::ACalculate(void)
 {
+    if(!Initialized)
+     return true;
+
  if(LoadTargetClassesYOLO)
  {
      if(ClassedList.size()==0)
