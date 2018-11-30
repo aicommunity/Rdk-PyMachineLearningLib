@@ -30,7 +30,7 @@ namespace py = boost::python;
 #ifdef WIN32
 namespace np = boost::python::numpy;
 #else
-namespace np = boost::numpy;
+namespace np = boost::python::numpy;
 #endif
 
 #if (PY_VERSION_HEX >= 0x03000000)
