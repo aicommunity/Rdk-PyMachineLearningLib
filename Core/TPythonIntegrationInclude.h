@@ -17,9 +17,9 @@
 #include <boost/python/numpy/dtype.hpp>
 #include <boost/python/numpy/ndarray.hpp>
 #else
-#include <boost/numpy.hpp>
-#include <boost/numpy/dtype.hpp>
-#include <boost/numpy/ndarray.hpp>
+#include <boost/python/numpy.hpp>
+#include <boost/python/numpy/dtype.hpp>
+#include <boost/python/numpy/ndarray.hpp>
 #endif
 #include <boost/python.hpp>
 #include <boost/python/detail/wrap_python.hpp>
@@ -30,7 +30,7 @@ namespace py = boost::python;
 #ifdef WIN32
 namespace np = boost::python::numpy;
 #else
-namespace np = boost::numpy;
+namespace np = boost::python::numpy;
 #endif
 
 #if (PY_VERSION_HEX >= 0x03000000)

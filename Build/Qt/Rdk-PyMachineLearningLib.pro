@@ -10,6 +10,8 @@ TARGET = Rdk-PyMachineLearningLib.qt
 TEMPLATE = lib
 CONFIG += staticlib
 
+CONFIG += c++11
+
 DEFINES += LIBRDK_LIBRARY_EXPORT
 DEFINES += RDK_UNICODE_RUN
 DEFINES += RDK_QT
@@ -23,7 +25,8 @@ unix {
     INCLUDEPATH += /usr/include/python3.5
     INCLUDEPATH += /usr/lib/python3/dist-packages/numpy/core/include/numpy/
     INCLUDEPATH += /usr/local/include
-    INCLUDEPATH += /usr/local/cuda-8.0/include
+    INCLUDEPATH += /usr/local/cuda-9.0/include
+    INCLUDEPATH += /usr/local/boost_1_68_0
     DESTDIR = $$PWD/../../../../Bin/Platform/Linux/Lib.Qt
 
     HEADERS += ../../ThirdParty/darknet/include/darknet.h \
@@ -32,6 +35,7 @@ unix {
 
     SOURCES += ../../ThirdParty/darknet/include/darknet_utils.cpp \
     ../../Core/TDarknetObjectDetector.cpp
+
 }
 
 windows {

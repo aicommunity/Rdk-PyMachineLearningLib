@@ -126,7 +126,7 @@ void TDarknetObjectDetector::AInit(void)
     if(!Initialized)
     {
        if(!Initialize())
-           return true;
+           return;
     }
 }
 
