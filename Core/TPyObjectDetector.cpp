@@ -117,11 +117,6 @@ TPyObjectDetector* TPyObjectDetector::New(void)
 
 void TPyObjectDetector::AInit(void)
 {
-    if(!Initialized)
-    {
-       if(!Initialize())
-           return;
-    }
 }
 
 // --------------------------
@@ -133,8 +128,8 @@ bool TPyObjectDetector::Initialize(void)
     {
         LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("Python init started..."));
 //        init_py();
-        py::to_python_converter<cv::Mat, pbcvt::matToNDArrayBoostConverter>();
-        py::to_python_converter<RDK::UBitmap, pbcvt::uBitmapToNDArrayBoostConverter>();
+//        py::to_python_converter<cv::Mat, pbcvt::matToNDArrayBoostConverter>();
+//        py::to_python_converter<RDK::UBitmap, pbcvt::uBitmapToNDArrayBoostConverter>();
         py::object MainModule = py::import("__main__");  // импортируем main-scope, см. https://docs.python.org/3/library/__main__.html
         py::object MainNamespace = MainModule.attr("__dict__");  // извлекаем область имен
 
@@ -208,6 +203,11 @@ bool TPyObjectDetector::Initialize(void)
         Initialized=false;
         return false;
     }
+    catch(...)
+    {
+        LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Python init fail: Undandled exception"));
+    }
+
     LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("...Python init finished successful!"));
     return true;
 }
@@ -230,19 +230,24 @@ bool TPyObjectDetector::ADefault(void)
 // в случае успешной сборки
 bool TPyObjectDetector::ABuild(void)
 {
+ if(IsInit())
+  Initialize();
  return true;
 }
 
 // Сброс процесса счета без потери настроек
 bool TPyObjectDetector::AReset(void)
 {
- //Initialized = false;
+ if(!Initialized)
+  Initialize();
  return true;
 }
 
 // Выполняет расчет этого объекта
 bool TPyObjectDetector::ACalculate(void)
 {
+ if(!Initialized)
+  return true;
 // if(!Initialized)
 // {
 //    if(!Initialize())

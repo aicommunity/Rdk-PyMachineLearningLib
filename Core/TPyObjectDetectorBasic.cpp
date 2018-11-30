@@ -123,8 +123,8 @@ bool TPyObjectDetectorBasic::Initialize(void)
     {
         LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("Python init started..."));
 //        init_py();
-        py::to_python_converter<cv::Mat, pbcvt::matToNDArrayBoostConverter>();
-        py::to_python_converter<RDK::UBitmap, pbcvt::uBitmapToNDArrayBoostConverter>();
+//        py::to_python_converter<cv::Mat, pbcvt::matToNDArrayBoostConverter>();
+//        py::to_python_converter<RDK::UBitmap, pbcvt::uBitmapToNDArrayBoostConverter>();
         py::object MainModule = py::import("__main__");  // импортируем main-scope, см. https://docs.python.org/3/library/__main__.html
         py::object MainNamespace = MainModule.attr("__dict__");  // извлекаем область имен
 
@@ -197,6 +197,10 @@ bool TPyObjectDetectorBasic::Initialize(void)
         LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Python init fail: ")+perrorStr);
         Initialized=false;
         return false;
+    }
+    catch(...)
+    {
+        LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Python init fail: Undandled exception"));
     }
     LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("...Python init finished successful!"));
     return true;

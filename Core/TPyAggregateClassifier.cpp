@@ -121,6 +121,10 @@ void TPyAggregateClassifier::AInit(void)
         std::string perrorStr = parse_python_exception();
         LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Python init fail: ")+perrorStr);
     }
+    catch(...)
+    {
+        LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Python init fail: Undandled exception"));
+    }
  LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("...Python init finished successful!"));
 }
 

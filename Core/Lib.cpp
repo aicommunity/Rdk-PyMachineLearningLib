@@ -75,7 +75,14 @@ UPyMachineLearningLib PyMachineLearningLib;
 UPyMachineLearningLib::UPyMachineLearningLib(void)
  : ULibrary("PyMachineLearningLib","1.0")
 {
- init_py();
+ try
+ {
+  init_py(); // ¬ызывать только из главного потока приложени€!!!
+ }
+ catch(...)
+ {
+  cout<<"PyMachineLearningLib: init_py() thors exception!"<<endl;
+ }
 }
 // --------------------------
 
@@ -86,6 +93,8 @@ UPyMachineLearningLib::UPyMachineLearningLib(void)
 // Ќе требуетс€ предварительна€ очистка массива и уборка пам€ти.
 void UPyMachineLearningLib::CreateClassSamples(UStorage *storage)
 {
+    py::to_python_converter<cv::Mat, pbcvt::matToNDArrayBoostConverter>();
+    py::to_python_converter<RDK::UBitmap, pbcvt::uBitmapToNDArrayBoostConverter>();
  //UploadClass<TPythonIntegration>("TPythonIntegration", "PythonIntegration");
 
     /*UContainer *cont=0;

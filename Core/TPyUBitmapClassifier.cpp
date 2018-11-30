@@ -80,53 +80,26 @@ TPyUBitmapClassifier* TPyUBitmapClassifier::New(void)
 // --------------------------
 // Скрытые методы управления счетом
 // --------------------------
-void TPyUBitmapClassifier::AInit(void)
+bool TPyUBitmapClassifier::Initialize(void)
 {
-    /*Py_Initialize();
-    bool res = np::initialize();
-    try
-    {
-        py::object main_module = py::import("__main__");
-        py::object main_namespace = main_module.attr("__dict__");
-
-        py::object ignored = py::exec("hello = open('/home/ivan/hello.txt', 'w')\n"
-                          "hello.write('Hello world!')\n"
-                          "hello.close()",
-                          main_namespace);
-    }
-    catch (py::error_already_set const &)
-    {
-        std::string perrorStr = RDK::parse_python_exception();
-        // TODO: логировать и выдавать ошибку с прекращением программы
-        std::cout << "Error occured:" << std::endl << perrorStr << std::endl;
-        std::cout << "Python init fail" << std::endl;
-    }*/
-
     try
     {
         LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("Python init started..."));
 //        init_py();
-        py::to_python_converter<cv::Mat, pbcvt::matToNDArrayBoostConverter>();
-        py::to_python_converter<RDK::UBitmap, pbcvt::uBitmapToNDArrayBoostConverter>();
+//        py::to_python_converter<cv::Mat, pbcvt::matToNDArrayBoostConverter>();
+//        py::to_python_converter<RDK::UBitmap, pbcvt::uBitmapToNDArrayBoostConverter>();
         py::object MainModule = py::import("__main__");  // импортируем main-scope, см. https://docs.python.org/3/library/__main__.html
         py::object MainNamespace = MainModule.attr("__dict__");  // извлекаем область имен
 
-        //py::object pycv2 = py::import("cv2");
-
         // TODO: путь для импорта файла брать из конфига"../../../../Libraries/Rdk-PyMachineLearningLib/PythonScripts/classifier_interface.py"
         // загрузка кода из файла в извлеченную область имен
-        std::string s = this->GetEnvironment()->GetCurrentDataDir()+PythonScriptFileName;
+        std::string s = GetEnvironment()->GetCurrentDataDir()+PythonScriptFileName;
         py::object ClassifierInterfaceModule = import("classifier_interface",s,MainNamespace);
         // экземпляр питоновского класса, через который активируется виртуальная среда и загружается модель
         // TODO: пусть до среды брать из конфига
         IntegrationInterface = ClassifierInterfaceModule.attr("ClassifierEmbeddingInterface");
         if(!IntegrationInterface.is_none())
             IntegrationInterfaceInstance = IntegrationInterface(); ///home/arnold/.virtualenvs/cv
-
-        //boost::python::object rand_mod = boost::python::import("random");
-        //boost::python::object rand_func = rand_mod.attr("random");
-        //boost::python::object rand2 = rand_func();
-        //std::cout << boost::python::extract<int>(rand2) << std::endl;
 
         std::cout << "Python init successs" << std::endl;
         Initialized = true;
@@ -136,14 +109,23 @@ void TPyUBitmapClassifier::AInit(void)
         std::string perrorStr = parse_python_exception();
         LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Python init fail: ")+perrorStr);
         Initialized=false;
-        return;
+        return false;
+    }
+    catch(...)
+    {
+        LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Python init fail: Undandled exception"));
     }
     LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("...Python init finished successful!"));
+ return true;
+}
+
+
+void TPyUBitmapClassifier::AInit(void)
+{
 }
 
 void TPyUBitmapClassifier::AUnInit(void)
 {
- Initialized=false;
 }
 
 // Восстановление настроек по умолчанию и сброс процесса счета
@@ -160,12 +142,16 @@ bool TPyUBitmapClassifier::ADefault(void)
 // в случае успешной сборки
 bool TPyUBitmapClassifier::ABuild(void)
 {
+ if(IsInit())
+  Initialize();
  return true;
 }
 
 // Сброс процесса счета без потери настроек
 bool TPyUBitmapClassifier::AReset(void)
 {
+ if(!Initialized)
+  Initialize();
 // Initialized = false;
  return true;
 }
@@ -173,10 +159,9 @@ bool TPyUBitmapClassifier::AReset(void)
 // Выполняет расчет этого объекта
 bool TPyUBitmapClassifier::ACalculate(void)
 {
-// if(!Initialized)
-// {
-//    Init();
-// }
+ if(!Initialized)
+  return true;
+
  if(!InputImages.IsConnected())
   return true;
 
