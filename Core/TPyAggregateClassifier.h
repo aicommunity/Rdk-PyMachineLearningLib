@@ -64,6 +64,7 @@ virtual TPyAggregateClassifier* New(void);
 // Скрытые методы управления счетом
 // --------------------------
 protected:
+bool Initialize(void);
 virtual void AInit(void);
 virtual void AUnInit(void);
 
