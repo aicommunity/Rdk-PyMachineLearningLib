@@ -55,7 +55,8 @@ HEADERS += \
     ../../Core/TPythonIntegrationInclude.h \
     ../../Core/TPyObjectDetector.h \
     ../../Core/TPyObjectDetectorBasic.h \
-    ../../Core/Lib.h
+    ../../Core/Lib.h \
+    ../../Core/TPyComponent.h
 
 
 SOURCES += \
@@ -65,4 +66,5 @@ SOURCES += \
     ../../Core/TPyUBitmapClassifier.cpp \
     ../../Core/TPyObjectDetector.cpp \
     ../../Core/TPyObjectDetectorBasic.cpp \
-    ../../Core/Lib.cpp
+    ../../Core/Lib.cpp \
+    ../../Core/TPyComponent.cpp

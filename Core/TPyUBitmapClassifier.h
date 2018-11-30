@@ -1,19 +1,15 @@
 #ifndef RDK_TPyUBitmapClassifierH
 #define RDK_TPyUBitmapClassifierH
 
-#include "TPythonIntegrationInclude.h"
-#include "TPythonIntegrationUtil.h"
+#include "TPyComponent.h"
 
 namespace RDK {
 
-class TPyUBitmapClassifier: public RDK::UNet
+class TPyUBitmapClassifier: public TPyComponent
 {
 public: // Свойства
 /// Входное изображение
 /// UPropertyInputData<UBitmap,TPyUBitmapClassifier> InputImage;
-
-/// Входное изображение
-//ULProperty<std::string,TPyUBitmapClassifier, ptPubParameter> PythonScriptFileName;
 
 //Входные матрицы с данными об обнаружениях
 /// Содержит изображения (обработанные) для классификации
@@ -34,15 +30,10 @@ UPropertyOutputData<std::vector<int>,TPyUBitmapClassifier, ptPubOutput> OutputCl
 /// Каждое значение - уверенность класса
 UPropertyOutputData<MDMatrix<double>, TPyUBitmapClassifier> OutputConfidences;
 
-boost::python::object IntegrationInterface;
-boost::python::object IntegrationInterfaceInstance;
-
 protected: // Переменные состояния
 
 UGraphics Graph;
 UBitmap Canvas;
-bool Initialized;
-std::string PythonScriptFileName;
 
 public: // Методы
 // --------------------------
@@ -51,19 +42,6 @@ public: // Методы
 TPyUBitmapClassifier(void);
 virtual ~TPyUBitmapClassifier(void);
 // --------------------------
-
-// ---------------------
-// Методы управления параметрами
-// ---------------------
-// ---------------------
-
-bool SetPythonClassifierScriptPath(const std::string& path);
-const std::string &GetPythonClassifierScriptPath(void) const;
-
-// ---------------------
-// Методы управления переменными состояния
-// ---------------------
-// ---------------------
 
 // --------------------------
 // Системные методы управления объектом
@@ -76,25 +54,22 @@ virtual TPyUBitmapClassifier* New(void);
 // Скрытые методы управления счетом
 // --------------------------
 protected:
-bool Initialize(void);
-
-virtual void AInit(void);
-virtual void AUnInit(void);
+bool APythonInitialize(void);
 
 // Восстановление настроек по умолчанию и сброс процесса счета
-virtual bool ADefault(void);
+virtual bool APyDefault(void);
 
 // Обеспечивает сборку внутренней структуры объекта
 // после настройки параметров
 // Автоматически вызывает метод Reset() и выставляет Ready в true
 // в случае успешной сборки
-virtual bool ABuild(void);
+virtual bool APyBuild(void);
 
 // Сброс процесса счета без потери настроек
-virtual bool AReset(void);
+virtual bool APyReset(void);
 
 // Выполняет расчет этого объекта
-virtual bool ACalculate(void);
+virtual bool APyCalculate(void);
 // --------------------------
 };
 
