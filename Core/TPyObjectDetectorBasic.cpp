@@ -28,7 +28,6 @@ namespace RDK {
 // --------------------------  //DetectionClass("DetectionClass",this),
 TPyObjectDetectorBasic::TPyObjectDetectorBasic(void)
 : InputImage("InputImage",this),
-  Initialized(false),
   OutputObjects("OutputObjects",this),
   ImageColorModel("ImageColorModel",this),
   ModelPathYOLO("ModelPathYOLO",this),
@@ -37,33 +36,14 @@ TPyObjectDetectorBasic::TPyObjectDetectorBasic(void)
   TargetClassesYOLO("TargetClassesYOLO",this),
   ChangeClassesYOLO("ChangeClassesYOLO",this),
   OutputImage("OutputImage",this),
-  //InitializationTypeYOLO("InitializationTypeYOLO",this),
-  //ConfigPathYOLO("ConfigPathYOLO",this),
-  //WeightsPathYOLO("WeightsPathYOLO",this),
   LoadTargetClassesYOLO("LoadTargetClassesYOLO",this)
-  //OutputConfidences("OutputConfidences", this)
-  //PythonScriptFileName("PythonScriptFileName",this)
 {
-    AddLookupProperty("PythonScriptPath",ptPubParameter, new UVProperty<std::string,TPyObjectDetectorBasic>(this,
-                 &TPyObjectDetectorBasic::SetPythonClassifierScriptPath,&TPyObjectDetectorBasic::GetPythonClassifierScriptPath));
-
     AddLookupProperty("NumTargetClassesYOLO",ptPubParameter, new UVProperty<int,TPyObjectDetectorBasic>(this,
                  &TPyObjectDetectorBasic::SetNumTargetClassesYOLO,&TPyObjectDetectorBasic::GetNumTargetClassesYOLO));
 
     AddLookupProperty("NumChangeClassesYOLO",ptPubParameter, new UVProperty<int,TPyObjectDetectorBasic>(this,
                  &TPyObjectDetectorBasic::SetNumChangeClassesYOLO,&TPyObjectDetectorBasic::GetNumChangeClassesYOLO));
 
-}
-
-bool TPyObjectDetectorBasic::SetPythonClassifierScriptPath(const std::string& path)
-{
-    PythonScriptFileName = path;
-    Initialized=false;
-    return true;
-}
-const std::string & TPyObjectDetectorBasic::GetPythonClassifierScriptPath(void) const
-{
-    return PythonScriptFileName;
 }
 
 bool TPyObjectDetectorBasic::SetNumTargetClassesYOLO(const int& num)
@@ -99,11 +79,6 @@ TPyObjectDetectorBasic::~TPyObjectDetectorBasic(void)
 // ---------------------
 // ---------------------
 
-// ---------------------
-// Методы управления переменными состояния
-// ---------------------
-// ---------------------
-
 // --------------------------
 // Системные методы управления объектом
 // --------------------------
@@ -117,31 +92,10 @@ TPyObjectDetectorBasic* TPyObjectDetectorBasic::New(void)
 // --------------------------
 // Скрытые методы управления счетом
 // --------------------------
-bool TPyObjectDetectorBasic::Initialize(void)
+bool TPyObjectDetectorBasic::APythonInitialize(void)
 {
     try
     {
-        LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("Python init started..."));
-//        init_py();
-//        py::to_python_converter<cv::Mat, pbcvt::matToNDArrayBoostConverter>();
-//        py::to_python_converter<RDK::UBitmap, pbcvt::uBitmapToNDArrayBoostConverter>();
-        py::object MainModule = py::import("__main__");  // импортируем main-scope, см. https://docs.python.org/3/library/__main__.html
-        py::object MainNamespace = MainModule.attr("__dict__");  // извлекаем область имен
-
-        // загрузка кода из файла в извлеченную область имен
-        std::string s = this->GetEnvironment()->GetCurrentDataDir()+PythonScriptFileName;
-        py::object DetectorInterfaceModule = import("detector_interface",s,MainNamespace);
-        // экземпляр питоновского класса, через который активируется виртуальная среда и загружается модель
-        // TODO: пусть до среды брать из конфига
-        IntegrationInterface = DetectorInterfaceModule.attr("DetectorEmbeddingInterface");
-        if(!IntegrationInterface.is_none())
-            IntegrationInterfaceInstance = IntegrationInterface(); ///home/arnold/.virtualenvs/cv
-
-        //boost::python::object rand_mod = boost::python::import("random");
-        //boost::python::object rand_func = rand_mod.attr("random");
-        //boost::python::object rand2 = rand_func();
-        //std::cout << boost::python::extract<int>(rand2) << std::endl;
-
         py::list target_classes = py::list();
         for(int i=0; i<TargetClassesYOLO->size(); i++)
         {
@@ -181,13 +135,11 @@ bool TPyObjectDetectorBasic::Initialize(void)
         if(!initialize.is_none())
         {
             LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Python init success"));
-            Initialized = true;
             return true;
         }
         else
         {
             LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Chosen initialization type not supported by selected detector interface file"));
-            Initialized = false;
             return false;
         }
     }
@@ -195,7 +147,6 @@ bool TPyObjectDetectorBasic::Initialize(void)
     {
         std::string perrorStr = parse_python_exception();
         LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Python init fail: ")+perrorStr);
-        Initialized=false;
         return false;
     }
     catch(...)
@@ -206,20 +157,11 @@ bool TPyObjectDetectorBasic::Initialize(void)
     return true;
 }
 
-void TPyObjectDetectorBasic::AInit(void)
-{
-
-}
-
-void TPyObjectDetectorBasic::AUnInit(void)
-{
-    //Initialized=false;
-}
-
 // Восстановление настроек по умолчанию и сброс процесса счета
-bool TPyObjectDetectorBasic::ADefault(void)
+bool TPyObjectDetectorBasic::APyDefault(void)
 {
- Initialized=false;
+ PythonModuleName="detector_interface";
+ PythonClassName="DetectorEmbeddingInterface";
  //InitializationTypeYOLO = 1;
  return true;
 }
@@ -227,27 +169,20 @@ bool TPyObjectDetectorBasic::ADefault(void)
 // после настройки параметров
 // Автоматически вызывает метод Reset() и выставляет Ready в true
 // в случае успешной сборки
-bool TPyObjectDetectorBasic::ABuild(void)
+bool TPyObjectDetectorBasic::APyBuild(void)
 {
-    if(IsInit())
-     Initialize();
  return true;
 }
 
 // Сброс процесса счета без потери настроек
-bool TPyObjectDetectorBasic::AReset(void)
+bool TPyObjectDetectorBasic::APyReset(void)
 {
-    if(!Initialized)
-     Initialize();
  return true;
 }
 
 // Выполняет расчет этого объекта
-bool TPyObjectDetectorBasic::ACalculate(void)
+bool TPyObjectDetectorBasic::APyCalculate(void)
 {
-    if(!Initialized)
-     return true;
-
  if(LoadTargetClassesYOLO)
  {
      if(ClassedList.size()==0)

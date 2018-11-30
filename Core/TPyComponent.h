@@ -15,6 +15,12 @@ ULProperty<std::string, TPyComponent> PythonScriptFileName;
 /// Deprecated: PythonScriptPath == PythonScriptFileName
 ULProperty<std::string, TPyComponent> PythonScriptPath;
 
+/// Имя питон-модуля
+ULProperty<std::string, TPyComponent> PythonModuleName;
+
+/// Имя питон-класса
+ULProperty<std::string, TPyComponent> PythonClassName;
+
 protected: // Временные переменные
 /// Флаг взводится при успешной инициализации подсистемы питона
 bool PythonInitialized;
@@ -41,6 +47,8 @@ virtual ~TPyComponent(void);
 // ---------------------
 bool SetPythonScriptFileName(const std::string& path);
 bool SetPythonClassifierScriptPath(const std::string& path);
+bool SetPythonModuleName(const std::string& path);
+bool SetPythonClassName(const std::string& path);
 // ---------------------
 
 // --------------------------

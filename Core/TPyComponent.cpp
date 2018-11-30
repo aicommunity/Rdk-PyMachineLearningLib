@@ -15,6 +15,8 @@ namespace RDK {
 TPyComponent::TPyComponent(void)
 : PythonScriptFileName("PythonScriptFileName",this,&TPyComponent::SetPythonScriptFileName),
   PythonScriptPath("PythonScriptPath",this,&TPyComponent::SetPythonClassifierScriptPath),
+  PythonModuleName("PythonModuleName",this, &TPyComponent::SetPythonModuleName),
+  PythonClassName("PythonClassName",this, &TPyComponent::SetPythonClassName),
   PythonInitialized(false)
 {
 }
@@ -36,6 +38,19 @@ bool TPyComponent::SetPythonClassifierScriptPath(const std::string& path)
  return true;
 }
 
+bool TPyComponent::SetPythonModuleName(const std::string& path)
+{
+ Ready=false;
+ return true;
+}
+
+bool TPyComponent::SetPythonClassName(const std::string& path)
+{
+ Ready=false;
+ return true;
+}
+
+
 TPyComponent::~TPyComponent(void)
 {
 }
@@ -50,18 +65,31 @@ void TPyComponent::PythonInitialize(void)
     {
         LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("Python init started..."));
         PythonInitialized=false;
+
+        if(PythonModuleName->empty())
+        {
+         LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("PythonModuleName is empty!"));
+         return;
+        }
+
+        if(PythonClassName->empty())
+        {
+         LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("PythonClassName is empty!"));
+         return;
+        }
+
         py::object MainModule = py::import("__main__");  // импортируем main-scope, см. https://docs.python.org/3/library/__main__.html
         py::object MainNamespace = MainModule.attr("__dict__");  // извлекаем область имен
 
         // загрузка кода из файла в извлеченную область имен
         FullPythonScriptFileName = GetEnvironment()->GetCurrentDataDir()+PythonScriptFileName->c_str();
-        py::object DetectorInterfaceModule = import("detector_interface",FullPythonScriptFileName,MainNamespace);
+        py::object DetectorInterfaceModule = import(*PythonModuleName,FullPythonScriptFileName,MainNamespace);
 
         // экземпл€р питоновского класса, через который активируетс€ виртуальна€ среда и загружаетс€ модель
         // TODO: пусть до среды брать из конфига
-        IntegrationInterface = DetectorInterfaceModule.attr("DetectorEmbeddingInterface");
+        IntegrationInterface = DetectorInterfaceModule.attr(PythonClassName->c_str());
         if(!IntegrationInterface.is_none())
-         IntegrationInterfaceInstance = IntegrationInterface();
+         IntegrationInterfaceInstance = IntegrationInterface(); // DetectorEmbeddingInterface
 
         PythonInitialized=APythonInitialize();
     }

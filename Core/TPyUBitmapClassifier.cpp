@@ -47,6 +47,8 @@ bool TPyUBitmapClassifier::APythonInitialize(void)
 // Восстановление настроек по умолчанию и сброс процесса счета
 bool TPyUBitmapClassifier::APyDefault(void)
 {
+ PythonModuleName="classifier_interface";
+ PythonClassName="ClassifierEmbeddingInterface";
  NumClasses=4;
  return true;
 }
