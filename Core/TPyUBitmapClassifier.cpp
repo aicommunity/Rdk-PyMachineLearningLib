@@ -41,6 +41,37 @@ TPyUBitmapClassifier* TPyUBitmapClassifier::New(void)
 // --------------------------
 bool TPyUBitmapClassifier::APythonInitialize(void)
 {
+    UBitmap b;
+    b.SetRes(10, 10, static_cast<RDK::UBMColorModel>(*ImageColorModel));
+    cv::Mat m;
+    if (b.GetColorModel() == RDK::ubmRGB24)
+    {
+        m=cv::Mat(b.GetHeight(), b.GetWidth(), CV_8UC3, b.GetData());
+    }
+    else if(b.GetColorModel() == RDK::ubmY8)
+    {
+        m=cv::Mat(b.GetHeight(), b.GetWidth(), CV_8U, b.GetData());
+    }
+    else
+    {
+        return true;
+    }
+
+    try
+    {
+     py::object retval = IntegrationInterfaceInstance.attr("classify")(m);
+    }
+    catch (py::error_already_set const &)
+    {
+     std::string perrorStr = parse_python_exception();
+     LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPyUBitmapClassifier error: ")+perrorStr);
+     return false;
+    }
+    catch(...)
+    {
+        LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Unknown exception"));
+        return false;
+    }
  return true;
 }
 
@@ -50,6 +81,7 @@ bool TPyUBitmapClassifier::APyDefault(void)
  PythonModuleName="classifier_interface";
  PythonClassName="ClassifierEmbeddingInterface";
  NumClasses=4;
+
  return true;
 }
 
@@ -119,7 +151,6 @@ bool TPyUBitmapClassifier::APyCalculate(void)
          /// Тут считаем
          try
          {
- //         import_array();
           py::object retval = IntegrationInterfaceInstance.attr("classify")(m);
 
           //std::vector<float> res = boost::python::extract<std::vector<float> >(retval);

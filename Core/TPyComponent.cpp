@@ -102,7 +102,7 @@ void TPyComponent::PythonInitialize(void)
     catch(...)
     {
         PythonInitialized=false;
-        LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Python init fail: Undandled exception"));
+        LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Python init fail: Unhandled exception"));
     }
 
     if(PythonInitialized)
