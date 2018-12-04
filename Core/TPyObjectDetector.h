@@ -33,6 +33,8 @@ ULProperty<std::string,TPyObjectDetector, ptPubParameter> ConfigPathYOLO;
 ///Путь к файлу весов Йолы
 ULProperty<std::string,TPyObjectDetector, ptPubParameter> WeightsPathYOLO;
 
+///Отвечает за домножение на
+ULProperty<bool,TPyObjectDetector, ptPubParameter> UseRelativeCoords;
 
 
 ///Путь к модели Йолы

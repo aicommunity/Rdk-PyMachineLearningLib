@@ -38,7 +38,8 @@ TPyObjectDetector::TPyObjectDetector(void)
   OutputImage("OutputImage",this),
   InitializationTypeYOLO("InitializationTypeYOLO",this),
   ConfigPathYOLO("ConfigPathYOLO",this),
-  WeightsPathYOLO("WeightsPathYOLO",this)
+  WeightsPathYOLO("WeightsPathYOLO",this),
+  UseRelativeCoords("UseRelativeCoords",this)
   //LoadTargetClassesYOLO("LoadTargetClassesYOLO",this)
   //OutputConfidences("OutputConfidences", this)
   //PythonScriptFileName("PythonScriptFileName",this)
@@ -234,10 +235,14 @@ bool TPyObjectDetector::APyCalculate(void)
   for(int i=0; i<result.size(); i++)
   {
       int xmin, ymin, xmax, ymax;
-      xmin = (int)(result[i][0]);
-      ymin = (int)(result[i][1]);
-      xmax = (int)(result[i][2]);
-      ymax = (int)(result[i][3]);
+
+      double wm = (*UseRelativeCoords)?(w):(1);
+      double hm = (*UseRelativeCoords)?(h):(1);
+
+      xmin = (int)(result[i][0]*wm);
+      ymin = (int)(result[i][1]*hm);
+      xmax = (int)(result[i][2]*wm);
+      ymax = (int)(result[i][3]*hm);
 
 
       Graph.SetPenColor(0x00FF00);

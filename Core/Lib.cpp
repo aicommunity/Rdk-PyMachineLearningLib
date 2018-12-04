@@ -111,6 +111,7 @@ void UPyMachineLearningLib::CreateClassSamples(UStorage *storage)
 
 #ifdef __GNUC__
  UploadClass<TDarknetObjectDetector>("TDarknetObjectDetector","DarknetObjectDetector");
+ UploadClass<TDarknetUBitmapClassifier>("TDarknetUBitmapClassifier","DarknetUBitmapClassifier");
 #endif
 }
 // --------------------------

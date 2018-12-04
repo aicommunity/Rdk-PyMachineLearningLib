@@ -70,9 +70,6 @@ ULProperty<std::string,TDarknetObjectDetector, ptPubParameter> WeightsPath;
 /// Ширина 4+2=Left; Top; Right; Bottom; Confidense, ClassNumber
 UPropertyOutputData<MDMatrix<double>, TDarknetObjectDetector> OutputObjects;
 
-boost::python::object IntegrationInterface;
-boost::python::object IntegrationInterfaceInstance;
-
 protected: // Переменные состояния
 
 UGraphics Graph;

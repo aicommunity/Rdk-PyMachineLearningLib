@@ -9,6 +9,7 @@
 #include "TPyObjectDetector.h"
 #ifdef __GNUC__
 #include "TDarknetObjectDetector.h"
+#include "TDarknetUBitmapClassifier.h"
 #endif
 
 namespace RDK {
