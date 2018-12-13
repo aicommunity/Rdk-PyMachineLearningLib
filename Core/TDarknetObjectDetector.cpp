@@ -251,7 +251,7 @@ bool TDarknetObjectDetector::ACalculate(void)
          }
      }
 
-     printf("Objectness is %f.\n", d.objectness);
+     //printf("Objectness is %f.\n", d.objectness);
 
 
      if(FilterClassesList)

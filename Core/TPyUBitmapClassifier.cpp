@@ -106,6 +106,7 @@ bool TPyUBitmapClassifier::APyCalculate(void)
  if(!InputImages.IsConnected())
   return true;
 
+ clock_t start_frame = clock();
  if(InputImages->size()>0)
  {
      OutputClasses->clear();
@@ -134,6 +135,7 @@ bool TPyUBitmapClassifier::APyCalculate(void)
          if (b.GetColorModel() == RDK::ubmRGB24)
          {
              m=cv::Mat(b.GetHeight(), b.GetWidth(), CV_8UC3, b.GetData());
+             cv::cvtColor(m, m, CV_BGR2RGB);
          }
          else if(b.GetColorModel() == RDK::ubmY8)
          {
@@ -151,9 +153,12 @@ bool TPyUBitmapClassifier::APyCalculate(void)
          /// Тут считаем
          try
          {
-          py::object retval = IntegrationInterfaceInstance.attr("classify")(m);
-
+          clock_t start = clock();
+          py::object retval = IntegrationInterfaceInstance.attr("classify")(m);     
+          clock_t end = clock();
+          double cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
           //std::vector<float> res = boost::python::extract<std::vector<float> >(retval);
+          printf("classification took %f seconds to execute \n", cpu_time_used);
           np::ndarray ndarr = boost::python::extract< np::ndarray  >(retval);
           int dms = ndarr.get_nd();
 
@@ -212,6 +217,10 @@ bool TPyUBitmapClassifier::APyCalculate(void)
              LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Unknown exception"));
          }
      }
+     clock_t end_frame = clock();
+     double cpu_time_used = ((double) (end_frame - start_frame)) / CLOCKS_PER_SEC;
+     //std::vector<float> res = boost::python::extract<std::vector<float> >(retval);
+     printf("frame took %f seconds to classify all objects \n", cpu_time_used);
  }
 
  return true;
