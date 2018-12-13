@@ -10,8 +10,6 @@ TARGET = Rdk-PyMachineLearningLib.qt
 TEMPLATE = lib
 CONFIG += staticlib
 
-CONFIG += c++11
-
 DEFINES += LIBRDK_LIBRARY_EXPORT
 DEFINES += RDK_UNICODE_RUN
 DEFINES += RDK_QT
@@ -21,6 +19,7 @@ DEFINES += BOOST_NUMPY_STATIC_LIB
 INCLUDEPATH += $$PWD/../../../../Rdk/Deploy/Include
 
 unix {
+    CONFIG += c++11
     DEFINES += GPU
     INCLUDEPATH += /usr/include/python3.5
     INCLUDEPATH += /usr/lib/python3/dist-packages/numpy/core/include/numpy/
@@ -31,14 +30,13 @@ unix {
 
     HEADERS += ../../ThirdParty/darknet/include/darknet.h \
     ../../Core/TDarknetObjectDetector.h \
+    ../../Core/TDarknetUBitmapClassifier.h \
     ../../ThirdParty/darknet/include/darknet_utils.h
 
     SOURCES += ../../ThirdParty/darknet/include/darknet_utils.cpp \
+    ../../Core/TDarknetUBitmapClassifier.cpp \
     ../../Core/TDarknetObjectDetector.cpp
-
-}
-
-windows {
+} else:windows {
     DESTDIR = $$PWD/../../../../Bin/Platform/Win/Lib.Qt
     INCLUDEPATH += $$(ANACONDA_PATH)/include/
     INCLUDEPATH += $$(BOOST_PATH)
@@ -56,7 +54,6 @@ HEADERS += \
     ../../Core/TPythonIntegrationUtil.h \
     ../../Core/TPyAggregateClassifier.h \
     ../../Core/TPyUBitmapClassifier.h \
-    ../../Core/TDarknetUBitmapClassifier.h \
     ../../Core/TPythonIntegrationInclude.h \
     ../../Core/TPyObjectDetector.h \
     ../../Core/TPyObjectDetectorBasic.h \
@@ -69,7 +66,6 @@ SOURCES += \
     ../../Core/TPythonIntegrationUtil.cpp \
     ../../Core/TPyAggregateClassifier.cpp \
     ../../Core/TPyUBitmapClassifier.cpp \
-    ../../Core/TDarknetUBitmapClassifier.cpp \
     ../../Core/TPyObjectDetector.cpp \
     ../../Core/TPyObjectDetectorBasic.cpp \
     ../../Core/Lib.cpp \

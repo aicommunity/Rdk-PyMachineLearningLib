@@ -81,7 +81,7 @@ UPyMachineLearningLib::UPyMachineLearningLib(void)
  }
  catch(...)
  {
-  cout<<"PyMachineLearningLib: init_py() thors exception!"<<endl;
+  cout<<"PyMachineLearningLib: init_py() throws exception!"<<endl;
  }
 }
 // --------------------------
