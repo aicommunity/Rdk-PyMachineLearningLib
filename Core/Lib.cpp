@@ -73,7 +73,7 @@ UPyMachineLearningLib PyMachineLearningLib;
 // Конструкторы и деструкторы
 // --------------------------
 UPyMachineLearningLib::UPyMachineLearningLib(void)
- : ULibrary("PyMachineLearningLib","1.0")
+ : ULibrary("PyMachineLearningLib","1.0", GetGlobalVersion())
 {
  try
  {
