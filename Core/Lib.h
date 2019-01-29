@@ -16,6 +16,9 @@ namespace RDK {
 
 class RDK_LIB_TYPE UPyMachineLearningLib: public RDK::ULibrary
 {
+private:
+/// Флаг, сигнализирующий что питон-подсистема была инициализирована
+static bool PythonInitFlag;
 public: // Методы
 // --------------------------
 // Конструкторы и деструкторы
@@ -26,6 +29,9 @@ UPyMachineLearningLib(void);
 // --------------------------
 // Методы заполенения бибилиотеки
 // --------------------------
+/// Однократная инициализация python-подистемы
+static void PythonInit(void);
+
 // Заполняет массив ClassSamples готовыми экземплярами образцов и их именами.
 // Не требуется предварительная очистка массива и уборка памяти.
 virtual void CreateClassSamples(RDK::UStorage *storage);

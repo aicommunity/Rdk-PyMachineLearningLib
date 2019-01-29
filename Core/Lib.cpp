@@ -67,6 +67,9 @@ namespace np = boost::python::numpy;
 
 namespace RDK {
 
+/// Флаг, сигнализирующий что питон-подсистема была инициализирована
+bool UPyMachineLearningLib::PythonInitFlag(false);
+
 UPyMachineLearningLib PyMachineLearningLib;
 
 // --------------------------
@@ -75,26 +78,37 @@ UPyMachineLearningLib PyMachineLearningLib;
 UPyMachineLearningLib::UPyMachineLearningLib(void)
  : ULibrary("PyMachineLearningLib","1.0", GetGlobalVersion())
 {
- try
- {
-  init_py(); // Вызывать только из главного потока приложения!!!
- }
- catch(...)
- {
-  cout<<"PyMachineLearningLib: init_py() throws exception!"<<endl;
- }
+ PythonInit();
 }
 // --------------------------
 
 // --------------------------
 // Методы заполенения бибилиотеки
 // --------------------------
+/// Однократная инициализация python-подистемы
+void UPyMachineLearningLib::PythonInit(void)
+{
+ if(!PythonInitFlag)
+ {
+     try
+     {
+      init_py(); // Вызывать только из главного потока приложения!!!
+     }
+     catch(...)
+     {
+      cout<<"PyMachineLearningLib: init_py() throws exception!"<<endl;
+     }
+     py::to_python_converter<cv::Mat, pbcvt::matToNDArrayBoostConverter>();
+     py::to_python_converter<RDK::UBitmap, pbcvt::uBitmapToNDArrayBoostConverter>();
+
+  PythonInitFlag=true;
+ }
+}
+
 // Заполняет массив ClassSamples готовыми экземплярами образцов и их именами.
 // Не требуется предварительная очистка массива и уборка памяти.
 void UPyMachineLearningLib::CreateClassSamples(UStorage *storage)
 {
-    py::to_python_converter<cv::Mat, pbcvt::matToNDArrayBoostConverter>();
-    py::to_python_converter<RDK::UBitmap, pbcvt::uBitmapToNDArrayBoostConverter>();
  //UploadClass<TPythonIntegration>("TPythonIntegration", "PythonIntegration");
 
     /*UContainer *cont=0;
