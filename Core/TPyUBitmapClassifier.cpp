@@ -189,7 +189,7 @@ bool TPyUBitmapClassifier::APyCalculate(void)
           //Если не совпадает то ничего не записываем и выдать ошибку!
           if(result.size()!=NumClasses)
           {
-              LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPyUBitmapClassifier error: NumClasses not equals to returned confidences count"));
+              LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPyUBitmapClassifier error: NumClasses "+sntoa(*NumClasses)+" not equals to returned confidences count "+sntoa(result.size())));
               return true;
           }
 
@@ -215,6 +215,30 @@ bool TPyUBitmapClassifier::APyCalculate(void)
          catch(...)
          {
              LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Unknown exception"));
+         }
+
+         std::string img_path = Environment->GetCurrentDataDir()+"classification_results";
+         if(RDK::CreateNewDirectory(img_path.c_str())==0)
+         {
+             static int index=0;
+             std::stringstream save_path;
+             save_path<<img_path<<"/"<<(*OutputClasses)[i];
+             if(RDK::CreateNewDirectory(save_path.str().c_str())==0)
+             {
+                 RDK::UBitmap TempBitmap;
+                 (*InputImages)[i].ConvertTo(TempBitmap);
+                 TempBitmap.SwapRGBChannels();
+
+                 jpge::params param;
+                 param.m_quality=100;
+
+                 save_path<<"/"<<index<<".jpg";
+                 //   jpge::jpeg_encoder jpeg_e;
+                 jpge::compress_image_to_jpeg_file(save_path.str().c_str(), TempBitmap.GetWidth(), TempBitmap.GetHeight(), 3,
+                                                TempBitmap.GetData(),param);
+                 index+=1;
+             }
+
          }
      }
      clock_t end_frame = clock();
