@@ -3,8 +3,42 @@
 
 #include "TDarknetUBitmapClassifier.h"
 #include <iostream>
+#include <opencv2/imgproc.hpp>
+#include <opencv2/opencv.hpp>
 
 namespace RDK {
+
+bool RdkCvResize(const UBitmap &source, UBitmap &dest, int new_width, int new_height)
+{
+ if(source.GetColorModel() != ubmY8 || source.GetColorModel() != ubmRGB24)
+  return false;
+
+ if(new_width <0 || new_height <0)
+  return false;
+
+ if(new_width ==0 || new_height == 0)
+ {
+  dest.SetRes(new_width, new_height, source.GetColorModel());
+  return true;
+ }
+
+ dest.SetRes(new_width, new_height, source.GetColorModel());
+
+ if(source.GetColorModel() == ubmRGB24)
+ {
+  cv::Mat cv_source(source.GetHeight(),source.GetWidth(),CV_8UC1,source.GetData());
+  cv::Mat cv_dest(dest.GetHeight(),dest.GetWidth(),CV_8UC1,dest.GetData());
+  cv::resize(cv_source, cv_dest, cv::Size(new_width, new_height), 0,0,cv::INTER_CUBIC);
+ }
+ else
+ if(source.GetColorModel() == ubmY8)
+ {
+  cv::Mat cv_source(source.GetHeight(),source.GetWidth(),CV_8UC3,source.GetData());
+  cv::Mat cv_dest(dest.GetHeight(),dest.GetWidth(),CV_8UC3,dest.GetData());
+  cv::resize(cv_source, cv_dest, cv::Size(new_width, new_height), 0,0,cv::INTER_CUBIC);
+ }
+ return true;
+}
 
 // Методы
 // --------------------------
@@ -133,9 +167,7 @@ bool TDarknetUBitmapClassifier::ACalculate(void)
          int w = bmp.GetWidth();
          int h = bmp.GetHeight();
 
-         UBitmap b;
-         b.SetRes(w, h, bmp.GetColorModel());
-         bmp.CopyTo(0,0,b);
+         RdkCvResize(bmp, bmp, Network->w, Network->h);
 
          //RDK::SaveBitmapToFile("/home/ivan/testB.bmp", b);
 
@@ -144,7 +176,7 @@ bool TDarknetUBitmapClassifier::ACalculate(void)
          ////////////////////////////////////////////////////////////
          /// Здесь место для обработки изображения сетью
 
-         image img = UBitmapToImage(b);
+         image img = UBitmapToImage(bmp);
 
          if(img.data==NULL)
          {
@@ -164,7 +196,7 @@ bool TDarknetUBitmapClassifier::ACalculate(void)
          printf("Predicted in %f seconds.\n", sec(clock()-time));
 
          int t = TopLayer->side*TopLayer->side*TopLayer->n;
-         do_nms_obj(dets, nboxes, TopLayer->classes, 0.1);
+         //do_nms_obj(dets, nboxes, TopLayer->classes, 0.1);
 
          std::vector<std::vector<double> > result;
 
@@ -223,13 +255,26 @@ bool TDarknetUBitmapClassifier::ACalculate(void)
              //std::cerr<<d.bbox.x<<" "<<d.bbox.y<<" "<<d.bbox.w<<" "<<d.bbox.h<<" "<<probmax<<" "<<d.objectness<<" "<<voc_names[cmax]<<"\n";
          }
 
+         double max_prob = -1.0f;
+         int cls = -1;
+         for(int j=0; j<result.size(); j++)
+         {
+             if(result[j][4]>max_prob)
+             {
+                 max_prob = result[j][4];
+                 cls = static_cast<int>(result[j][5]);
+             }
+         }
+
          free_detections(dets, nboxes);
-         free_image(img);
+         //free_image(img);
          free_image(sized);
 
-         (*OutputClasses)[i] = 1;
-         (*OutputConfidences)(i,0)=0.0f;
-         (*OutputConfidences)(i,1)=1.0f;
+         (*OutputClasses)[i] = cls;
+         //(*OutputConfidences)(i,0)=0.0f;
+         (*OutputConfidences)(i,cls)=1.0f;
+
+         cls=0;
 
          /*try
          {

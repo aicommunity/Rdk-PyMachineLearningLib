@@ -6,6 +6,9 @@
 #include "TPyUBitmapClassifier.h"
 #include <iostream>
 
+#define CLASS_UNDEFINED -2
+#define CLASS_LOWQUAL -3
+
 namespace RDK {
 
 // Ìועמהû
@@ -17,6 +20,7 @@ TPyUBitmapClassifier::TPyUBitmapClassifier(void)
   OutputClasses("OutputClasses",this),
   ImageColorModel("ImageColorModel",this),
   NumClasses("NumClasses",this),
+  ConfidenceThreshold("ConfidenceThreshold", this),
   OutputConfidences("OutputConfidences", this)
 {
 }
@@ -195,6 +199,9 @@ bool TPyUBitmapClassifier::APyCalculate(void)
 
           int max_id = -1;
           double max_conf = -100;
+
+
+
           for(int k=0; k<result.size(); k++)
           {
               (*OutputConfidences)(i, k) = result[k];
@@ -204,6 +211,27 @@ bool TPyUBitmapClassifier::APyCalculate(void)
                   max_id = k;
               }
           }
+
+          if(max_conf<ConfidenceThreshold)
+          {
+              for(int k=0; k<result.size(); k++)
+                  result[k]=0.0f;
+
+              max_id=CLASS_LOWQUAL;
+          }
+
+          /*
+          if(OneHot)
+          {
+            for(int n=0; n<result.size(); n++)
+            {
+                if(n==max_id)
+                    result[n] = 1.0f;
+                else
+                    result[n] = 0.0f;
+            }
+          }*/
+
           (*OutputClasses)[i] = max_id;
 
          }
@@ -217,6 +245,7 @@ bool TPyUBitmapClassifier::APyCalculate(void)
              LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Unknown exception"));
          }
 
+         /*
          std::string img_path = Environment->GetCurrentDataDir()+"classification_results";
          if(RDK::CreateNewDirectory(img_path.c_str())==0)
          {
@@ -239,7 +268,7 @@ bool TPyUBitmapClassifier::APyCalculate(void)
                  index+=1;
              }
 
-         }
+         }*/
      }
      clock_t end_frame = clock();
      double cpu_time_used = ((double) (end_frame - start_frame)) / CLOCKS_PER_SEC;
