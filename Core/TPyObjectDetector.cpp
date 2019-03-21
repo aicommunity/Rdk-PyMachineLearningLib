@@ -244,12 +244,17 @@ bool TPyObjectDetector::APyCalculate(void)
       xmax = (int)(result[i][2]*wm);
       ymax = (int)(result[i][3]*hm);
 
+      double conf = result[i][4];
+      int cls = static_cast<int>(result[i][5]);
+
+
+      if(conf<0.2)
+        continue;
 
       Graph.SetPenColor(0x00FF00);
       Graph.Rect(xmin, ymin, xmax, ymax);
 
-      double conf = result[i][4];
-      int cls = static_cast<int>(result[i][5]);
+
 
       std::stringstream ss;
       ss<<"[";
@@ -274,6 +279,16 @@ bool TPyObjectDetector::APyCalculate(void)
         Graph.Text(ss.str(),xmin, ymax+3);
       }
   }
+
+  static int index=0;
+  std::stringstream ss;
+
+  UBitmap f;
+  OutputImage->ReflectionX(&f);
+
+  ss<<"/home/ivan/stats/"<<index<<".bmp";
+  SaveBitmapToFile(ss.str().c_str(), f);
+  index+=1;
 
   //int k=1+21;
   //Если не совпадает то ничего не записываем и выдать ошибку!
