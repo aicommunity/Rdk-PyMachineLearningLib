@@ -25,7 +25,7 @@
 #ifdef WIN32
 #include <ndarrayobject.h>
 #else
-#include <numpy/ndarrayobject.h>
+#include <ndarrayobject.h>
 #endif
 
 namespace py = boost::python;

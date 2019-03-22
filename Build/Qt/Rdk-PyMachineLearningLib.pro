@@ -26,12 +26,14 @@ INCLUDEPATH += $$PWD/../../../../Rdk/Deploy/Include
 
 unix {
     CONFIG += c++11
-    DEFINES += GPU
+#    DEFINES += GPU
+    INCLUDEPATH += $$(ANACONDA_PATH)/include/
     INCLUDEPATH += /usr/include/python3.5
     INCLUDEPATH += /usr/lib/python3/dist-packages/numpy/core/include/numpy/
-    INCLUDEPATH += /usr/local/include
+    INCLUDEPATH += $$(ANACONDA_PATH)/lib/python3.6/site-packages/numpy/core/include/numpy/
+    INCLUDEPATH += /usr/include
     INCLUDEPATH += /usr/local/cuda-9.0/include
-    INCLUDEPATH += /usr/local/boost_1_68_0
+#    INCLUDEPATH += /usr/boost_1_68_0
     DESTDIR = $$PWD/../../../../Bin/Platform/Linux/Lib.Qt
 
     HEADERS += ../../ThirdParty/darknet/include/darknet.h \
