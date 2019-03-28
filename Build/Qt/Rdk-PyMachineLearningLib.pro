@@ -22,7 +22,7 @@ unix {
     CONFIG += c++11
     DEFINES += GPU
     INCLUDEPATH += /usr/include/python3.5
-    INCLUDEPATH += /usr/lib/python3/dist-packages/numpy/core/include/numpy/
+    INCLUDEPATH += /usr/local/lib/python3.5/dist-packages/numpy/core/include/numpy/
     INCLUDEPATH += /usr/local/include
     INCLUDEPATH += /usr/local/cuda-9.0/include
     INCLUDEPATH += /usr/local/boost_1_68_0
@@ -31,10 +31,12 @@ unix {
     HEADERS += ../../ThirdParty/darknet/include/darknet.h \
     ../../Core/TDarknetObjectDetector.h \
     ../../Core/TDarknetUBitmapClassifier.h \
+    ../../Core/TDarknetAggrLocalizer.h \
     ../../ThirdParty/darknet/include/darknet_utils.h
 
     SOURCES += ../../ThirdParty/darknet/include/darknet_utils.cpp \
     ../../Core/TDarknetUBitmapClassifier.cpp \
+    ../../Core/TDarknetAggrLocalizer.cpp \
     ../../Core/TDarknetObjectDetector.cpp
 } else:windows {
     DESTDIR = $$PWD/../../../../Bin/Platform/Win/Lib.Qt

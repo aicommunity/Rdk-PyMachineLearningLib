@@ -25,7 +25,7 @@
 #ifdef WIN32
 #include <ndarrayobject.h>
 #else
-#include <numpy/ndarrayobject.h>
+#include <ndarrayobject.h>
 #endif
 
 namespace py = boost::python;
@@ -104,13 +104,14 @@ void UPyMachineLearningLib::CreateClassSamples(UStorage *storage)
  cont->SetName("PythonIntegration");
  UploadClass("TPythonIntegration",cont);*/
 
- UploadClass<TPyUBitmapClassifier>("TPyUBitmapClassifier","PyUBitmapClassifier");
- UploadClass<TPyAggregateClassifier>("TPyAggregateClassifier","PyAggregateClassifier");
- UploadClass<TPyObjectDetectorBasic>("TPyObjectDetectorBasic","PyObjectDetectorBasic");
- UploadClass<TPyObjectDetector>("TPyObjectDetector","PyObjectDetector");
+ //UploadClass<TPyUBitmapClassifier>("TPyUBitmapClassifier","PyUBitmapClassifier");
+ //UploadClass<TPyAggregateClassifier>("TPyAggregateClassifier","PyAggregateClassifier");
+ //UploadClass<TPyObjectDetectorBasic>("TPyObjectDetectorBasic","PyObjectDetectorBasic");
+ //UploadClass<TPyObjectDetector>("TPyObjectDetector","PyObjectDetector");
 
 #ifdef __GNUC__
  UploadClass<TDarknetObjectDetector>("TDarknetObjectDetector","DarknetObjectDetector");
+ UploadClass<TDarknetAggrLocalizer>("TDarknetAggrLocalizer","DarknetAggrLocalizer");
  UploadClass<TDarknetUBitmapClassifier>("TDarknetUBitmapClassifier","DarknetUBitmapClassifier");
 #endif
 }

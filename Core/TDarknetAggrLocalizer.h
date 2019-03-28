@@ -1,5 +1,5 @@
-#ifndef RDK_TDarknetUBitmapClassifierH
-#define RDK_TDarknetUBitmapClassifierH
+#ifndef RDK_TDarknetAggrLocalizerH
+#define RDK_TDarknetAggrLocalizerH
 
 #include "TPythonIntegrationInclude.h"
 //#include "TPythonIntegrationUtil.h"
@@ -7,39 +7,39 @@
 
 namespace RDK {
 
-class TDarknetUBitmapClassifier: public RDK::UNet
+class TDarknetAggrLocalizer: public RDK::UNet
 {
 public: // Свойства
 /// Входное изображение
-/// UPropertyInputData<UBitmap,TDarknetUBitmapClassifier> InputImage;
+/// UPropertyInputData<UBitmap,TDarknetAggrLocalizer> InputImage;
 
 //Входные матрицы с данными об обнаружениях
 /// Содержит изображения (обработанные) для классификации
-UPropertyInputData<std::vector<UBitmap>, TDarknetUBitmapClassifier, ptPubInput> InputImages;
+UPropertyInputData<std::vector<UBitmap>, TDarknetAggrLocalizer, ptPubInput> InputImages;
 
 /// Целое число, определяющее цветовую модель, на которую рассчитана сеть
 /// ubmRGB24=3 - цветное изображение
 /// umbY8=400 - черно-белое изображение
-ULProperty<int,TDarknetUBitmapClassifier, ptPubParameter> ImageColorModel;
+ULProperty<int,TDarknetAggrLocalizer, ptPubParameter> ImageColorModel;
 
 /// Количество классов объектов (какой размер будет у вектора
-ULProperty<int,TDarknetUBitmapClassifier, ptPubParameter> NumClasses;
+ULProperty<int,TDarknetAggrLocalizer, ptPubParameter> NumClasses;
 /// Порог уверенности, выше которого обнаружения считаются валидными (probability)
-ULProperty<float,TDarknetUBitmapClassifier, ptPubParameter> ProbabilityThreshold;
+ULProperty<float,TDarknetAggrLocalizer, ptPubParameter> ProbabilityThreshold;
 /// Порог объектности, выше которого обнаружения считаются валидными (objectness)
-ULProperty<float,TDarknetUBitmapClassifier, ptPubParameter> ObjectnessThreshold;
+ULProperty<float,TDarknetAggrLocalizer, ptPubParameter> ObjectnessThreshold;
 
 /// Выходная матрица с классами объектов
-UPropertyOutputData<std::vector<int>,TDarknetUBitmapClassifier, ptPubOutput> OutputClasses;
+UPropertyOutputData<std::vector<int>,TDarknetAggrLocalizer, ptPubOutput> OutputClasses;
 
 /// Выходная матрица. Количество столбцов по числу объектов, количество строк в столбце по числу классов
 /// Каждое значение - уверенность класса
-UPropertyOutputData<MDMatrix<double>, TDarknetUBitmapClassifier> OutputConfidences;
+UPropertyOutputData<MDMatrix<double>, TDarknetAggrLocalizer> OutputConfidences;
 
 ///Путь к файлу конфигурации Йолы
-ULProperty<std::string,TDarknetUBitmapClassifier, ptPubParameter> ConfigPath;
+ULProperty<std::string,TDarknetAggrLocalizer, ptPubParameter> ConfigPath;
 ///Путь к файлу весов Йолы
-ULProperty<std::string,TDarknetUBitmapClassifier, ptPubParameter> WeightsPath;
+ULProperty<std::string,TDarknetAggrLocalizer, ptPubParameter> WeightsPath;
 
 protected: // Переменные состояния
 
@@ -49,21 +49,21 @@ UBitmap Canvas;
 bool Initialized;
 
 network *Network;
-//layer* TopLayer;
+layer* TopLayer;
 
 public: // Методы
 // --------------------------
 // Конструкторы и деструкторы
 // --------------------------
-TDarknetUBitmapClassifier(void);
-virtual ~TDarknetUBitmapClassifier(void);
+TDarknetAggrLocalizer(void);
+virtual ~TDarknetAggrLocalizer(void);
 // --------------------------
 
 // --------------------------
 // Системные методы управления объектом
 // --------------------------
 // Выделяет память для новой чистой копии объекта этого класса
-virtual TDarknetUBitmapClassifier* New(void);
+virtual TDarknetAggrLocalizer* New(void);
 // --------------------------
 
 // --------------------------

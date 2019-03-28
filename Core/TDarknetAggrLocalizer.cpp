@@ -1,15 +1,15 @@
-#ifndef RDK_TDarknetUBitmapClassifierCPP
-#define RDK_TDarknetUBitmapClassifierCPP
+#ifndef RDK_TDarknetAggrLocalizerCPP
+#define RDK_TDarknetAggrLocalizerCPP
 
-#include "TDarknetUBitmapClassifier.h"
+#include "TDarknetAggrLocalizer.h"
 #include <iostream>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/opencv.hpp>
 
 namespace RDK {
 
-bool RdkCvResize(const UBitmap &source, UBitmap &dest, int new_width, int new_height)
-{
+extern bool RdkCvResize(const UBitmap &source, UBitmap &dest, int new_width, int new_height);
+/*{
  if(source.GetColorModel() != ubmY8 || source.GetColorModel() != ubmRGB24)
   return false;
 
@@ -39,12 +39,13 @@ bool RdkCvResize(const UBitmap &source, UBitmap &dest, int new_width, int new_he
  }
  return true;
 }
+*/
 
 // Методы
 // --------------------------
 // Конструкторы и деструкторы
 // --------------------------  //DetectionClass("DetectionClass",this),
-TDarknetUBitmapClassifier::TDarknetUBitmapClassifier(void)
+TDarknetAggrLocalizer::TDarknetAggrLocalizer(void)
 : InputImages("InputImages",this),
   OutputClasses("OutputClasses",this),
   ImageColorModel("ImageColorModel",this),
@@ -57,7 +58,7 @@ TDarknetUBitmapClassifier::TDarknetUBitmapClassifier(void)
 {
 }
 
-TDarknetUBitmapClassifier::~TDarknetUBitmapClassifier(void)
+TDarknetAggrLocalizer::~TDarknetAggrLocalizer(void)
 {
 }
 // --------------------------
@@ -66,14 +67,14 @@ TDarknetUBitmapClassifier::~TDarknetUBitmapClassifier(void)
 // Системные методы управления объектом
 // --------------------------
 // Выделяет память для новой чистой копии объекта этого класса
-TDarknetUBitmapClassifier* TDarknetUBitmapClassifier::New(void)
+TDarknetAggrLocalizer* TDarknetAggrLocalizer::New(void)
 {
- return new TDarknetUBitmapClassifier;
+ return new TDarknetAggrLocalizer;
 }
 // --------------------------
 
 
-void TDarknetUBitmapClassifier::AInit(void)
+void TDarknetAggrLocalizer::AInit(void)
 {
     if(!Initialized)
     {
@@ -82,26 +83,26 @@ void TDarknetUBitmapClassifier::AInit(void)
     }
 }
 
-void TDarknetUBitmapClassifier::AUnInit(void)
+void TDarknetAggrLocalizer::AUnInit(void)
 {
 }
 // --------------------------
 // Скрытые методы управления счетом
 // --------------------------
-bool TDarknetUBitmapClassifier::Initialize(void)
+bool TDarknetAggrLocalizer::Initialize(void)
 {
     if(ConfigPath->size()==0 || WeightsPath->size()==0)
     {
-        LogMessageEx(RDK_EX_WARNING, __FUNCTION__, std::string("TDarknetUBitmapClassifier error: ConfigPath or WeightsPath is empty!"));
+        LogMessageEx(RDK_EX_WARNING, __FUNCTION__, std::string("TDarknetAggrLocalizer error: ConfigPath or WeightsPath is empty!"));
         return false;
     }
     try {
         Network = load_network(const_cast<char*>(ConfigPath->c_str()), const_cast<char*>(WeightsPath->c_str()), 0);
-        /*if(Network)
-            TopLayer = &(Network->layers[Network->n-1]);*/
+        if(Network)
+            TopLayer = &(Network->layers[Network->n-1]);
         /*set_batch_network(Network, 1);*/
     } catch (...) {
-        LogMessageEx(RDK_EX_WARNING, __FUNCTION__, std::string("TDarknetUBitmapClassifier error: Unhandled exception"));
+        LogMessageEx(RDK_EX_WARNING, __FUNCTION__, std::string("TDarknetAggrLocalizer error: Unhandled exception"));
         return false;
     }
 
@@ -120,7 +121,7 @@ bool TDarknetUBitmapClassifier::Initialize(void)
 
 
 // Восстановление настроек по умолчанию и сброс процесса счета
-bool TDarknetUBitmapClassifier::ADefault(void)
+bool TDarknetAggrLocalizer::ADefault(void)
 {
  NumClasses=2;
  return true;
@@ -130,26 +131,25 @@ bool TDarknetUBitmapClassifier::ADefault(void)
 // после настройки параметров
 // Автоматически вызывает метод Reset() и выставляет Ready в true
 // в случае успешной сборки
-bool TDarknetUBitmapClassifier::ABuild(void)
+bool TDarknetAggrLocalizer::ABuild(void)
 {
  return true;
 }
 
 // Сброс процесса счета без потери настроек
-bool TDarknetUBitmapClassifier::AReset(void)
+bool TDarknetAggrLocalizer::AReset(void)
 {
  return true;
 }
 
 // Выполняет расчет этого объекта
-bool TDarknetUBitmapClassifier::ACalculate(void)
+bool TDarknetAggrLocalizer::ACalculate(void)
 {
  if(!InputImages.IsConnected())
   return true;
 
  if(InputImages->size()>0)
  {
-     clock_t start_frame = clock();
      OutputClasses->clear();
      OutputClasses->resize(InputImages->size(), -1);
      OutputConfidences->Resize(InputImages->size(), NumClasses);
@@ -165,10 +165,10 @@ bool TDarknetUBitmapClassifier::ACalculate(void)
              return true;
          }
 
-         //int w = bmp.GetWidth();
-         //int h = bmp.GetHeight();
+         int w = bmp.GetWidth();
+         int h = bmp.GetHeight();
 
-         //RdkCvResize(bmp, bmp, Network->w, Network->h);
+         RdkCvResize(bmp, bmp, Network->w, Network->h);
 
          //RDK::SaveBitmapToFile("/home/ivan/testB.bmp", b);
 
@@ -179,10 +179,6 @@ bool TDarknetUBitmapClassifier::ACalculate(void)
 
          image img = UBitmapToImage(bmp);
 
-         // save_image(img, "/home/ivan/test_flip");
-
-         int classes = NumClasses;
-
          if(img.data==NULL)
          {
              LogMessageEx(RDK_EX_WARNING, __FUNCTION__, std::string("InputImage not converted correctly to darknet image"));
@@ -192,26 +188,7 @@ bool TDarknetUBitmapClassifier::ACalculate(void)
              continue;
          }
 
-         image resized = resize_min(img, Network->w);
-         image crop = crop_image(resized, (resized.w - Network->w)/2, (resized.h - Network->h)/2, Network->w, Network->h);
-
-         float *pred = network_predict(Network, crop.data);
-
-         if(Network->hierarchy) hierarchy_predictions(pred, Network->outputs, Network->hierarchy, 0, 1);
-
-
-         for(int j=0; j<classes; j++)
-         {
-             (*OutputConfidences)(i,j) = pred[j];
-         }
-    }
-     clock_t end_frame = clock();
-     double cpu_time_used = ((double) (end_frame - start_frame)) / CLOCKS_PER_SEC;
-     //std::vector<float> res = boost::python::extract<std::vector<float> >(retval);
-     printf("AggrClassifierBase frame took %f seconds to classify all objects \n", cpu_time_used);
-
-
-         /*int nboxes = 0;
+         int nboxes = 0;
          image sized = resize_image(img, Network->w, Network->h);
          float *X = sized.data;
          clock_t time=clock();
@@ -244,22 +221,22 @@ bool TDarknetUBitmapClassifier::ACalculate(void)
              //printf("Objectness is %f.\n", d.objectness);
 
 
-//             if(FilterClassesList)
-//             {
-//                if(ClassesList->size()>0)
-//                {
-//                    bool skip=true;
-//                    for(int ci=0; ci<ClassesList->size(); ci++)
-//                    {
-//                        if((*ClassesList)[ci]==cmax)
-//                        {
-//                            skip=false;
-//                        }
-//                    }
-//                    if(skip)
-//                        continue;
-//                }
-//             }
+             /*if(FilterClassesList)
+             {
+                if(ClassesList->size()>0)
+                {
+                    bool skip=true;
+                    for(int ci=0; ci<ClassesList->size(); ci++)
+                    {
+                        if((*ClassesList)[ci]==cmax)
+                        {
+                            skip=false;
+                        }
+                    }
+                    if(skip)
+                        continue;
+                }
+             }*/
 
 
              double xmin = d.bbox.x-d.bbox.w/2;
@@ -310,7 +287,7 @@ bool TDarknetUBitmapClassifier::ACalculate(void)
 
           if(dms>2)
           {
-              LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TDarknetUBitmapClassifier error: Returned array with incorrect dimensions"));
+              LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TDarknetAggrLocalizer error: Returned array with incorrect dimensions"));
               return true;
           }
 
@@ -335,7 +312,7 @@ bool TDarknetUBitmapClassifier::ACalculate(void)
           //Если не совпадает то ничего не записываем и выдать ошибку!
           if(result.size()!=NumClasses)
           {
-              LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TDarknetUBitmapClassifier error: NumClasses not equals to returned confidences count"));
+              LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TDarknetAggrLocalizer error: NumClasses not equals to returned confidences count"));
               return true;
           }
 
@@ -356,20 +333,20 @@ bool TDarknetUBitmapClassifier::ACalculate(void)
          catch (py::error_already_set const &)
          {
           std::string perrorStr = parse_python_exception();
-          LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TDarknetUBitmapClassifier error: ")+perrorStr);
+          LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TDarknetAggrLocalizer error: ")+perrorStr);
          } 
          catch(...)
          {
              LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Unknown exception"));
          }*/
-
+     }
  }
 
  return true;
 }
 // --------------------------
 
-image TDarknetUBitmapClassifier::UBitmapToImage(const UBitmap& ub)
+image TDarknetAggrLocalizer::UBitmapToImage(const UBitmap& ub)
 {
     int h = ub.GetHeight();
     int w = ub.GetWidth();
