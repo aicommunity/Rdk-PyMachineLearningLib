@@ -3,12 +3,13 @@
 
 #include "../../../Rdk/Deploy/Include/rdk.h"
 //#include "TPythonIntegration.h"
-#include "TPyUBitmapClassifier.h"
-#include "TPyAggregateClassifier.h"
-#include "TPyObjectDetectorBasic.h"
-#include "TPyObjectDetector.h"
+//#include "TPyUBitmapClassifier.h"
+//#include "TPyAggregateClassifier.h"
+//#include "TPyObjectDetectorBasic.h"
+//#include "TPyObjectDetector.h"
 #ifdef __GNUC__
 #include "TDarknetObjectDetector.h"
+#include "TDarknetAggrLocalizer.h"
 #include "TDarknetUBitmapClassifier.h"
 #endif
 
