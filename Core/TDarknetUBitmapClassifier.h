@@ -49,7 +49,7 @@ UBitmap Canvas;
 bool Initialized;
 
 network *Network;
-layer* TopLayer;
+//layer* TopLayer;
 
 public: // Ìועמהû
 // --------------------------
