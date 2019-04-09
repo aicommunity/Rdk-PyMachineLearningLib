@@ -28,16 +28,22 @@ unix {
     CONFIG += c++11
 #    DEFINES += GPU
     INCLUDEPATH += $$(ANACONDA_PATH)/include/
-    INCLUDEPATH += /usr/include/python3.6
-    #INCLUDEPATH += $$(ANACONDA_PATH)/include/python3.6m/
+    #INCLUDEPATH += /usr/include/python3.6
+    #INCLUDEPATH += /usr/include/python3.5
+    INCLUDEPATH += $$(ANACONDA_PATH)/include/python3.6m/
     #INCLUDEPATH += /usr/lib/python3/dist-packages/numpy/core/include/numpy/
     INCLUDEPATH += $$(ANACONDA_PATH)/lib/python3.6/site-packages/numpy/core/include/numpy/
     #INCLUDEPATH += /usr/include
-    INCLUDEPATH += /home/ivan/opencv-3.4.4/build/include
+    INCLUDEPATH += $$(OPENCV3_PATH)/include
+    INCLUDEPATH += $$(BOOST_PATH)
 
-
+    @
+    contains(DEFINES, GPU) {
     INCLUDEPATH += /usr/local/cuda-9.0/include
-    INCLUDEPATH += /usr/local/boost_1_68_0
+}
+
+ #   INCLUDEPATH += /usr/local/boost_1_68_0
+ #   INCLUDEPATH += /usr/include
     DESTDIR = $$PWD/../../../../Bin/Platform/Linux/Lib.Qt
 
     HEADERS += ../../ThirdParty/darknet/include/darknet.h \

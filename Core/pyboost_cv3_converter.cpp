@@ -2,9 +2,8 @@
 #define PY_ARRAY_UNIQUE_SYMBOL pbcvt_ARRAY_API
 
 #include "pyboostcvconverter.hpp"
-#include <boost/thread/thread.hpp>
 
-#if CV_VERSION_MAJOR == 3
+#if !defined(CV_VERSION_EPOCH) && CV_VERSION_MAJOR >= 3
 namespace pbcvt {
 using namespace cv;
 //===================   ERROR HANDLING     =========================================================
@@ -48,21 +47,15 @@ private:
 
 class PyEnsureGIL {
 public:
-    PyEnsureGIL() : _state(PyGILState_Ensure())
-//            guard(mutex)
-    {
+	PyEnsureGIL() :
+			_state(PyGILState_Ensure()) {
 	}
-    ~PyEnsureGIL()
-    {
+	~PyEnsureGIL() {
 		PyGILState_Release(_state);
 	}
 private:
-//    static boost::mutex mutex;
-//    boost::unique_lock<boost::mutex> guard;
-    PyGILState_STATE _state;
+	PyGILState_STATE _state;
 };
-
-//boost::mutex PyEnsureGIL::mutex;
 
 enum {
 	ARG_NONE = 0, ARG_MAT = 1, ARG_SCALAR = 2
@@ -98,7 +91,7 @@ public:
 			return stdAllocator->allocate(dims0, sizes, type, data, step, flags,
 					usageFlags);
 		}
-//		PyEnsureGIL gil;
+		PyEnsureGIL gil;
 
 		int depth = CV_MAT_DEPTH(type);
 		int cn = CV_MAT_CN(type);
@@ -119,7 +112,7 @@ public:
 			_sizes[i] = sizes[i];
 		if (cn > 1)
 			_sizes[dims++] = cn;
-        //void* p1=reinterpret_cast<void*>(PyArray_New);
+		void* p1=reinterpret_cast<void*>(PyArray_New);
         //void* pp1=PyArray_SimpleNew;
 		PyObject* o = PyArray_SimpleNew(dims, _sizes, typenum); // SEGFAULT
 		if (!o)
@@ -135,7 +128,7 @@ public:
 
 	void deallocate(UMatData* u) const {
 		if (u) {
-//            PyEnsureGIL gil;
+			PyEnsureGIL gil;
 			PyObject* o = (PyObject*) u->userdata;
 			Py_XDECREF(o);
 			delete u;
@@ -284,8 +277,7 @@ PyObject* matToNDArrayBoostConverter::convert(Mat const& m) {
 		Py_RETURN_NONE;
 		Mat temp,
 	*p = (Mat*) &m;
-
-        if (!p->u || p->allocator != &g_numpyAllocator)
+	if (!p->u || p->allocator != &g_numpyAllocator)
 			{
 		temp.allocator = &g_numpyAllocator;
 		ERRWRAP2(m.copyTo(temp));
@@ -319,9 +311,6 @@ PyObject* uBitmapToNDArrayBoostConverter::convert(RDK::UBitmap const& bmp) {
 	{
         Py_RETURN_NONE;
 	}
-
-    return matToNDArrayBoostConverter::convert(m);
-    /*
     Mat temp, *p = (Mat*) &m;
 	if (!p->u || p->allocator != &g_numpyAllocator)
     {
@@ -331,7 +320,7 @@ PyObject* uBitmapToNDArrayBoostConverter::convert(RDK::UBitmap const& bmp) {
 	}
 	PyObject* o = (PyObject*) p->u->userdata;
 	Py_INCREF(o);
-    return o;*/
+	return o;
 }
 
 matFromNDArrayBoostConverter::matFromNDArrayBoostConverter() {
