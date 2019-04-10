@@ -34,7 +34,8 @@ unix {
     #INCLUDEPATH += $$(ANACONDA_PATH)/include/python3.6m/
     INCLUDEPATH += /usr/local/include
     INCLUDEPATH += /usr/local/cuda-9.0/include
-    INCLUDEPATH += $$(BOOST_PATH)
+    INCLUDEPATH += $$(BOOST_PATH)/include
+    INCLUDEPATH += $$(OPENCV3_PATH)/include
     DESTDIR = $$PWD/../../../../Bin/Platform/Linux/Lib.Qt
 
     HEADERS += ../../ThirdParty/darknet/include/darknet.h \
