@@ -1,6 +1,8 @@
 #ifndef RDK_UPyMachineLearningLib_CPP
 #define RDK_UPyMachineLearningLib_CPP
 
+#ifdef RDK_USE_PYTHON
+
 #ifndef PY_ARRAY_UNIQUE_SYMBOL
 #define PY_ARRAY_UNIQUE_SYMBOL pbcvt_ARRAY_API
 #endif
@@ -60,10 +62,13 @@ namespace np = boost::python::numpy;
         return NUMPY_IMPORT_ARRAY_RETVAL;
     }
 
+#endif
 
 #include "Lib.h"
 
+#ifdef RDK_USE_PYTHON
 #include "TPythonIntegrationInclude.h"
+#endif
 
 namespace RDK {
 
@@ -88,6 +93,7 @@ UPyMachineLearningLib::UPyMachineLearningLib(void)
 /// Однократная инициализация python-подистемы
 void UPyMachineLearningLib::PythonInit(void)
 {
+#ifdef RDK_USE_PYTHON
  if(!PythonInitFlag)
  {
      try
@@ -103,27 +109,21 @@ void UPyMachineLearningLib::PythonInit(void)
 
   PythonInitFlag=true;
  }
+#endif
 }
 
 // Заполняет массив ClassSamples готовыми экземплярами образцов и их именами.
 // Не требуется предварительная очистка массива и уборка памяти.
 void UPyMachineLearningLib::CreateClassSamples(UStorage *storage)
 {
- //UploadClass<TPythonIntegration>("TPythonIntegration", "PythonIntegration");
-
-    /*UContainer *cont=0;
-
- cont=new TPythonIntegration;
- cont->Default();
- cont->SetName("PythonIntegration");
- UploadClass("TPythonIntegration",cont);*/
-
+#ifdef RDK_USE_PYTHON
  UploadClass<TPyUBitmapClassifier>("TPyUBitmapClassifier","PyUBitmapClassifier");
  UploadClass<TPyAggregateClassifier>("TPyAggregateClassifier","PyAggregateClassifier");
  UploadClass<TPyObjectDetectorBasic>("TPyObjectDetectorBasic","PyObjectDetectorBasic");
  UploadClass<TPyObjectDetector>("TPyObjectDetector","PyObjectDetector");
+#endif
 
-#ifdef __GNUC__
+#ifdef RDK_USE_DARKNET
  UploadClass<TDarknetObjectDetector>("TDarknetObjectDetector","DarknetObjectDetector");
  UploadClass<TDarknetUBitmapClassifier>("TDarknetUBitmapClassifier","DarknetUBitmapClassifier");
 #endif

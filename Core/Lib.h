@@ -2,12 +2,15 @@
 #define RDK_UPyMachineLearningLib_H
 
 #include "../../../Rdk/Deploy/Include/rdk.h"
-//#include "TPythonIntegration.h"
+
+#ifdef RDK_USE_PYTHON
 #include "TPyUBitmapClassifier.h"
 #include "TPyAggregateClassifier.h"
 #include "TPyObjectDetectorBasic.h"
 #include "TPyObjectDetector.h"
-#ifdef __GNUC__
+#endif
+
+#ifdef RDK_USE_DARKNET
 #include "TDarknetObjectDetector.h"
 #include "TDarknetUBitmapClassifier.h"
 #endif

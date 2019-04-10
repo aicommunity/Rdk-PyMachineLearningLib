@@ -10,8 +10,18 @@ TARGET = Rdk-PyMachineLearningLib.qt
 TEMPLATE = lib
 CONFIG += staticlib
 
-DEFINES += RDK_USE_CUDA
-DEFINES += RDK_USE_PYTHON
+#DEFINES += RDK_USE_CUDA
+#DEFINES += RDK_USE_PYTHON
+
+#unix {
+#    DEFINES += RDK_USE_DARKNET
+#}
+
+include($$PWD/../../../../Rdk/Build/Lib/Qt/RdkDefines.pri)
+
+    contains(DEFINES,RDK_USE_CUDA) {
+        DEFINES += GPU
+}
 
 DEFINES += LIBRDK_LIBRARY_EXPORT
 DEFINES += RDK_UNICODE_RUN
@@ -26,25 +36,21 @@ INCLUDEPATH += $$PWD/../../../../Rdk/Deploy/Include
 
 unix {
     CONFIG += c++11
-#    DEFINES += GPU
-    #INCLUDEPATH += $$(ANACONDA_PATH)/include/
-    #INCLUDEPATH += /usr/include/python3.6
-    #INCLUDEPATH += /usr/include/python3.5
-    INCLUDEPATH += $$(ANACONDA_PATH)/include/python3.6m/
-    #INCLUDEPATH += /usr/lib/python3/dist-packages/numpy/core/include/numpy/
-    INCLUDEPATH += $$(ANACONDA_PATH)/lib/python3.6/site-packages/numpy/core/include/numpy/
-    #INCLUDEPATH += /usr/include
+
+    contains(DEFINES,RDK_USE_PYTHON) {
+        INCLUDEPATH += $$(ANACONDA_PATH)/include/python3.6m/
+        INCLUDEPATH += $$(ANACONDA_PATH)/lib/python3.6/site-packages/numpy/core/include/numpy/
+}
     INCLUDEPATH += $$(OPENCV3_PATH)/include
     INCLUDEPATH += $$(BOOST_PATH)/include
 
-    @
     contains(DEFINES, GPU) {
-    INCLUDEPATH += /usr/local/cuda-9.0/include
+        INCLUDEPATH += /usr/local/cuda-9.0/include
 }
 
- #   INCLUDEPATH += /usr/local/boost_1_68_0
- #   INCLUDEPATH += /usr/include
     DESTDIR = $$PWD/../../../../Bin/Platform/Linux/Lib.Qt
+
+    contains(DEFINES,RDK_USE_DARKNET) {
 
     HEADERS += ../../ThirdParty/darknet/include/darknet.h \
     ../../Core/TDarknetObjectDetector.h \
@@ -54,18 +60,22 @@ unix {
     SOURCES += ../../ThirdParty/darknet/include/darknet_utils.cpp \
     ../../Core/TDarknetUBitmapClassifier.cpp \
     ../../Core/TDarknetObjectDetector.cpp
+}
 } else:windows {
     DESTDIR = $$PWD/../../../../Bin/Platform/Win/Lib.Qt
-    INCLUDEPATH += $$(ANACONDA_PATH)/include/
+    contains(DEFINES,RDK_USE_PYTHON) {
+        INCLUDEPATH += $$(ANACONDA_PATH)/include/
+        INCLUDEPATH += $$(ANACONDA_PATH)/Lib/site-packages/numpy/core/include/numpy
+}
     INCLUDEPATH += $$(BOOST_PATH)
     INCLUDEPATH += $$(OPENCV3_PATH)/build/include
-    INCLUDEPATH += $$(ANACONDA_PATH)/Lib/site-packages/numpy/core/include/numpy
 
-    @
     contains(DEFINES, GPU) {
-    INCLUDEPATH += $$(CUDA_PATH)/include
+        INCLUDEPATH += $$(CUDA_PATH)/include
 }
 }
+
+contains(DEFINES,RDK_USE_PYTHON) {
 
 HEADERS += \
     ../../Core/pyboostcvconverter.hpp \
@@ -88,3 +98,11 @@ SOURCES += \
     ../../Core/TPyObjectDetectorBasic.cpp \
     ../../Core/Lib.cpp \
     ../../Core/TPyComponent.cpp
+}
+
+HEADERS += \
+    ../../Core/Lib.h
+
+
+SOURCES += \
+    ../../Core/Lib.cpp
