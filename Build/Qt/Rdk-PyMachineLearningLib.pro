@@ -27,7 +27,7 @@ INCLUDEPATH += $$PWD/../../../../Rdk/Deploy/Include
 unix {
     CONFIG += c++11
 #    DEFINES += GPU
-    INCLUDEPATH += $$(ANACONDA_PATH)/include/
+    #INCLUDEPATH += $$(ANACONDA_PATH)/include/
     #INCLUDEPATH += /usr/include/python3.6
     #INCLUDEPATH += /usr/include/python3.5
     INCLUDEPATH += $$(ANACONDA_PATH)/include/python3.6m/
@@ -35,7 +35,7 @@ unix {
     INCLUDEPATH += $$(ANACONDA_PATH)/lib/python3.6/site-packages/numpy/core/include/numpy/
     #INCLUDEPATH += /usr/include
     INCLUDEPATH += $$(OPENCV3_PATH)/include
-    INCLUDEPATH += $$(BOOST_PATH)
+    INCLUDEPATH += $$(BOOST_PATH)/include
 
     @
     contains(DEFINES, GPU) {
