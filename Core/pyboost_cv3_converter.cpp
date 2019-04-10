@@ -3,7 +3,7 @@
 
 #include "pyboostcvconverter.hpp"
 
-#if !defined(CV_VERSION_EPOCH) && CV_VERSION_MAJOR >= 3
+#if CV_VERSION_MAJOR == 3
 namespace pbcvt {
 using namespace cv;
 //===================   ERROR HANDLING     =========================================================
@@ -55,6 +55,8 @@ public:
 	}
 private:
 	PyGILState_STATE _state;
+    PyEnsureGIL(const PyEnsureGIL&) = delete;
+    PyEnsureGIL& operator=(const PyEnsureGIL&) = delete;
 };
 
 enum {
@@ -91,7 +93,7 @@ public:
 			return stdAllocator->allocate(dims0, sizes, type, data, step, flags,
 					usageFlags);
 		}
-		PyEnsureGIL gil;
+        PyEnsureGIL gil;
 
 		int depth = CV_MAT_DEPTH(type);
 		int cn = CV_MAT_CN(type);
@@ -128,7 +130,7 @@ public:
 
 	void deallocate(UMatData* u) const {
 		if (u) {
-			PyEnsureGIL gil;
+            PyEnsureGIL gil;
 			PyObject* o = (PyObject*) u->userdata;
 			Py_XDECREF(o);
 			delete u;

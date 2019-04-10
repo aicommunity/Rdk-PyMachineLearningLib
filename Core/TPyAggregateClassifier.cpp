@@ -71,6 +71,13 @@ bool TPyAggregateClassifier::Initialize(void)
     try
     {
         LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("Python init started..."));
+
+        if(!PyEval_ThreadsInitialized())
+        {
+         LogMessageEx(RDK_EX_FATAL,__FUNCTION__,std::string("Python Py_Initialize didn't called!"));
+         LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Python init fail"));
+         return false;
+        }
 //        init_py();
 //        py::to_python_converter<cv::Mat, pbcvt::matToNDArrayBoostConverter>();
 //        py::to_python_converter<RDK::UBitmap, pbcvt::uBitmapToNDArrayBoostConverter>();

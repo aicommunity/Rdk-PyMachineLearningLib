@@ -61,6 +61,13 @@ bool TPyUBitmapClassifier::APythonInitialize(void)
         return true;
     }
 
+    if(!PyEval_ThreadsInitialized())
+    {
+     LogMessageEx(RDK_EX_FATAL,__FUNCTION__,std::string("Python Py_Initialize didn't called!"));
+     LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Python init fail"));
+     return false;
+    }
+
     try
     {
      py::object retval = IntegrationInterfaceInstance.attr("classify")(m);

@@ -96,6 +96,13 @@ bool TPyObjectDetectorBasic::APythonInitialize(void)
 {
     try
     {
+        if(!PyEval_ThreadsInitialized())
+        {
+         LogMessageEx(RDK_EX_FATAL,__FUNCTION__,std::string("Python Py_Initialize didn't called!"));
+         LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Python init fail"));
+         return false;
+        }
+
         py::list target_classes = py::list();
         for(int i=0; i<TargetClassesYOLO->size(); i++)
         {

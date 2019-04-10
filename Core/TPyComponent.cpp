@@ -78,6 +78,13 @@ void TPyComponent::PythonInitialize(void)
          return;
         }
 
+        if(!PyEval_ThreadsInitialized())
+        {
+         LogMessageEx(RDK_EX_FATAL,__FUNCTION__,std::string("Python Py_Initialize didn't called!"));
+         LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Python init fail"));
+         return;
+        }
+
         py::object MainModule = py::import("__main__");  // импортируем main-scope, см. https://docs.python.org/3/library/__main__.html
         py::object MainNamespace = MainModule.attr("__dict__");  // извлекаем область имен
 

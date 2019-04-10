@@ -70,22 +70,12 @@ bool TPyObjectDetector::APythonInitialize(void)
 {
     try
     {
-        /*
-        py::list target_classes = py::list();
-        for(int i=0; i<TargetClassesYOLO->size(); i++)
+        if(!PyEval_ThreadsInitialized())
         {
-            target_classes.insert(i, (*TargetClassesYOLO)[i]);
+         LogMessageEx(RDK_EX_FATAL,__FUNCTION__,std::string("Python Py_Initialize didn't called!"));
+         LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Python init fail"));
+         return false;
         }
-
-        py::list change_classes = py::list();
-        if(ChangeClassesYOLO->size()>0)
-        {
-            for(int i=0; i<ChangeClassesYOLO->size(); i++)
-            {
-                change_classes.insert(i, (*ChangeClassesYOLO)[i]);
-            }
-        }
-        */
 
         py::object initialize;
         switch(InitializationTypeYOLO)
