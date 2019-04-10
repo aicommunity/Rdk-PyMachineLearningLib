@@ -28,11 +28,11 @@ unix {
     CONFIG += c++11
 #    DEFINES += GPU
     INCLUDEPATH += $$(ANACONDA_PATH)/include/
-    #INCLUDEPATH += /usr/include/python3.5
-    #INCLUDEPATH += /usr/lib/python3/dist-packages/numpy/core/include/numpy/
+    INCLUDEPATH += /usr/include/python3.5
+    INCLUDEPATH += /usr/lib/python3/dist-packages/numpy/core/include/numpy/
     INCLUDEPATH += $$(ANACONDA_PATH)/lib/python3.6/site-packages/numpy/core/include/numpy/
-    INCLUDEPATH += $$(ANACONDA_PATH)/include/python3.6m/
-    #INCLUDEPATH += /usr/local/include
+    #INCLUDEPATH += $$(ANACONDA_PATH)/include/python3.6m/
+    INCLUDEPATH += /usr/local/include
     INCLUDEPATH += /usr/local/cuda-9.0/include
     INCLUDEPATH += $$(BOOST_PATH)
     DESTDIR = $$PWD/../../../../Bin/Platform/Linux/Lib.Qt
@@ -40,11 +40,13 @@ unix {
     HEADERS += ../../ThirdParty/darknet/include/darknet.h \
     ../../Core/TDarknetObjectDetector.h \
     ../../Core/TDarknetUBitmapClassifier.h \
+    ../../Core/TDarknetAggrLocalizer.h \
     ../../ThirdParty/darknet/include/darknet_utils.h
 
     SOURCES += ../../ThirdParty/darknet/include/darknet_utils.cpp \
     ../../Core/TDarknetUBitmapClassifier.cpp \
-    ../../Core/TDarknetObjectDetector.cpp
+    ../../Core/TDarknetObjectDetector.cpp \
+    ../../Core/TDarknetAggrLocalizer.cpp
 } else:windows {
     DESTDIR = $$PWD/../../../../Bin/Platform/Win/Lib.Qt
     INCLUDEPATH += $$(ANACONDA_PATH)/include/
