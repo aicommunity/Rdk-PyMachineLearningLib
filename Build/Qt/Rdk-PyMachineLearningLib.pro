@@ -19,9 +19,6 @@ CONFIG += staticlib
 
 include($$PWD/../../../../Rdk/Build/Lib/Qt/RdkDefines.pri)
 
-    contains(DEFINES,RDK_USE_CUDA) {
-        DEFINES += GPU
-}
 
 DEFINES += LIBRDK_LIBRARY_EXPORT
 DEFINES += RDK_UNICODE_RUN
@@ -36,17 +33,6 @@ INCLUDEPATH += $$PWD/../../../../Rdk/Deploy/Include
 
 unix {
     CONFIG += c++11
-
-    contains(DEFINES,RDK_USE_PYTHON) {
-        INCLUDEPATH += $$(ANACONDA_PATH)/include/python3.6m/
-        INCLUDEPATH += $$(ANACONDA_PATH)/lib/python3.6/site-packages/numpy/core/include/numpy/
-}
-    INCLUDEPATH += $$(OPENCV3_PATH)/include
-    INCLUDEPATH += $$(BOOST_PATH)/include
-
-    contains(DEFINES, GPU) {
-        INCLUDEPATH += /usr/local/cuda-9.0/include
-}
 
     DESTDIR = $$PWD/../../../../Bin/Platform/Linux/Lib.Qt
 
@@ -63,16 +49,6 @@ unix {
 }
 } else:windows {
     DESTDIR = $$PWD/../../../../Bin/Platform/Win/Lib.Qt
-    contains(DEFINES,RDK_USE_PYTHON) {
-        INCLUDEPATH += $$(ANACONDA_PATH)/include/
-        INCLUDEPATH += $$(ANACONDA_PATH)/Lib/site-packages/numpy/core/include/numpy
-}
-    INCLUDEPATH += $$(BOOST_PATH)
-    INCLUDEPATH += $$(OPENCV3_PATH)/build/include
-
-    contains(DEFINES, GPU) {
-        INCLUDEPATH += $$(CUDA_PATH)/include
-}
 }
 
 contains(DEFINES,RDK_USE_PYTHON) {
