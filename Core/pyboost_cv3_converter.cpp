@@ -93,7 +93,7 @@ public:
 			return stdAllocator->allocate(dims0, sizes, type, data, step, flags,
 					usageFlags);
 		}
-        PyEnsureGIL gil;
+//        PyEnsureGIL gil;
 
 		int depth = CV_MAT_DEPTH(type);
 		int cn = CV_MAT_CN(type);
@@ -130,7 +130,7 @@ public:
 
 	void deallocate(UMatData* u) const {
 		if (u) {
-            PyEnsureGIL gil;
+ //          PyEnsureGIL gil;
 			PyObject* o = (PyObject*) u->userdata;
 			Py_XDECREF(o);
 			delete u;
