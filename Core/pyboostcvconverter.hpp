@@ -1,25 +1,14 @@
 #ifndef CVBOOSTCONVERTER_HPP_
 #define CVBOOSTCONVERTER_HPP_
 
-#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
-#ifndef BOOST_PYTHON_STATIC_LIB
-#include <numpy/ndarrayobject.h>
-#endif
-/*#ifdef _DEBUG
-  #undef _DEBUG
-  #include <python.h>
-  #define _DEBUG
-#else
-  #include <python.h>
-#endif*/
-#include <boost/python.hpp>
+#include "TPythonIntegrationInclude.h"
+#ifdef WIN32
 #include <ndarrayobject.h>
-#include <boost/python/numpy.hpp>
-#include <boost/python/numpy/dtype.hpp>
-#include <boost/python/numpy/ndarray.hpp>
+#else
+#include <ndarrayobject.h>
+#endif
 #include <opencv2/core/core.hpp>
 #include "opencv2/imgproc/imgproc.hpp"
-#include <boost/python.hpp>
 #include <cstdio>
 #include "../../../Rdk/Deploy/Include/rdk.h"
 

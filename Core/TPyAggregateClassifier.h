@@ -1,12 +1,8 @@
 #ifndef RDK_TPyAggregateClassifierH
 #define RDK_TPyAggregateClassifierH
 
-#include "../../../Rdk/Deploy/Include/rdk.h"
-#ifndef BOOST_PYTHON_STATIC_LIB
-#define BOOST_PYTHON_STATIC_LIB
-#endif
-#include <boost/python.hpp>
-#include <boost/python/detail/wrap_python.hpp>
+#include "TPythonIntegrationInclude.h"
+#include "TPythonIntegrationUtil.h"
 
 namespace RDK {
 
@@ -16,8 +12,8 @@ public: // Свойства
 /// Входное изображение
 UPropertyInputData<UBitmap,TPyAggregateClassifier> InputImage;
 
-/// Входное изображение
-ULProperty<std::string,TPyAggregateClassifier, ptPubParameter> InputFile;
+/// Входной файл
+ULProperty<std::string,TPyAggregateClassifier, ptPubParameter> PythonScriptFileName;
 
 //Входные матрицы с данными об обнаружениях
 /// строка матрицы содержит [Left Top Right Bottom] индексы и размеры симметричны с AggrIdMatrix
@@ -28,10 +24,6 @@ UPropertyInputData<MDMatrix<int>, TPyAggregateClassifier, ptPubInput> AggrIdMatr
 /// Выходная матрица с рамками объектов
 UPropertyOutputData<MDMatrix<int>,TPyAggregateClassifier> Detections;
 
-
-/// Выходная матрица с рамками объектов
-//UPropertyOutputData<MDMatrix<double>,TPyAggregateClassifier> DetectionReliability;
-
 UPropertyOutputData<UBitmap,TPyAggregateClassifier> DebugImage;
 
 boost::python::object IntegrationInterface;
@@ -41,6 +33,7 @@ protected: // Переменные состояния
 
 UGraphics Graph;
 UBitmap Canvas;
+bool Initialized;
 
 public: // Методы
 // --------------------------
@@ -71,6 +64,7 @@ virtual TPyAggregateClassifier* New(void);
 // Скрытые методы управления счетом
 // --------------------------
 protected:
+bool Initialize(void);
 virtual void AInit(void);
 virtual void AUnInit(void);
 

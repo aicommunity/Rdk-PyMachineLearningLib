@@ -1,6 +1,8 @@
 #define NO_IMPORT_ARRAY
 #define PY_ARRAY_UNIQUE_SYMBOL pbcvt_ARRAY_API
+
 #include "pyboostcvconverter.hpp"
+
 #if CV_VERSION_MAJOR == 3
 namespace pbcvt {
 using namespace cv;
@@ -53,6 +55,8 @@ public:
 	}
 private:
 	PyGILState_STATE _state;
+    PyEnsureGIL(const PyEnsureGIL&) = delete;
+    PyEnsureGIL& operator=(const PyEnsureGIL&) = delete;
 };
 
 enum {
@@ -89,7 +93,7 @@ public:
 			return stdAllocator->allocate(dims0, sizes, type, data, step, flags,
 					usageFlags);
 		}
-		PyEnsureGIL gil;
+//        PyEnsureGIL gil;
 
 		int depth = CV_MAT_DEPTH(type);
 		int cn = CV_MAT_CN(type);
@@ -110,6 +114,8 @@ public:
 			_sizes[i] = sizes[i];
 		if (cn > 1)
 			_sizes[dims++] = cn;
+		void* p1=reinterpret_cast<void*>(PyArray_New);
+        //void* pp1=PyArray_SimpleNew;
 		PyObject* o = PyArray_SimpleNew(dims, _sizes, typenum); // SEGFAULT
 		if (!o)
 			CV_Error_(Error::StsError,
@@ -124,7 +130,7 @@ public:
 
 	void deallocate(UMatData* u) const {
 		if (u) {
-			PyEnsureGIL gil;
+ //          PyEnsureGIL gil;
 			PyObject* o = (PyObject*) u->userdata;
 			Py_XDECREF(o);
 			delete u;
@@ -289,11 +295,20 @@ PyObject* uBitmapToNDArrayBoostConverter::convert(RDK::UBitmap const& bmp) {
     {
         Py_RETURN_NONE;
     }
-    if (bmp.GetColorModel() != RDK::ubmY8)
+    Mat m;
+    if (bmp.GetColorModel() == RDK::ubmRGB24)
+    {
+        m=Mat(bmp.GetHeight(), bmp.GetWidth(), CV_8UC3, bmp.GetData());
+    }
+    else if(bmp.GetColorModel() == RDK::ubmY8)
+    {
+        m=Mat(bmp.GetHeight(), bmp.GetWidth(), CV_8U, bmp.GetData());
+    }
+    else
     {
         Py_RETURN_NONE;
     }
-	Mat m(bmp.GetHeight(), bmp.GetWidth(), CV_8U, bmp.GetData());
+
 	if (!m.data)
 	{
         Py_RETURN_NONE;
@@ -301,8 +316,8 @@ PyObject* uBitmapToNDArrayBoostConverter::convert(RDK::UBitmap const& bmp) {
     Mat temp, *p = (Mat*) &m;
 	if (!p->u || p->allocator != &g_numpyAllocator)
     {
-		temp.allocator = &g_numpyAllocator;
-		ERRWRAP2(m.copyTo(temp));
+        temp.allocator = &g_numpyAllocator;
+        ERRWRAP2(m.copyTo(temp));
 		p = &temp;
 	}
 	PyObject* o = (PyObject*) p->u->userdata;

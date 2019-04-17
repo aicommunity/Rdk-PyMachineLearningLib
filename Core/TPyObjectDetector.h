@@ -1,0 +1,128 @@
+#ifndef RDK_TPyObjectDetectorH
+#define RDK_TPyObjectDetectorH
+
+#include "TPyComponent.h"
+
+namespace RDK {
+
+#define YOLOV2_INITTYPE 2
+#define YOLOV3_INITTYPE 3
+
+class TPyObjectDetector: public TPyComponent
+{
+public: // Свойства
+/// Входное изображение
+UPropertyInputData<UBitmap, TPyObjectDetector, ptPubInput> InputImage;
+UPropertyInputData<UBitmap, TPyObjectDetector, ptPubOutput> OutputImage;
+
+/// Целое число, определяющее цветовую модель, на которую рассчитана сеть
+/// ubmRGB24=3 - цветное изображение
+/// umbY8=400 - черно-белое изображение
+ULProperty<int,TPyObjectDetector, ptPubParameter> ImageColorModel;
+
+/// Количество классов объектов (какой размер будет у вектора
+//ULProperty<int,TPyObjectDetector, ptPubParameter> NumClasses;model_path
+
+///Тип инициализации: 2 - YOLOV2
+///                   3 - YOLOV3
+ULProperty<int,TPyObjectDetector, ptPubParameter> InitializationTypeYOLO;
+
+///Путь к файлу конфигурации Йолы
+ULProperty<std::string,TPyObjectDetector, ptPubParameter> ConfigPathYOLO;
+
+///Путь к файлу весов Йолы
+ULProperty<std::string,TPyObjectDetector, ptPubParameter> WeightsPathYOLO;
+
+///Отвечает за домножение на
+ULProperty<bool,TPyObjectDetector, ptPubParameter> UseRelativeCoords;
+
+
+///Путь к модели Йолы
+//ULProperty<std::string,TPyObjectDetector, ptPubParameter> ModelPathYOLO;
+
+///Путь к файлу с якорями (оставить пустым если используем стандарт)
+//ULProperty<std::string,TPyObjectDetector, ptPubParameter> AnchorsPathYOLO;
+
+///Путь к файлу с перечнем классов для используемой сети
+//ULProperty<std::string,TPyObjectDetector, ptPubParameter> ClassesPathYOLO;
+
+///Список целевых классов
+//ULProperty<std::vector<std::string>,TPyObjectDetector, ptPubParameter> TargetClassesYOLO;
+
+///Загружать список классов из соответствующего файла
+//ULProperty<bool,TPyObjectDetector, ptPubParameter> LoadTargetClassesYOLO;
+
+///Список замен классов (изменить список классов в файле ClassesPathYOLO на свои имена)
+///ВНИМАНИЕ!!! Число классов должно соответствовать числу классов в ClassesPathYOLO
+//ULProperty<std::vector<std::string>,TPyObjectDetector, ptPubParameter> ChangeClassesYOLO;
+
+///Замена классов по значениям
+///ULProperty<std::map<int, int>,TPyObjectDetector, ptPubParameter> ClassIndicesExchange;
+
+
+/// Выходная матрица с классами объектов
+//UPropertyOutputData<std::vector<int>,TPyObjectDetector, ptPubOutput> OutputClasses;
+
+/// Выходная матрица. Количество столбцов по числу объектов, количество строк в столбце по числу классов
+/// Формат матрицы:
+/// Высота по количеству объектов
+/// Ширина 4+1=Left; Top; Right; Bottom; ClassNumber
+UPropertyOutputData<MDMatrix<double>, TPyObjectDetector> OutputObjects;
+
+protected: // Переменные состояния
+
+UGraphics Graph;
+UBitmap Canvas;
+
+int NumTargetClassesYOLO;
+int NumChangeClassesYOLO;
+
+std::vector<std::string> ClassedList;
+
+public: // Методы
+// --------------------------
+// Конструкторы и деструкторы
+// --------------------------
+TPyObjectDetector(void);
+virtual ~TPyObjectDetector(void);
+// --------------------------
+
+// --------------------------
+// Системные методы управления объектом
+// --------------------------
+// Выделяет память для новой чистой копии объекта этого класса
+virtual TPyObjectDetector* New(void);
+// --------------------------
+
+
+// --------------------------
+// Скрытые методы управления счетом
+// --------------------------
+protected:
+bool APythonInitialize(void);
+
+
+// Восстановление настроек по умолчанию и сброс процесса счета
+virtual bool APyDefault(void);
+
+// Обеспечивает сборку внутренней структуры объекта
+// после настройки параметров
+// Автоматически вызывает метод Reset() и выставляет Ready в true
+// в случае успешной сборки
+virtual bool APyBuild(void);
+
+// Сброс процесса счета без потери настроек
+virtual bool APyReset(void);
+
+// Выполняет расчет этого объекта
+virtual bool APyCalculate(void);
+// --------------------------
+};
+
+
+}
+
+#endif
+
+
+

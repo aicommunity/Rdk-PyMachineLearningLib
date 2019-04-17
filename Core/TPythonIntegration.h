@@ -16,6 +16,8 @@ ULProperty<int,TPythonIntegration> Param1;
 /// Входное изображение
 UPropertyInputData<UBitmap,TPythonIntegration> InputImage;
 
+/// Входное изображение
+ULProperty<std::string,TPythonIntegration, ptPubParameter> InputFile;
 /// Выходная матрица с рамками объектов
 UPropertyOutputData<MDMatrix<int>,TPythonIntegration> Detections;
 
@@ -27,6 +29,7 @@ UPropertyOutputData<MDMatrix<double>,TPythonIntegration> DetectionReliability;
 
 UPropertyOutputData<UBitmap,TPythonIntegration> DebugImage;
 
+boost::python::object IntegrationInterface;
 boost::python::object IntegrationInterfaceInstance;
 
 protected: // Переменные состояния
