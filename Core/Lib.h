@@ -6,8 +6,8 @@
 #ifdef RDK_USE_PYTHON
 #include "TPyUBitmapClassifier.h"
 #include "TPyAggregateClassifier.h"
-#include "TPyObjectDetectorBasic.h"
-#include "TPyObjectDetector.h"
+#include "TPyObjectDetectorYoloEx.h"
+#include "TPyObjectDetectorYolo.h"
 #endif
 
 #ifdef RDK_USE_DARKNET

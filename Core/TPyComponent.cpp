@@ -14,7 +14,7 @@ namespace RDK {
 // --------------------------
 TPyComponent::TPyComponent(void)
 : PythonScriptFileName("PythonScriptFileName",this,&TPyComponent::SetPythonScriptFileName),
-  PythonScriptPath("PythonScriptPath",this,&TPyComponent::SetPythonClassifierScriptPath),
+//  PythonScriptPath("PythonScriptPath",this,&TPyComponent::SetPythonClassifierScriptPath),
   PythonModuleName("PythonModuleName",this, &TPyComponent::SetPythonModuleName),
   PythonClassName("PythonClassName",this, &TPyComponent::SetPythonClassName),
   PythonInitialized(false)
@@ -30,14 +30,14 @@ bool TPyComponent::SetPythonScriptFileName(const std::string& path)
  Ready=false;
  return true;
 }
-
+/*
 bool TPyComponent::SetPythonClassifierScriptPath(const std::string& path)
 {
  PythonScriptFileName = path;
  Ready=false;
  return true;
 }
-
+*/
 bool TPyComponent::SetPythonModuleName(const std::string& path)
 {
  Ready=false;

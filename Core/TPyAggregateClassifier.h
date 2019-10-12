@@ -15,9 +15,10 @@ UPropertyInputData<UBitmap,TPyAggregateClassifier> InputImage;
 /// ¬ходной файл
 ULProperty<std::string,TPyAggregateClassifier, ptPubParameter> PythonScriptFileName;
 
-//¬ходные матрицы с данными об обнаружени€х
+/// ¬ходные матрицы с данными об обнаружени€х
 /// строка матрицы содержит [Left Top Right Bottom] индексы и размеры симметричны с AggrIdMatrix
 UPropertyInputData<MDMatrix<int>, TPyAggregateClassifier, ptPubInput> AggrRectsMatrix;
+
 /// строка матрицы содержит [AggrID] индексы и размеры симметричны с AggrRectsMatrix
 UPropertyInputData<MDMatrix<int>, TPyAggregateClassifier, ptPubInput> AggrIdMatrix;
 

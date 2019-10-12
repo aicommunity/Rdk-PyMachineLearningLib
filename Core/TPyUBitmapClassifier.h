@@ -9,9 +9,10 @@ class TPyUBitmapClassifier: public TPyComponent
 {
 public: // Свойства
 /// Входное изображение
-/// UPropertyInputData<UBitmap,TPyUBitmapClassifier> InputImage;
+/// Игнорируется, если подключен векторный вход InputImages
+UPropertyInputData<UBitmap,TPyUBitmapClassifier> InputImage;
 
-//Входные матрицы с данными об обнаружениях
+//Входные изображения с данными об обнаружениях
 /// Содержит изображения (обработанные) для классификации
 UPropertyInputData<std::vector<UBitmap>, TPyUBitmapClassifier, ptPubInput> InputImages;
 
@@ -20,24 +21,27 @@ UPropertyInputData<std::vector<UBitmap>, TPyUBitmapClassifier, ptPubInput> Input
 /// umbY8=400 - черно-белое изображение
 ULProperty<int,TPyUBitmapClassifier, ptPubParameter> ImageColorModel;
 
-/// Количество классов объектов (какой размер будет у вектора
+/// Количество классов объектов (какой размер будет у вектора)
 ULProperty<int,TPyUBitmapClassifier, ptPubParameter> NumClasses;
-
-///Включенный параметр означает, что результат вида [0.2,0.8,0.1,0.1] будет преобразован в [0.0, 1.0, 0.0, 0.0]
-//ULProperty<bool,TPyUBitmapClassifier, ptPubParameter> OneHot;
 
 ///Порог уверенности: если класс не превышает порога уверенности, то он выставляется в 0, все классы выставляются в 0.
 ///TODO: Это пихать ДО OneHot'а. И проверить, чтобы класс выдавало в виде '-1', а уверенности все 0
 ULProperty<double,TPyUBitmapClassifier, ptPubParameter> ConfidenceThreshold;
 
 /// Выходная матрица с классами объектов
-UPropertyOutputData<std::vector<int>,TPyUBitmapClassifier, ptPubOutput> OutputClasses;
+UPropertyOutputData<MDMatrix<int>,TPyUBitmapClassifier, ptPubOutput> OutputClasses;
 
 /// Выходная матрица. Количество столбцов по числу объектов, количество строк в столбце по числу классов
 /// Каждое значение - уверенность класса
 UPropertyOutputData<MDMatrix<double>, TPyUBitmapClassifier> OutputConfidences;
 
-protected: // Переменные состояния
+/// Время, затраченное на классификацию, секунды
+ULProperty<double,TPyUBitmapClassifier, ptPubState> ClassificationTime;
+
+protected: // Временные переменные
+
+UBitmap ProcessedBmp;
+cv::Mat ProcessedMat;
 
 UGraphics Graph;
 UBitmap Canvas;
@@ -77,6 +81,9 @@ virtual bool APyReset(void);
 
 // Выполняет расчет этого объекта
 virtual bool APyCalculate(void);
+
+/// Обрабатывает одно изображение
+virtual bool ClassifyBitmap(UBitmap &bmp, MDVector<double> &output_confidences, double conf_thresh, int &class_id, bool &is_classified);
 // --------------------------
 };
 

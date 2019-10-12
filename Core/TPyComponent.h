@@ -13,7 +13,7 @@ public: // Свойства
 ULProperty<std::string, TPyComponent> PythonScriptFileName;
 
 /// Deprecated: PythonScriptPath == PythonScriptFileName
-ULProperty<std::string, TPyComponent> PythonScriptPath;
+//ULProperty<std::string, TPyComponent> PythonScriptPath;
 
 /// Имя питон-модуля
 ULProperty<std::string, TPyComponent> PythonModuleName;
@@ -46,7 +46,7 @@ virtual ~TPyComponent(void);
 // Методы управления параметрами
 // ---------------------
 bool SetPythonScriptFileName(const std::string& path);
-bool SetPythonClassifierScriptPath(const std::string& path);
+//bool SetPythonClassifierScriptPath(const std::string& path);
 bool SetPythonModuleName(const std::string& path);
 bool SetPythonClassName(const std::string& path);
 // ---------------------

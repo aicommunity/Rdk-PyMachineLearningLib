@@ -119,8 +119,8 @@ void UPyMachineLearningLib::CreateClassSamples(UStorage *storage)
 #ifdef RDK_USE_PYTHON
  UploadClass<TPyUBitmapClassifier>("TPyUBitmapClassifier","PyUBitmapClassifier");
  UploadClass<TPyAggregateClassifier>("TPyAggregateClassifier","PyAggregateClassifier");
- UploadClass<TPyObjectDetectorBasic>("TPyObjectDetectorBasic","PyObjectDetectorBasic");
- UploadClass<TPyObjectDetector>("TPyObjectDetector","PyObjectDetector");
+ UploadClass<TPyObjectDetectorYoloEx>("TPyObjectDetectorBasic","PyObjectDetectorBasic");
+ UploadClass<TPyObjectDetectorYolo>("TPyObjectDetector","PyObjectDetector");
 #endif
 
 #ifdef RDK_USE_DARKNET

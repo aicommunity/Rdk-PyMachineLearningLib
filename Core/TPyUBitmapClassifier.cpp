@@ -16,12 +16,14 @@ namespace RDK {
 // Конструкторы и деструкторы
 // --------------------------  //DetectionClass("DetectionClass",this),
 TPyUBitmapClassifier::TPyUBitmapClassifier(void)
-: InputImages("InputImages",this),
+: InputImage("InputImage",this),
+  InputImages("InputImages",this),
   OutputClasses("OutputClasses",this),
   ImageColorModel("ImageColorModel",this),
   NumClasses("NumClasses",this),
   ConfidenceThreshold("ConfidenceThreshold", this),
-  OutputConfidences("OutputConfidences", this)
+  OutputConfidences("OutputConfidences", this),
+  ClassificationTime("ClassificationTime",this)
 {
 }
 
@@ -45,7 +47,7 @@ TPyUBitmapClassifier* TPyUBitmapClassifier::New(void)
 // --------------------------
 bool TPyUBitmapClassifier::APythonInitialize(void)
 {
-    UBitmap b;
+ /*   UBitmap b;
     b.SetRes(10, 10, static_cast<RDK::UBMColorModel>(*ImageColorModel));
     cv::Mat m;
     if (b.GetColorModel() == RDK::ubmRGB24)
@@ -68,6 +70,7 @@ bool TPyUBitmapClassifier::APythonInitialize(void)
      return false;
     }
 
+
     try
     {
      py::object retval = IntegrationInterfaceInstance.attr("classify")(m);
@@ -80,9 +83,10 @@ bool TPyUBitmapClassifier::APythonInitialize(void)
     }
     catch(...)
     {
-        LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Unknown exception"));
-        return false;
-    }
+     LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Unknown exception"));
+     return false;
+    }*/
+  // Все что выше не нужно же?!
  return true;
 }
 
@@ -108,181 +112,193 @@ bool TPyUBitmapClassifier::APyBuild(void)
 // Сброс процесса счета без потери настроек
 bool TPyUBitmapClassifier::APyReset(void)
 {
+ ClassificationTime=0.0;
+ OutputClasses->Resize(0,1);
+ OutputConfidences->Resize(0, NumClasses);
  return true;
 }
 
 // Выполняет расчет этого объекта
 bool TPyUBitmapClassifier::APyCalculate(void)
 {
- if(!InputImages.IsConnected())
-  return true;
-
+ ClassificationTime=0.0;
  clock_t start_frame = clock();
- if(InputImages->size()>0)
+
+ if(InputImages.IsConnected() && InputImages->size()>0)
  {
-     OutputClasses->clear();
-     OutputClasses->resize(InputImages->size(), -1);
-     OutputConfidences->Resize(InputImages->size(), NumClasses);
+     OutputClasses->Assign(InputImages->size(),1, CLASS_UNDEFINED);
+     OutputConfidences->Assign(InputImages->size(), NumClasses,0.0);
      for(int i=0; i<InputImages->size(); i++)
      {
          UBitmap &bmp = (*InputImages)[i];
          if(bmp.GetData()==NULL)
-            continue;
+         {
+          LogMessageEx(RDK_EX_WARNING, __FUNCTION__, std::string("InputImages["+sntoa(i)+" is NULL"));
+          continue;
+         }
+
 
          if(ImageColorModel!=bmp.GetColorModel())
          {
-             LogMessageEx(RDK_EX_WARNING, __FUNCTION__, std::string("Incorrect image ["+sntoa(i)+"] color model. Need "+sntoa(*ImageColorModel)+" got: ")+sntoa(bmp.GetColorModel()));
-             return true;
+          LogMessageEx(RDK_EX_WARNING, __FUNCTION__, std::string("Incorrect InputImages["+sntoa(i)+"] color model. Need "+sntoa(*ImageColorModel)+" got: ")+sntoa(bmp.GetColorModel()));
+          continue;
          }
 
-         int w = bmp.GetWidth();
-         int h = bmp.GetHeight();
+         MDVector<double> output_confidences;
+         int class_id;
+         bool is_classified;
+         bool classify_res=ClassifyBitmap(bmp, output_confidences, ConfidenceThreshold, class_id, is_classified);
 
-         UBitmap b;
-         b.SetRes(w, h, bmp.GetColorModel());
-         bmp.CopyTo(0,0,b);
-
-         cv::Mat m;
-         if (b.GetColorModel() == RDK::ubmRGB24)
+         if(classify_res)
          {
-             m=cv::Mat(b.GetHeight(), b.GetWidth(), CV_8UC3, b.GetData());
-             cv::cvtColor(m, m, CV_BGR2RGB);
+          for(int k=0; k<output_confidences.GetSize(); k++)
+           (*OutputConfidences)(i, k) = output_confidences(k);
+
+          (*OutputClasses)[i] = (is_classified)?class_id:CLASS_LOWQUAL;
          }
-         else if(b.GetColorModel() == RDK::ubmY8)
-         {
-             m=cv::Mat(b.GetHeight(), b.GetWidth(), CV_8U, b.GetData());
-         }
-         else
-         {
-             return true;
-         }
-
-
-         //RDK::SaveBitmapToFile("/home/ivan/testB.bmp", b);
-
-         int object_cls = -1;
-         /// Тут считаем
-         try
-         {
-          clock_t start = clock();
-          py::object retval = IntegrationInterfaceInstance.attr("classify")(m);     
-          clock_t end = clock();
-          double cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
-          //std::vector<float> res = boost::python::extract<std::vector<float> >(retval);
-          printf("classification took %f seconds to execute \n", cpu_time_used);
-          np::ndarray ndarr = boost::python::extract< np::ndarray  >(retval);
-          int dms = ndarr.get_nd();
-
-          if(dms>2)
-          {
-              LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPyUBitmapClassifier error: Returned array with incorrect dimensions"));
-              return true;
-          }
-
-          const Py_intptr_t* shp = ndarr.get_shape();
-          long height = shp[0];
-          long width  = shp[1];
-
-          const Py_intptr_t *strides = ndarr.get_strides();
-          long str0 = ndarr.strides(0);
-          long str1 = ndarr.strides(1);
-
-          std::vector<float> result;
-          float *data = reinterpret_cast<float*>(ndarr.get_data());
-          for(int y=0; y<height; y++)
-          {
-              for(int x=0; x<width;x++)
-              {
-                  float val = data[y*width+x];
-                  result.push_back(val);
-              }
-          }
-          //Если не совпадает то ничего не записываем и выдать ошибку!
-          if(result.size()!=NumClasses)
-          {
-              LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPyUBitmapClassifier error: NumClasses "+sntoa(*NumClasses)+" not equals to returned confidences count "+sntoa(result.size())));
-              return true;
-          }
-
-          int max_id = -1;
-          double max_conf = -100;
-
-
-
-          for(int k=0; k<result.size(); k++)
-          {
-              (*OutputConfidences)(i, k) = result[k];
-              if(result[k]>max_conf)
-              {
-                  max_conf = result[k];
-                  max_id = k;
-              }
-          }
-
-          if(max_conf<ConfidenceThreshold)
-          {
-              for(int k=0; k<result.size(); k++)
-                  result[k]=0.0f;
-
-              max_id=CLASS_LOWQUAL;
-          }
-
-          /*
-          if(OneHot)
-          {
-            for(int n=0; n<result.size(); n++)
-            {
-                if(n==max_id)
-                    result[n] = 1.0f;
-                else
-                    result[n] = 0.0f;
-            }
-          }*/
-
-          (*OutputClasses)[i] = max_id;
-
-         }
-         catch (py::error_already_set const &)
-         {
-          std::string perrorStr = parse_python_exception();
-          LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPyUBitmapClassifier error: ")+perrorStr);
-         } 
-         catch(...)
-         {
-             LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Unknown exception"));
-         }
-
-         /*
-         std::string img_path = Environment->GetCurrentDataDir()+"classification_results";
-         if(RDK::CreateNewDirectory(img_path.c_str())==0)
-         {
-             static int index=0;
-             std::stringstream save_path;
-             save_path<<img_path<<"/"<<(*OutputClasses)[i];
-             if(RDK::CreateNewDirectory(save_path.str().c_str())==0)
-             {
-                 RDK::UBitmap TempBitmap;
-                 (*InputImages)[i].ConvertTo(TempBitmap);
-                 TempBitmap.SwapRGBChannels();
-
-                 jpge::params param;
-                 param.m_quality=100;
-
-                 save_path<<"/"<<index<<".jpg";
-                 //   jpge::jpeg_encoder jpeg_e;
-                 jpge::compress_image_to_jpeg_file(save_path.str().c_str(), TempBitmap.GetWidth(), TempBitmap.GetHeight(), 3,
-                                                TempBitmap.GetData(),param);
-                 index+=1;
-             }
-
-         }*/
      }
-     clock_t end_frame = clock();
-     double cpu_time_used = ((double) (end_frame - start_frame)) / CLOCKS_PER_SEC;
-     //std::vector<float> res = boost::python::extract<std::vector<float> >(retval);
-     printf("frame took %f seconds to classify all objects \n", cpu_time_used);
+ }
+ else
+ if(InputImage.IsConnected())
+ {
+  OutputClasses->Assign(1,1, CLASS_UNDEFINED);
+  OutputConfidences->Assign(1, NumClasses,0.0);
+  UBitmap &bmp = *InputImage;
+  if(bmp.GetData() == NULL)
+  {
+   LogMessageEx(RDK_EX_WARNING, __FUNCTION__, std::string("InputImage is NULL"));
+   return true;
+  }
+
+  if(ImageColorModel!=bmp.GetColorModel())
+  {
+   LogMessageEx(RDK_EX_WARNING, __FUNCTION__, std::string("Incorrect InputImage color model. Need "+sntoa(*ImageColorModel)+" got: ")+sntoa(bmp.GetColorModel()));
+   return true;
+  }
+
+  MDVector<double> output_confidences;
+  int class_id;
+  bool is_classified;
+  bool classify_res=ClassifyBitmap(bmp, output_confidences, ConfidenceThreshold, class_id, is_classified);
+
+  for(int k=0; k<output_confidences.GetSize(); k++)
+   (*OutputConfidences)(0, k) = output_confidences(k);
+
+  (*OutputClasses)[0] = (is_classified)?class_id:CLASS_LOWQUAL;
+ }
+ clock_t end_frame = clock();
+ ClassificationTime = ((double) (end_frame - start_frame)) / CLOCKS_PER_SEC;
+ return true;
+}
+
+
+/// Обрабатывает одно изображение
+bool TPyUBitmapClassifier::ClassifyBitmap(UBitmap &bmp, MDVector<double> &output_confidences, double conf_thresh, int &class_id, bool &is_classified)
+{
+ int w = bmp.GetWidth();
+ int h = bmp.GetHeight();
+
+ ProcessedBmp.SetRes(w, h, bmp.GetColorModel());
+ bmp.CopyTo(0,0,ProcessedBmp);
+
+ if (ProcessedBmp.GetColorModel() == RDK::ubmRGB24)
+ {
+     ProcessedMat=cv::Mat(ProcessedBmp.GetHeight(), ProcessedBmp.GetWidth(), CV_8UC3, ProcessedBmp.GetData());
+     cv::cvtColor(ProcessedMat, ProcessedMat, CV_BGR2RGB);
+ }
+ else
+ if(ProcessedBmp.GetColorModel() == RDK::ubmY8)
+ {
+     ProcessedMat=cv::Mat(ProcessedBmp.GetHeight(), ProcessedBmp.GetWidth(), CV_8U, ProcessedBmp.GetData());
+ }
+ else
+ {
+  LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPyUBitmapClassifier error: Incorrect UBitmap color model: ")+sntoa(ProcessedBmp.GetColorModel()));
+  return false;
  }
 
+ int object_cls = -1;
+ /// Тут считаем
+ try
+ {
+  clock_t start = clock();
+  py::object retval = IntegrationInterfaceInstance.attr("classify")(ProcessedMat);
+  clock_t end = clock();
+  double cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+  //std::vector<float> res = boost::python::extract<std::vector<float> >(retval);
+  printf("classification took %f seconds to execute \n", cpu_time_used);
+  np::ndarray ndarr = boost::python::extract< np::ndarray  >(retval);
+  int dms = ndarr.get_nd();
+
+  if(dms>2)
+  {
+   LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPyUBitmapClassifier error: Returned array with incorrect dimensions"));
+   return false;
+  }
+
+  const Py_intptr_t* shp = ndarr.get_shape();
+  long height = shp[0];
+  long width  = shp[1];
+
+  const Py_intptr_t *strides = ndarr.get_strides();
+  long str0 = ndarr.strides(0);
+  long str1 = ndarr.strides(1);
+
+  std::vector<float> result;
+  float *data = reinterpret_cast<float*>(ndarr.get_data());
+  for(int y=0; y<height; y++)
+  {
+      for(int x=0; x<width;x++)
+      {
+          float val = data[y*width+x];
+          result.push_back(val);
+      }
+  }
+
+  //Если не совпадает то ничего не записываем и выдать ошибку!
+  if(result.size() != NumClasses)
+  {
+   LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPyUBitmapClassifier error: NumClasses "+sntoa(*NumClasses)+" not equals to returned confidences count "+sntoa(result.size())));
+   return false;
+  }
+
+  int max_id = -1;
+  double max_conf = -100;
+
+  output_confidences.Resize(result.size());
+  for(int k=0; k<result.size(); k++)
+  {
+      output_confidences(k) = result[k];
+      if(result[k]>max_conf)
+      {
+          max_conf = result[k];
+          max_id = k;
+      }
+  }
+
+  if(max_conf<conf_thresh)
+  {
+//      for(int k=0; k<result.size(); k++)
+//          result[k]=0.0f;
+
+//      max_id=CLASS_LOWQUAL;
+      is_classified=false;
+  }
+  else
+   is_classified=true;
+
+  class_id = max_id;
+
+ }
+ catch (py::error_already_set const &)
+ {
+  std::string perrorStr = parse_python_exception();
+  LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPyUBitmapClassifier error: ")+perrorStr);
+ }
+ catch(...)
+ {
+  LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Unknown exception"));
+ }
  return true;
 }
 // --------------------------

@@ -60,7 +60,8 @@ HEADERS += \
     ../../Core/TPyUBitmapClassifier.h \
     ../../Core/TPythonIntegrationInclude.h \
     ../../Core/TPyObjectDetector.h \
-    ../../Core/TPyObjectDetectorBasic.h \
+    ../../Core/TPyObjectDetectorYolo.h \
+    ../../Core/TPyObjectDetectorYoloEx.h \
     ../../Core/Lib.h \
     ../../Core/TPyComponent.h
 
@@ -71,7 +72,8 @@ SOURCES += \
     ../../Core/TPyAggregateClassifier.cpp \
     ../../Core/TPyUBitmapClassifier.cpp \
     ../../Core/TPyObjectDetector.cpp \
-    ../../Core/TPyObjectDetectorBasic.cpp \
+    ../../Core/TPyObjectDetectorYolo.cpp \
+    ../../Core/TPyObjectDetectorYoloEx.cpp \
     ../../Core/Lib.cpp \
     ../../Core/TPyComponent.cpp
 }
