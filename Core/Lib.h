@@ -10,11 +10,6 @@
 #include "TPyObjectDetectorYolo.h"
 #endif
 
-#ifdef RDK_USE_DARKNET
-#include "TDarknetObjectDetector.h"
-#include "TDarknetUBitmapClassifier.h"
-#endif
-
 namespace RDK {
 
 class RDK_LIB_TYPE UPyMachineLearningLib: public RDK::ULibrary

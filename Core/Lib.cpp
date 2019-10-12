@@ -123,10 +123,6 @@ void UPyMachineLearningLib::CreateClassSamples(UStorage *storage)
  UploadClass<TPyObjectDetectorYolo>("TPyObjectDetector","PyObjectDetector");
 #endif
 
-#ifdef RDK_USE_DARKNET
- UploadClass<TDarknetObjectDetector>("TDarknetObjectDetector","DarknetObjectDetector");
- UploadClass<TDarknetUBitmapClassifier>("TDarknetUBitmapClassifier","DarknetUBitmapClassifier");
-#endif
 }
 // --------------------------
 
