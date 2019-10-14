@@ -36,17 +36,6 @@ unix {
 
     DESTDIR = $$PWD/../../../../Bin/Platform/Linux/Lib.Qt
 
-    contains(DEFINES,RDK_USE_DARKNET) {
-
-    HEADERS += ../../ThirdParty/darknet/include/darknet.h \
-    ../../Core/TDarknetObjectDetector.h \
-    ../../Core/TDarknetUBitmapClassifier.h \
-    ../../ThirdParty/darknet/include/darknet_utils.h
-
-    SOURCES += ../../ThirdParty/darknet/include/darknet_utils.cpp \
-    ../../Core/TDarknetUBitmapClassifier.cpp \
-    ../../Core/TDarknetObjectDetector.cpp
-}
 } else:windows {
     DESTDIR = $$PWD/../../../../Bin/Platform/Win/Lib.Qt
 }
