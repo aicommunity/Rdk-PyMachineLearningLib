@@ -51,6 +51,7 @@ HEADERS += \
     ../../Core/TPyObjectDetector.h \
     ../../Core/TPyObjectDetectorYolo.h \
     ../../Core/TPyObjectDetectorYoloEx.h \
+    ../../Core/TPyObjectDetectorSqueezeDet.h \
     ../../Core/Lib.h \
     ../../Core/TPyComponent.h
 
@@ -63,6 +64,7 @@ SOURCES += \
     ../../Core/TPyObjectDetector.cpp \
     ../../Core/TPyObjectDetectorYolo.cpp \
     ../../Core/TPyObjectDetectorYoloEx.cpp \
+    ../../Core/TPyObjectDetectorSqueezeDet.cpp \
     ../../Core/Lib.cpp \
     ../../Core/TPyComponent.cpp
 }

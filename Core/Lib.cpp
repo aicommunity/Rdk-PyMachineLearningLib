@@ -121,6 +121,7 @@ void UPyMachineLearningLib::CreateClassSamples(UStorage *storage)
  UploadClass<TPyAggregateClassifier>("TPyAggregateClassifier","PyAggregateClassifier");
  UploadClass<TPyObjectDetectorYoloEx>("TPyObjectDetectorBasic","PyObjectDetectorBasic");
  UploadClass<TPyObjectDetectorYolo>("TPyObjectDetector","PyObjectDetector");
+ UploadClass<TPyObjectDetectorSqueezeDet>("TPyObjectDetectorSqueezeDet","PyObjectDetectorSqueezeDet");
 #endif
 
 }

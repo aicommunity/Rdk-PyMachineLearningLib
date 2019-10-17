@@ -8,6 +8,7 @@
 #include "TPyAggregateClassifier.h"
 #include "TPyObjectDetectorYoloEx.h"
 #include "TPyObjectDetectorYolo.h"
+#include "TPyObjectDetectorSqueezeDet.h"
 #endif
 
 namespace RDK {

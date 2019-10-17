@@ -108,12 +108,17 @@ bool TPyObjectDetector::APyCalculate(void)
    ; // TODO: “ут что то должно быть
   }
 
-  OutputObjects->Resize(OutputRects->GetRows(), 5);
+  OutputObjects->Resize(OutputRects->GetRows(), 6);
   for(int i=0;i<OutputRects->GetRows();i++)
   {
-   for(int j=0;j<OutputRects->GetCols();j++)
-    (*OutputObjects)(i,j)=(*OutputRects)(i,j);
-   (*OutputObjects)(i,4)=(*OutputClasses)(i,0);
+   double wm = (*UseRelativeCoords)?(InputImage->GetWidth()):(1);
+   double hm = (*UseRelativeCoords)?(InputImage->GetHeight()):(1);
+   (*OutputObjects)(i,0) = (int)((*OutputRects)(i,0)*wm);
+   (*OutputObjects)(i,1) = (int)((*OutputRects)(i,1)*hm);
+   (*OutputObjects)(i,2) = (int)((*OutputRects)(i,2)*wm);
+   (*OutputObjects)(i,3) = (int)((*OutputRects)(i,3)*hm);
+   (*OutputObjects)(i,4)=(*OutputReliability)(i,0);
+   (*OutputObjects)(i,5)=(*OutputClasses)(i,0);
   }
 
   if(UseDebugImage)
@@ -129,13 +134,12 @@ bool TPyObjectDetector::APyCalculate(void)
    {
       int xmin, ymin, xmax, ymax;
 
-      double wm = (*UseRelativeCoords)?(InputImage->GetWidth()):(1);
-      double hm = (*UseRelativeCoords)?(InputImage->GetHeight()):(1);
+      xmin = (int)((*OutputObjects)(i,0));
+      ymin = (int)((*OutputObjects)(i,1));
+      xmax = (int)((*OutputObjects)(i,2));
+      ymax = (int)((*OutputObjects)(i,3));
 
-      xmin = (int)((*OutputRects)(i,0)*wm);
-      ymin = (int)((*OutputRects)(i,1)*hm);
-      xmax = (int)((*OutputRects)(i,2)*wm);
-      ymax = (int)((*OutputRects)(i,3)*hm);
+
 
       double conf = (*OutputReliability)(i,0);
       int cls = (*OutputClasses)(i,0);
