@@ -64,6 +64,8 @@ class NumpyAllocator;
 PyObject* fromMatToNDArray(const Mat& m);
 Mat fromNDArrayToMat(PyObject* o);
 
+//RDK::UBitmap fromNDArrayToUBitmap(PyObject* o);
+
 //===================   BOOST CONVERTERS     =======================================================
 
 struct matToNDArrayBoostConverter {

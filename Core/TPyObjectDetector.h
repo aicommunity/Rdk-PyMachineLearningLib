@@ -22,10 +22,10 @@ UPropertyOutputData<UBitmap, TPyObjectDetector> DebugImage;
 /// umbY8=400 - черно-белое изображение
 ULProperty<int,TPyObjectDetector, ptPubParameter> ImageColorModel;
 
-///Отвечает за домножение на
+///Отвечает за домножение полученных координат на ширину и высоту
 ULProperty<bool,TPyObjectDetector, ptPubParameter> UseRelativeCoords;
 
-///Отвечает за домножение на
+///Рисовать или не рисовать отладочные изображения
 ULProperty<bool,TPyObjectDetector, ptPubParameter> UseDebugImage;
 
 /// Выходная матрица. Количество строк по числу объектов

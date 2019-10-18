@@ -49,9 +49,11 @@ HEADERS += \
     ../../Core/TPyUBitmapClassifier.h \
     ../../Core/TPythonIntegrationInclude.h \
     ../../Core/TPyObjectDetector.h \
+    ../../Core/TPySegmentator.h \
     ../../Core/TPyObjectDetectorYolo.h \
     ../../Core/TPyObjectDetectorYoloEx.h \
     ../../Core/TPyObjectDetectorSqueezeDet.h \
+    ../../Core/TPySegmentatorProtobuf.h \
     ../../Core/Lib.h \
     ../../Core/TPyComponent.h
 
@@ -62,9 +64,11 @@ SOURCES += \
     ../../Core/TPyAggregateClassifier.cpp \
     ../../Core/TPyUBitmapClassifier.cpp \
     ../../Core/TPyObjectDetector.cpp \
+    ../../Core/TPySegmentator.cpp \
     ../../Core/TPyObjectDetectorYolo.cpp \
     ../../Core/TPyObjectDetectorYoloEx.cpp \
     ../../Core/TPyObjectDetectorSqueezeDet.cpp \
+    ../../Core/TPySegmentatorProtobuf.cpp \
     ../../Core/Lib.cpp \
     ../../Core/TPyComponent.cpp
 }

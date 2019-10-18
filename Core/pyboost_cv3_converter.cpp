@@ -271,6 +271,13 @@ Mat fromNDArrayToMat(PyObject* o) {
 	}
 	return m;
 }
+/*
+RDK::UBitmap fromNDArrayToUBitmap(PyObject* o)
+{
+    cv::Mat m = fromNDArrayToMat(o);
+
+}
+*/
 
 //===================   BOOST CONVERTERS     =======================================================
 

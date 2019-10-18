@@ -9,6 +9,7 @@
 #include "TPyObjectDetectorYoloEx.h"
 #include "TPyObjectDetectorYolo.h"
 #include "TPyObjectDetectorSqueezeDet.h"
+#include "TPySegmentatorProtobuf.h"
 #endif
 
 namespace RDK {
