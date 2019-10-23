@@ -12,6 +12,9 @@ public: // Свойства
 ///Путь к файлу весов
 ULProperty<std::string,TPySegmentatorUNet, ptPubParameter> WeightsPath;
 
+/// Порог инференса на котором труба будет обозначена белым
+ULProperty<double,TPySegmentatorUNet, ptPubParameter> RespondThreshold;
+
 protected: // Переменные состояния
 public: // Методы
 // --------------------------

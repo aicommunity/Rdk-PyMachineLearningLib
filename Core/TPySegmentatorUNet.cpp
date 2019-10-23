@@ -14,7 +14,8 @@ namespace RDK {
 // Конструкторы и деструкторы
 // --------------------------
 TPySegmentatorUNet::TPySegmentatorUNet(void):
-  WeightsPath("WeightsPath",this)
+  WeightsPath("WeightsPath",this),
+  RespondThreshold("RespondThreshold", this)
 {
 
 }
@@ -76,6 +77,7 @@ bool TPySegmentatorUNet::APythonInitialize(void)
 // Восстановление настроек по умолчанию и сброс процесса счета
 bool TPySegmentatorUNet::APyDefault2(void)
 {
+ (*RespondThreshold)=64.0;
  return true;
 }
 
@@ -102,17 +104,21 @@ bool TPySegmentatorUNet::Inference(UBitmap &bmp, UBitmap &mask)
  {
   py::object retval = IntegrationInterfaceInstance.attr("inference")(bmp);
 
-  cv::Mat result_mat = pbcvt::fromNDArrayToMat(retval.ptr());
+  cv::Mat res_grayscale = pbcvt::fromNDArrayToMat(retval.ptr());
 
-  int type = result_mat.type();
+  cv::Mat result_grey;
+  cv::threshold(res_grayscale, result_grey, (*RespondThreshold), 255, cv::ThresholdTypes::THRESH_BINARY);
+
+
+  int type = result_grey.type();
   uchar depth = type & CV_MAT_DEPTH_MASK;
   uchar chans = 1 + (type >> CV_CN_SHIFT);
   if(depth==CV_8U && chans==3)
   {
       UBitmap temp;
-      temp.SetRes(result_mat.cols, result_mat.rows, RDK::ubmRGB24);
-      temp.AttachBuffer(result_mat.data);
-      mask.SetRes(result_mat.cols, result_mat.rows, RDK::ubmRGB24);
+      temp.SetRes(result_grey.cols, result_grey.rows, RDK::ubmRGB24);
+      temp.AttachBuffer(result_grey.data);
+      mask.SetRes(result_grey.cols, result_grey.rows, RDK::ubmRGB24);
       temp.ConvertTo(mask);
       temp.DetachBuffer();
       mask.SwapRGBChannels();
@@ -120,10 +126,11 @@ bool TPySegmentatorUNet::Inference(UBitmap &bmp, UBitmap &mask)
   else if(depth==CV_8U && chans==1)
   {
       UBitmap temp;
-      temp.SetRes(result_mat.cols, result_mat.rows, RDK::ubmY8);
-      temp.AttachBuffer(result_mat.data);
-      mask.SetRes(result_mat.cols, result_mat.rows, RDK::ubmY8);
+      temp.SetRes(result_grey.cols, result_grey.rows, RDK::ubmY8);
+      temp.AttachBuffer(result_grey.data);
+      mask.SetRes(result_grey.cols, result_grey.rows, RDK::ubmY8);
       temp.ConvertTo(mask);
+      temp.DetachBuffer();
   }
   else
   {
