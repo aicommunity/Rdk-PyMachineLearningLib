@@ -23,7 +23,10 @@ TPyUBitmapClassifier::TPyUBitmapClassifier(void)
   NumClasses("NumClasses",this),
   ConfidenceThreshold("ConfidenceThreshold", this),
   OutputConfidences("OutputConfidences", this),
-  ClassificationTime("ClassificationTime",this)
+  ClassificationTime("ClassificationTime",this),
+  WeightsPath("WeightsPath", this),
+  UseWeightsPath("UseWeightsPath", this),
+  UseRelativeWeightsPath("UseRelativeWeightsPath", this)
 {
 }
 
@@ -47,47 +50,32 @@ TPyUBitmapClassifier* TPyUBitmapClassifier::New(void)
 // --------------------------
 bool TPyUBitmapClassifier::APythonInitialize(void)
 {
- /*   UBitmap b;
-    b.SetRes(10, 10, static_cast<RDK::UBMColorModel>(*ImageColorModel));
-    cv::Mat m;
-    if (b.GetColorModel() == RDK::ubmRGB24)
+    if((*UseWeightsPath))
     {
-        m=cv::Mat(b.GetHeight(), b.GetWidth(), CV_8UC3, b.GetData());
-    }
-    else if(b.GetColorModel() == RDK::ubmY8)
-    {
-        m=cv::Mat(b.GetHeight(), b.GetWidth(), CV_8U, b.GetData());
+        py::object initialize;
+        if((*UseRelativeWeightsPath))
+        {
+            initialize = IntegrationInterfaceInstance.attr("initialize_weights")(GetEnvironment()->GetCurrentDataDir()+*WeightsPath);
+            if(!initialize.is_none())
+                return true;
+            else
+                return false;
+        }
+        else
+        {
+            initialize = IntegrationInterfaceInstance.attr("initialize_weights")(*WeightsPath);
+            if(!initialize.is_none())
+                return true;
+            else
+                return false;
+        }
+
     }
     else
     {
         return true;
     }
-
-    if(!PyEval_ThreadsInitialized())
-    {
-     LogMessageEx(RDK_EX_FATAL,__FUNCTION__,std::string("Python Py_Initialize didn't called!"));
-     LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Python init fail"));
-     return false;
-    }
-
-
-    try
-    {
-     py::object retval = IntegrationInterfaceInstance.attr("classify")(m);
-    }
-    catch (py::error_already_set const &)
-    {
-     std::string perrorStr = parse_python_exception();
-     LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPyUBitmapClassifier error: ")+perrorStr);
-     return false;
-    }
-    catch(...)
-    {
-     LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Unknown exception"));
-     return false;
-    }*/
-  // Все что выше не нужно же?!
- return true;
+    return true;
 }
 
 // Восстановление настроек по умолчанию и сброс процесса счета
