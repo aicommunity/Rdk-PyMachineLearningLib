@@ -17,6 +17,7 @@ TPyComponent::TPyComponent(void)
 //  PythonScriptPath("PythonScriptPath",this,&TPyComponent::SetPythonClassifierScriptPath),
   PythonModuleName("PythonModuleName",this, &TPyComponent::SetPythonModuleName),
   PythonClassName("PythonClassName",this, &TPyComponent::SetPythonClassName),
+  UseFullPath("UseFullPath", this),
   PythonInitialized(false)
 {
 }
@@ -89,7 +90,14 @@ void TPyComponent::PythonInitialize(void)
         py::object MainNamespace = MainModule.attr("__dict__");  // извлекаем область имен
 
         // загрузка кода из файла в извлеченную область имен
-        FullPythonScriptFileName = GetEnvironment()->GetCurrentDataDir()+PythonScriptFileName->c_str();
+        if(*UseFullPath)
+        {
+         FullPythonScriptFileName = PythonScriptFileName->c_str();
+        }
+        else
+        {
+         FullPythonScriptFileName = GetEnvironment()->GetCurrentDataDir()+PythonScriptFileName->c_str();
+        }
         py::object DetectorInterfaceModule = import(*PythonModuleName,FullPythonScriptFileName,MainNamespace);
 
         // экземпл€р питоновского класса, через который активируетс€ виртуальна€ среда и загружаетс€ модель
@@ -122,6 +130,7 @@ void TPyComponent::PythonInitialize(void)
 bool TPyComponent::ADefault(void)
 {
  PythonInitialized=false;
+ UseFullPath=true;
  return APyDefault();
 }
 

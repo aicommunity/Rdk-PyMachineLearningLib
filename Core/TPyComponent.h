@@ -21,6 +21,9 @@ ULProperty<std::string, TPyComponent> PythonModuleName;
 /// Имя питон-класса
 ULProperty<std::string, TPyComponent> PythonClassName;
 
+/// Использовать путь к файлу "как есть". Вкл по умолчанию, надо переключать для старых проектов
+ULProperty<bool, TPyComponent> UseFullPath;
+
 protected: // Временные переменные
 /// Флаг взводится при успешной инициализации подсистемы питона
 bool PythonInitialized;
