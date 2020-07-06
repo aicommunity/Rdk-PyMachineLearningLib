@@ -44,8 +44,7 @@ bool TPySegmentatorProtobuf::APythonInitialize(void)
     try
     {
         py::object initialize;
-        initialize = IntegrationInterfaceInstance.attr("initialize_config")(GetEnvironment()->GetCurrentDataDir()+*ProtobufPath,
-                                                                            GetEnvironment()->GetCurrentDataDir()+*JSONPath);
+        initialize = IntegrationInterfaceInstance.attr("initialize_config")(*ProtobufPath, *JSONPath);
 
 
         if(!initialize.is_none())

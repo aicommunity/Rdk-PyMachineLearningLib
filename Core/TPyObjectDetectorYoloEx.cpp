@@ -79,11 +79,7 @@ bool TPyObjectDetectorYoloEx::APythonInitialize(void)
                 change_classes.insert(i, (*ChangeClassesYOLO)[i]);
             }
         }
-        py::object initialize = IntegrationInterfaceInstance.attr("initialize_predictor")(GetEnvironment()->GetCurrentDataDir()+*ModelPathYOLO,
-                                                                                          GetEnvironment()->GetCurrentDataDir()+*AnchorsPathYOLO,
-                                                                                          GetEnvironment()->GetCurrentDataDir()+*ClassesPathYOLO,
-                                                                                          target_classes,
-                                                                                          change_classes);
+        py::object initialize = IntegrationInterfaceInstance.attr("initialize_predictor")(*ModelPathYOLO, *AnchorsPathYOLO, *ClassesPathYOLO, target_classes, change_classes);
         if(!initialize.is_none())
         {
             LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Python init success"));
