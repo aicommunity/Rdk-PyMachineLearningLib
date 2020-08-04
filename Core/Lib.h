@@ -11,6 +11,7 @@
 #include "TPyObjectDetectorSqueezeDet.h"
 #include "TPySegmentatorProtobuf.h"
 #include "TPySegmentatorUNet.h"
+#include "TPyClassifierTrainer.h"
 #endif
 
 namespace RDK {
