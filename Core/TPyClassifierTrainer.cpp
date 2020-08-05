@@ -59,7 +59,7 @@ bool TPyClassifierTrainer::APythonInitialize(void)
 bool TPyClassifierTrainer::APyDefault(void)
 {
     PythonModuleName="classifier_interface_tf1";
-    PythonClassName="ClassifierEmbeddingInterface";
+    PythonClassName="ClassifierTrainer";
     TrainDataDir = "";
     WorkingDir = "";
     ArchitectureName= "MobileNet";
@@ -102,6 +102,10 @@ bool TPyClassifierTrainer::APyReset(void)
 // Выполняет расчет этого объекта
 bool TPyClassifierTrainer::APyCalculate(void)
 {
+    // Проверки на входные аргументы
+    if(!CheckInputParameters())
+        return true;
+
     try
     {
         // Перевод аргументов в тип PyObject
@@ -168,6 +172,8 @@ bool TPyClassifierTrainer::APyCalculate(void)
 
         py::dict online_augmentation = {};
 
+        //TODO при запуске функции она работает не до конца, прерывается
+        // и ошибка в лог TPyClassifierTrainer dont exist in pipeline
         py::object retval = IntegrationInterfaceInstance.attr("training_interface")
                                                             (data_dir,
                                                              working_dir,
@@ -203,6 +209,54 @@ bool TPyClassifierTrainer::APyCalculate(void)
     return true;
 }
 
+
+bool TPyClassifierTrainer::CheckInputParameters()
+{
+    if(TrainDataDir->empty())
+    {
+        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("TrainDataDir is empty!"));
+        return false;
+    }
+
+    if(WorkingDir->empty())
+    {
+        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("WorkingDir is empty!"));
+        return false;
+    }
+
+    if(ArchitectureName->empty())
+    {
+        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("ArchitectureName is empty!"));
+        return false;
+    }
+
+    if(DatasetName->empty())
+    {
+        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("DatasetName is empty!"));
+        return false;
+    }
+
+    if(SplitRatio.size()!=3)
+    {
+        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("SplitRatio must have 3 values!"));
+        return false;
+    }
+
+    if(ImageSize.size()!=3)
+    {
+        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("ImageSize must have 3 values!"));
+        return false;
+    }
+
+    if(BatchSizes.size()!=3)
+    {
+        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("BatchSizes must have 3 values!"));
+        return false;
+    }
+    //возможно нужные еще проверки на отриц.значения и проч.
+    return true;
+
+}
 
 // --------------------------
 

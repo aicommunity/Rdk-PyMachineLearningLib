@@ -122,6 +122,9 @@ virtual bool APyReset(void);
 // Выполняет расчет этого объекта
 virtual bool APyCalculate(void);
 
+
+// Проверяет входные параметры перед запуском python-функции
+bool CheckInputParameters();
 // --------------------------
 };
 

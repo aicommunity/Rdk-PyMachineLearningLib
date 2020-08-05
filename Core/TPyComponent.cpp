@@ -20,6 +20,7 @@ TPyComponent::TPyComponent(void)
   UseFullPath("UseFullPath", this),
   PythonInitialized(false)
 {
+
 }
 // --------------------------
 
@@ -142,6 +143,7 @@ bool TPyComponent::ABuild(void)
 {
  if(IsInit())
   PythonInitialize();
+
  return APyBuild();
 }
 
