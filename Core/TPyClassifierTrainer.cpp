@@ -28,7 +28,9 @@ TPyClassifierTrainer::TPyClassifierTrainer(void)
   Classes("Classes",this),
   EarlyStop("EarlyStop",this),
   SavingInterval("SavingInterval",this),
-  SaveBestOnly("SaveBestOnly",this)
+  SaveBestOnly("SaveBestOnly",this),
+  TrainingInProgress("TrainingInProgress",this),
+  StartTraining("StartTraining",this)
 {
 }
 
@@ -78,7 +80,8 @@ bool TPyClassifierTrainer::APyDefault(void)
     EarlyStop = 0;
     SavingInterval = 1;
     SaveBestOnly = false;
-
+    TrainingInProgress = false;
+    StartTraining = false;
     return true;
 }
 
@@ -102,109 +105,137 @@ bool TPyClassifierTrainer::APyReset(void)
 // Выполняет расчет этого объекта
 bool TPyClassifierTrainer::APyCalculate(void)
 {
-    // Проверки на входные аргументы
-    if(!CheckInputParameters())
+    //если обучение идет, опрашиваем геттеры
+    if(TrainingInProgress.v)
+    {
+        //Отключаем работу потоков питона, включаем по окончанию геттеров
+        Py_BLOCK_THREADS
+
+        //Запуск геттеров
+        //py::object train_status = IntegrationInterfaceInstance.attr("get_train_status")();
+        //bool train_status_bool = boost::python::extract< int >(train_status);
+        //TrainingInProgress = train_status_bool;
+
+        Py_UNBLOCK_THREADS
+
         return true;
-
-    try
+    }
+    // Если не идет - запускаем, если надо
+    // TODO починить StartTraining
+    else
     {
-        // Перевод аргументов в тип PyObject
-        py::str data_dir(TrainDataDir->c_str());
-        py::str working_dir(WorkingDir->c_str());
-        py::str architecture(ArchitectureName->c_str());
-        py::str dataset_name(DatasetName->c_str());
-
-
-        py::list split_ratio;
-            split_ratio.append(SplitRatio[0]);
-            split_ratio.append(SplitRatio[1]);
-            split_ratio.append(SplitRatio[2]);
-
-
-        py::object save_splits(SaveSplits.v);
-        py::object copy_images(CopySplittedImages.v);
-        py::object test_equal_to_val(TestEqualVal.v);
-
-        py::tuple image_size = py::make_tuple(ImageSize[0],ImageSize[1],ImageSize[2]);
-
-        py::object epochs(Epochs.v);
-
-        py::object learning_rate(LearningRate.v);
-
-        py::list batch_sizes;
-            batch_sizes.append(BatchSizes[0]);
-            batch_sizes.append(BatchSizes[1]);
-            batch_sizes.append(BatchSizes[2]);
-
-        py::str weights(Weights->c_str());
-
-
-
-        py::object layers_to_be_trained;
-
-        if(LayersToBeTrained.v)
-            layers_to_be_trained = py::object(LayersToBeTrained.v);
-        else
-            layers_to_be_trained = py::str("default");
-
-
-        py::object classes;
-        if(!Classes.empty())
+        if(StartTraining.v)
         {
-            split_ratio.append(Classes[0]);
-            split_ratio.append(Classes[1]);
-            split_ratio.append(Classes[2]);
+            //TODO с блоком не работает? проверить
+            //Py_BLOCK_THREADS
+            // Проверки на входные аргументы
+            if(!CheckInputParameters())
+                return true;
+
+            try
+            {
+                // Перевод аргументов в тип PyObject для последующего вызова функции обучения
+                py::str data_dir(TrainDataDir->c_str());
+                py::str working_dir(WorkingDir->c_str());
+                py::str architecture(ArchitectureName->c_str());
+                py::str dataset_name(DatasetName->c_str());
+
+
+                py::list split_ratio;
+                    split_ratio.append(SplitRatio[0]);
+                    split_ratio.append(SplitRatio[1]);
+                    split_ratio.append(SplitRatio[2]);
+
+
+                py::object save_splits(SaveSplits.v);
+                py::object copy_images(CopySplittedImages.v);
+                py::object test_equal_to_val(TestEqualVal.v);
+
+                py::tuple image_size = py::make_tuple(ImageSize[0],ImageSize[1],ImageSize[2]);
+
+                py::object epochs(Epochs.v);
+
+                py::object learning_rate(LearningRate.v);
+
+                py::list batch_sizes;
+                    batch_sizes.append(BatchSizes[0]);
+                    batch_sizes.append(BatchSizes[1]);
+                    batch_sizes.append(BatchSizes[2]);
+
+                py::str weights(Weights->c_str());
+
+                py::object layers_to_be_trained;
+
+                if(LayersToBeTrained.v)
+                    layers_to_be_trained = py::object(LayersToBeTrained.v);
+                else
+                    layers_to_be_trained = py::str("default");
+
+
+                py::object classes;
+                if(!Classes.empty())
+                {
+                    split_ratio.append(Classes[0]);
+                    split_ratio.append(Classes[1]);
+                    split_ratio.append(Classes[2]);
+                }
+
+                py::object early_stop;
+
+                if(EarlyStop.v)
+                    early_stop = py::object(EarlyStop.v);
+                else
+                    early_stop = py::object(false);
+
+
+                py::object preprocessing;
+
+                py::object saving_interval(SavingInterval.v);
+
+                py::object save_best_only(SaveBestOnly.v);
+
+                py::dict online_augmentation = {};
+
+                //Запуск обучения, внутри функции питона остоединение обучения в поток
+                py::object retval = IntegrationInterfaceInstance.attr("start_calculating")
+                                                                    (data_dir,
+                                                                     working_dir,
+                                                                     architecture,
+                                                                     dataset_name,
+                                                                     split_ratio,
+                                                                     save_splits,
+                                                                     copy_images,
+                                                                     test_equal_to_val,
+                                                                     image_size,
+                                                                     epochs,
+                                                                     learning_rate,
+                                                                     batch_sizes,
+                                                                     weights,
+                                                                     layers_to_be_trained,
+                                                                     classes,
+                                                                     early_stop,
+                                                                     preprocessing,
+                                                                     saving_interval,
+                                                                     save_best_only,
+                                                                     online_augmentation);
+                //Отпускаем поток исполняться
+                Py_UNBLOCK_THREADS
+                TrainingInProgress = true;
+                StartTraining = false;
+            }
+            catch (py::error_already_set const &)
+            {
+                std::string perrorStr = parse_python_exception();
+                LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPyClassifierTrainer error: ")+perrorStr);
+                TrainingInProgress = false;
+            }
+            catch(...)
+            {
+                LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Unknown exception"));
+                TrainingInProgress = false;
+            }
         }
-
-        py::object early_stop;
-
-        if(EarlyStop.v)
-            early_stop = py::object(EarlyStop.v);
-        else
-            early_stop = py::object(false);
-
-
-        py::object preprocessing;
-
-        py::object saving_interval(SavingInterval.v);
-
-        py::object save_best_only(SaveBestOnly.v);
-
-        py::dict online_augmentation = {};
-
-        //TODO при запуске функции она работает не до конца, прерывается
-        // и ошибка в лог TPyClassifierTrainer dont exist in pipeline
-        py::object retval = IntegrationInterfaceInstance.attr("training_interface")
-                                                            (data_dir,
-                                                             working_dir,
-                                                             architecture,
-                                                             dataset_name,
-                                                             split_ratio,
-                                                             save_splits,
-                                                             copy_images,
-                                                             test_equal_to_val,
-                                                             image_size,
-                                                             epochs,
-                                                             learning_rate,
-                                                             batch_sizes,
-                                                             weights,
-                                                             layers_to_be_trained,
-                                                             classes,
-                                                             early_stop,
-                                                             preprocessing,
-                                                             saving_interval,
-                                                             save_best_only,
-                                                             online_augmentation
-                                                             );
-    }
-    catch (py::error_already_set const &)
-    {
-     std::string perrorStr = parse_python_exception();
-     LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPyClassifierTrainer error: ")+perrorStr);
-    }
-    catch(...)
-    {
-     LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Unknown exception"));
+        return true;
     }
     return true;
 }
@@ -253,9 +284,9 @@ bool TPyClassifierTrainer::CheckInputParameters()
         LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("BatchSizes must have 3 values!"));
         return false;
     }
-    //возможно нужные еще проверки на отриц.значения и проч.
-    return true;
+    //возможно нужны еще проверки на отриц.значения и проч.
 
+    return true;
 }
 
 // --------------------------

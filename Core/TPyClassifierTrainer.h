@@ -2,6 +2,7 @@
 #define RDK_TPyClassifierTrainerH
 
 #include "TPyComponent.h"
+#include <thread>
 
 namespace RDK {
 
@@ -81,10 +82,19 @@ ULProperty<int, TPyClassifierTrainer> SavingInterval;
 /// Cохранять ли только лучшую модель по параметру val_loss
 ULProperty<bool, TPyClassifierTrainer> SaveBestOnly;
 
+/// Флаг включения обучения
+// обучение начнется при StartTraining=true и TrainingInProgress=false
+// при запуске обучения становится false
+ULProperty<bool, TPyClassifierTrainer> StartTraining;
 
+/// Флаг - идет ли обучение
+ULProperty<bool, TPyClassifierTrainer, ptPubState> TrainingInProgress;
 
 protected: // Временные переменные
 
+//Состояние потока
+//Нужен чтобы отключать/включать исполнение потоков питона
+PyThreadState *_save;
 
 public: // Методы
 // --------------------------
