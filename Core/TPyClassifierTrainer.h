@@ -84,11 +84,39 @@ ULProperty<bool, TPyClassifierTrainer> SaveBestOnly;
 
 /// Флаг включения обучения
 // обучение начнется при StartTraining=true и TrainingInProgress=false
-// при запуске обучения становится false
+// при запуске обучения данный флаг становится false
 ULProperty<bool, TPyClassifierTrainer> StartTraining;
+
+/// Флаг остановки обучения
+// останавливает обучение и делает тест, если прошло больше одной эпохи, потом завершается поток
+ULProperty<bool, TPyClassifierTrainer> StopTraining;
+
+/// Флаг остановки обучения (закончит как можно быстрее без тестов)
+ULProperty<bool, TPyClassifierTrainer> StopNow;
+
 
 /// Флаг - идет ли обучение
 ULProperty<bool, TPyClassifierTrainer, ptPubState> TrainingInProgress;
+
+/// Текущая эпоха
+ULProperty<int, TPyClassifierTrainer, ptPubState> Epoch;
+
+/// Текущая ошибка на тренировочном наборе
+ULProperty<float, TPyClassifierTrainer, ptPubState> TrainLoss;
+
+/// Текущая точность на тренировочном наборе
+ULProperty<float, TPyClassifierTrainer, ptPubState> TrainAcc;
+
+/// Текущая ошибка на валидационном наборе
+ULProperty<float, TPyClassifierTrainer, ptPubState> ValLoss;
+
+/// Текущая точность на валидационном наборе
+ULProperty<float, TPyClassifierTrainer, ptPubState> ValAcc;
+
+/// Текущий прогресс
+ULProperty<float, TPyClassifierTrainer, ptPubState> Progress;
+
+
 
 protected: // Временные переменные
 

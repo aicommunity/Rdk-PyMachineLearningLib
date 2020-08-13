@@ -30,7 +30,15 @@ TPyClassifierTrainer::TPyClassifierTrainer(void)
   SavingInterval("SavingInterval",this),
   SaveBestOnly("SaveBestOnly",this),
   TrainingInProgress("TrainingInProgress",this),
-  StartTraining("StartTraining",this)
+  StartTraining("StartTraining",this),
+  StopTraining("StopTraining",this),
+  Epoch("Epoch",this),
+  TrainAcc("TrainAcc",this),
+  TrainLoss("TrainLoss",this),
+  ValAcc("ValAcc",this),
+  ValLoss("ValLoss",this),
+  Progress("Progress",this),
+  StopNow("StopNow",this)
 {
 }
 
@@ -82,6 +90,13 @@ bool TPyClassifierTrainer::APyDefault(void)
     SaveBestOnly = false;
     TrainingInProgress = false;
     StartTraining = false;
+    StopTraining = false;
+    Epoch = 0;
+    TrainAcc = 0.0;
+    TrainLoss = 0.0;
+    ValAcc = 0.0;
+    ValLoss = 0.0;
+    Progress = 0.0;
     return true;
 }
 
@@ -105,72 +120,75 @@ bool TPyClassifierTrainer::APyReset(void)
 // Выполняет расчет этого объекта
 bool TPyClassifierTrainer::APyCalculate(void)
 {
-    //если обучение идет, опрашиваем геттеры
-    if(TrainingInProgress.v)
+    try
     {
-        //Отключаем работу потоков питона, включаем по окончанию геттеров
-        Py_BLOCK_THREADS
-
-        //Запуск геттеров
-        //py::object train_status = IntegrationInterfaceInstance.attr("get_train_status")();
-        //bool train_status_bool = boost::python::extract< int >(train_status);
-        //TrainingInProgress = train_status_bool;
-
+        if(_save!=nullptr)
+            Py_BLOCK_THREADS
+        // Проверка статуса обучения
+        py::object train_status = IntegrationInterfaceInstance.attr("is_training")();
+        TrainingInProgress.v = boost::python::extract< int >(train_status);
         Py_UNBLOCK_THREADS
-
-        return true;
-    }
-    // Если не идет - запускаем, если надо
-    // TODO починить StartTraining
-    else
-    {
-        if(StartTraining.v)
+        //если обучение идет, опрашиваем геттеры
+        if(TrainingInProgress.v)
         {
-            //TODO с блоком не работает? проверить
-            //Py_BLOCK_THREADS
-            // Проверки на входные аргументы
-            if(!CheckInputParameters())
-                return true;
+            //Отключаем работу потоков питона, включаем по окончанию геттеров
+            if(_save!=nullptr)
+                Py_BLOCK_THREADS
 
-            try
+            //Запуск геттеров для получения информации о состоянии обучения
+            py::object epoch        = IntegrationInterfaceInstance.attr("get_epoch")();
+            py::object train_acc    = IntegrationInterfaceInstance.attr("get_train_acc")();
+            py::object train_loss   = IntegrationInterfaceInstance.attr("get_train_loss")();
+            py::object val_acc      = IntegrationInterfaceInstance.attr("get_val_acc")();
+            py::object val_loss     = IntegrationInterfaceInstance.attr("get_val_loss")();
+            py::object progress     = IntegrationInterfaceInstance.attr("get_progess")();
+
+            Epoch       = boost::python::extract< int >(epoch) + 1;
+            TrainAcc    = boost::python::extract< float >(train_acc);
+            TrainLoss   = boost::python::extract< float >(train_loss);
+            ValAcc      = boost::python::extract< float >(val_acc);
+            ValLoss     = boost::python::extract< float >(val_loss);
+            Progress    = boost::python::extract< float >(progress);
+
+            //Останавливаем обучение либо вообще все, если требуется
+            if(StopTraining.v)
             {
+                IntegrationInterfaceInstance.attr("stop_training")();
+            }
+            if(StopNow.v)
+            {
+                IntegrationInterfaceInstance.attr("stop_now")();
+            }
+            Py_UNBLOCK_THREADS
+
+            return true;
+        }
+        // Если обучение не идет - запускаем, если надо
+        else
+        {
+            if(StartTraining.v)
+            {
+                //TODO с блоком не работает?
+                if(_save!=nullptr)
+                    Py_BLOCK_THREADS
+                // Проверки на входные аргументы
+                if(!CheckInputParameters())
+                    return true;
+
+                // Запуск обучения
+                StopTraining = false;
+
+
                 // Перевод аргументов в тип PyObject для последующего вызова функции обучения
-                py::str data_dir(TrainDataDir->c_str());
-                py::str working_dir(WorkingDir->c_str());
-                py::str architecture(ArchitectureName->c_str());
-                py::str dataset_name(DatasetName->c_str());
-
-
                 py::list split_ratio;
                     split_ratio.append(SplitRatio[0]);
                     split_ratio.append(SplitRatio[1]);
                     split_ratio.append(SplitRatio[2]);
 
-
-                py::object save_splits(SaveSplits.v);
-                py::object copy_images(CopySplittedImages.v);
-                py::object test_equal_to_val(TestEqualVal.v);
-
-                py::tuple image_size = py::make_tuple(ImageSize[0],ImageSize[1],ImageSize[2]);
-
-                py::object epochs(Epochs.v);
-
-                py::object learning_rate(LearningRate.v);
-
                 py::list batch_sizes;
                     batch_sizes.append(BatchSizes[0]);
                     batch_sizes.append(BatchSizes[1]);
                     batch_sizes.append(BatchSizes[2]);
-
-                py::str weights(Weights->c_str());
-
-                py::object layers_to_be_trained;
-
-                if(LayersToBeTrained.v)
-                    layers_to_be_trained = py::object(LayersToBeTrained.v);
-                else
-                    layers_to_be_trained = py::str("default");
-
 
                 py::object classes;
                 if(!Classes.empty())
@@ -180,62 +198,55 @@ bool TPyClassifierTrainer::APyCalculate(void)
                     split_ratio.append(Classes[2]);
                 }
 
-                py::object early_stop;
+                //Заполнение словаря параметров (кроме data_dir у него свой кортеж)
+                py::dict func_params;
 
-                if(EarlyStop.v)
-                    early_stop = py::object(EarlyStop.v);
-                else
-                    early_stop = py::object(false);
+                func_params["working_dir"]          =   py::str(WorkingDir->c_str());;
+                func_params["image_size"]           =   py::make_tuple(ImageSize[0],ImageSize[1],ImageSize[2]);
+                func_params["architecture"]         =   py::str(ArchitectureName->c_str());;
+                func_params["dataset_name"]         =   py::str(DatasetName->c_str());;
+                func_params["split_ratio"]          =   split_ratio;
+                func_params["save_splits"]          =   py::object(SaveSplits.v);
+                func_params["copy_images"]          =   py::object(CopySplittedImages.v);
+                func_params["test_equal_to_val"]    =   py::object(TestEqualVal.v);
+                func_params["epochs"]               =   py::object(Epochs.v);
+                func_params["learning_rate"]        =   py::object(LearningRate.v);
+                func_params["batch_sizes"]          =   batch_sizes;
+                func_params["weights"]              =   py::object(Weights->c_str());
+                func_params["layers_to_be_trained"] =   LayersToBeTrained.v ? py::object(LayersToBeTrained.v) : py::str("default");
+                func_params["classes"]              =   classes;
+                func_params["early_stop"]           =   EarlyStop.v ? py::object(EarlyStop.v) : py::object(false);
+                func_params["preprocessing"]        =   py::object();
+                func_params["saving_interval"]      =   py::object(SavingInterval.v);
+                func_params["save_best_only"]       =   py::object(SaveBestOnly.v);
+                func_params["online_augmentation"]  =   py::dict();
 
-
-                py::object preprocessing;
-
-                py::object saving_interval(SavingInterval.v);
-
-                py::object save_best_only(SaveBestOnly.v);
-
-                py::dict online_augmentation = {};
+                py::tuple data_dir_tuple = py::make_tuple((TrainDataDir->c_str()));
 
                 //Запуск обучения, внутри функции питона остоединение обучения в поток
-                py::object retval = IntegrationInterfaceInstance.attr("start_calculating")
-                                                                    (data_dir,
-                                                                     working_dir,
-                                                                     architecture,
-                                                                     dataset_name,
-                                                                     split_ratio,
-                                                                     save_splits,
-                                                                     copy_images,
-                                                                     test_equal_to_val,
-                                                                     image_size,
-                                                                     epochs,
-                                                                     learning_rate,
-                                                                     batch_sizes,
-                                                                     weights,
-                                                                     layers_to_be_trained,
-                                                                     classes,
-                                                                     early_stop,
-                                                                     preprocessing,
-                                                                     saving_interval,
-                                                                     save_best_only,
-                                                                     online_augmentation);
+                py::object retval = IntegrationInterfaceInstance.attr("classification_train")
+                                                                        (data_dir_tuple,
+                                                                         func_params);
                 //Отпускаем поток исполняться
                 Py_UNBLOCK_THREADS
+
                 TrainingInProgress = true;
                 StartTraining = false;
+
             }
-            catch (py::error_already_set const &)
-            {
-                std::string perrorStr = parse_python_exception();
-                LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPyClassifierTrainer error: ")+perrorStr);
-                TrainingInProgress = false;
-            }
-            catch(...)
-            {
-                LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Unknown exception"));
-                TrainingInProgress = false;
-            }
+            return true;
         }
-        return true;
+    }
+    catch (py::error_already_set const &)
+    {
+        std::string perrorStr = parse_python_exception();
+        LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPyClassifierTrainer error: ")+perrorStr);
+        TrainingInProgress = false;
+    }
+    catch(...)
+    {
+        LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Unknown exception"));
+        TrainingInProgress = false;
     }
     return true;
 }
