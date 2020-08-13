@@ -3,7 +3,7 @@
 
 #include "TPyClassifierTrainer.h"
 #include <iostream>
-
+#include <boost/filesystem.hpp>
 namespace RDK {
 
 // Методы
@@ -29,7 +29,7 @@ TPyClassifierTrainer::TPyClassifierTrainer(void)
   EarlyStop("EarlyStop",this),
   SavingInterval("SavingInterval",this),
   SaveBestOnly("SaveBestOnly",this),
-  TrainingInProgress("TrainingInProgress",this),
+  TrainingStatus("TrainingStatus",this),
   StartTraining("StartTraining",this),
   StopTraining("StopTraining",this),
   Epoch("Epoch",this),
@@ -88,7 +88,7 @@ bool TPyClassifierTrainer::APyDefault(void)
     EarlyStop = 0;
     SavingInterval = 1;
     SaveBestOnly = false;
-    TrainingInProgress = false;
+    TrainingStatus = false;
     StartTraining = false;
     StopTraining = false;
     Epoch = 0;
@@ -113,10 +113,20 @@ bool TPyClassifierTrainer::APyBuild(void)
 // Сброс процесса счета без потери настроек
 bool TPyClassifierTrainer::APyReset(void)
 {
+    //Остановка обучения
+    if(_save!=nullptr)
+        Py_BLOCK_THREADS
+
+    IntegrationInterfaceInstance.attr("stop_now")();
+
+    Py_UNBLOCK_THREADS
+
+    StopTraining = StopNow = false;
+    StartTraining = false;
 
     return true;
 }
-
+//TODO доразобраться с Py_BLOCK_THREADS и Py_UNBLOCK_THREADS
 // Выполняет расчет этого объекта
 bool TPyClassifierTrainer::APyCalculate(void)
 {
@@ -126,10 +136,10 @@ bool TPyClassifierTrainer::APyCalculate(void)
             Py_BLOCK_THREADS
         // Проверка статуса обучения
         py::object train_status = IntegrationInterfaceInstance.attr("is_training")();
-        TrainingInProgress.v = boost::python::extract< int >(train_status);
+        TrainingStatus.v = boost::python::extract< int >(train_status);
         Py_UNBLOCK_THREADS
         //если обучение идет, опрашиваем геттеры
-        if(TrainingInProgress.v)
+        if(TrainingStatus.v)
         {
             //Отключаем работу потоков питона, включаем по окончанию геттеров
             if(_save!=nullptr)
@@ -168,12 +178,14 @@ bool TPyClassifierTrainer::APyCalculate(void)
         {
             if(StartTraining.v)
             {
-                //TODO с блоком не работает?
                 if(_save!=nullptr)
                     Py_BLOCK_THREADS
                 // Проверки на входные аргументы
                 if(!CheckInputParameters())
+                {
+                    Py_UNBLOCK_THREADS
                     return true;
+                }
 
                 // Запуск обучения
                 StopTraining = false;
@@ -230,7 +242,7 @@ bool TPyClassifierTrainer::APyCalculate(void)
                 //Отпускаем поток исполняться
                 Py_UNBLOCK_THREADS
 
-                TrainingInProgress = true;
+                TrainingStatus = true;
                 StartTraining = false;
 
             }
@@ -241,13 +253,16 @@ bool TPyClassifierTrainer::APyCalculate(void)
     {
         std::string perrorStr = parse_python_exception();
         LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPyClassifierTrainer error: ")+perrorStr);
-        TrainingInProgress = false;
+        TrainingStatus = 0;
+        Py_UNBLOCK_THREADS
     }
     catch(...)
     {
         LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Unknown exception"));
-        TrainingInProgress = false;
+        TrainingStatus = 0;
+        Py_UNBLOCK_THREADS
     }
+    //Py_UNBLOCK_THREADS
     return true;
 }
 
@@ -295,8 +310,15 @@ bool TPyClassifierTrainer::CheckInputParameters()
         LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("BatchSizes must have 3 values!"));
         return false;
     }
-    //возможно нужны еще проверки на отриц.значения и проч.
 
+    if(!boost::filesystem::is_empty(WorkingDir.v.c_str()))
+    {
+        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("WorkingDir isn't empty, it contains some files"));
+        return false;
+    }
+    //возможно нужны еще проверки на отриц.значения и проч.
+    //TODO проверка на непустую директорию WorkingDir
+    //TODO проверки на пути относительные и т.д.
     return true;
 }
 

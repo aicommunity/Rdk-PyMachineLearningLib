@@ -95,8 +95,12 @@ ULProperty<bool, TPyClassifierTrainer> StopTraining;
 ULProperty<bool, TPyClassifierTrainer> StopNow;
 
 
-/// Флаг - идет ли обучение
-ULProperty<bool, TPyClassifierTrainer, ptPubState> TrainingInProgress;
+/// Статус обучения
+// 0 - ничего не происходит
+// 1 - обучение
+// 2 - тестирование после обучения
+// 3 -
+ULProperty<int, TPyClassifierTrainer, ptPubState> TrainingStatus;
 
 /// Текущая эпоха
 ULProperty<int, TPyClassifierTrainer, ptPubState> Epoch;
