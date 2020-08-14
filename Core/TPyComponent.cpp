@@ -64,6 +64,7 @@ TPyComponent::~TPyComponent(void)
 // --------------------------
 void TPyComponent::PythonInitialize(void)
 {
+    Py_CUSTOM_BLOCK_THREADS
     try
     {
         LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("Python init started..."));
@@ -142,7 +143,6 @@ bool TPyComponent::ADefault(void)
 // в случае успешной сборки
 bool TPyComponent::ABuild(void)
 {
- Py_CUSTOM_BLOCK_THREADS
  if(IsInit())
   PythonInitialize();
 
