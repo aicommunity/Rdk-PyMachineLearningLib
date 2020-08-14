@@ -106,7 +106,7 @@ bool TPyClassifierTrainer::APyDefault(void)
 // в случае успешной сборки
 bool TPyClassifierTrainer::APyBuild(void)
 {
-    _custom_save = nullptr;
+    //_custom_save = nullptr;
     return true;
 }
 

@@ -18,7 +18,8 @@ TPyComponent::TPyComponent(void)
   PythonModuleName("PythonModuleName",this, &TPyComponent::SetPythonModuleName),
   PythonClassName("PythonClassName",this, &TPyComponent::SetPythonClassName),
   UseFullPath("UseFullPath", this),
-  PythonInitialized(false)
+  PythonInitialized(false),
+  _custom_save(nullptr)
 {
 
 }
@@ -141,6 +142,7 @@ bool TPyComponent::ADefault(void)
 // в случае успешной сборки
 bool TPyComponent::ABuild(void)
 {
+ Py_CUSTOM_BLOCK_THREADS
  if(IsInit())
   PythonInitialize();
 

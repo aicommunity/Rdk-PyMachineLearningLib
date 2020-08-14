@@ -2,14 +2,8 @@
 #define RDK_TPyClassifierTrainerH
 
 #include "TPyComponent.h"
-#include <thread>
 
-//кастомные дефайны для управления испонением потоков питона
-//оригинал Py_BLOCK_THREADS и Py_UNBLOCK_THREADS
-#define Py_CUSTOM_BLOCK_THREADS        if(_custom_save!=nullptr){PyEval_RestoreThread(_custom_save);\
-                                                                _custom_save=nullptr;}
 
-#define Py_CUSTOM_UNBLOCK_THREADS      if(_custom_save==nullptr){_custom_save = PyEval_SaveThread();}
 
 
 namespace RDK {
@@ -132,9 +126,7 @@ ULProperty<float, TPyClassifierTrainer, ptPubState> Progress;
 
 protected: // Временные переменные
 
-//Состояние потока
-//Нужен чтобы отключать/включать исполнение потоков питона
-PyThreadState *_custom_save;
+
 
 public: // Методы
 // --------------------------
