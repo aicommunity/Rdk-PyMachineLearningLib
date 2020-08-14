@@ -106,20 +106,19 @@ bool TPyClassifierTrainer::APyDefault(void)
 // в случае успешной сборки
 bool TPyClassifierTrainer::APyBuild(void)
 {
-
+    _custom_save = nullptr;
     return true;
 }
 
 // Сброс процесса счета без потери настроек
 bool TPyClassifierTrainer::APyReset(void)
 {
+    //TODO тут что-то надо, но как ниже не работает=(
     //Остановка обучения
-    if(_save!=nullptr)
-        Py_BLOCK_THREADS
 
+    Py_CUSTOM_BLOCK_THREADS
     IntegrationInterfaceInstance.attr("stop_now")();
-
-    Py_UNBLOCK_THREADS
+    //Py_CUSTOM_UNBLOCK_THREADS
 
     StopTraining = StopNow = false;
     StartTraining = false;
@@ -131,20 +130,15 @@ bool TPyClassifierTrainer::APyReset(void)
 bool TPyClassifierTrainer::APyCalculate(void)
 {
     try
-    {
-        if(_save!=nullptr)
-            Py_BLOCK_THREADS
+    {   //Отключаем работу потоков питона в конце включаем
+        Py_CUSTOM_BLOCK_THREADS
         // Проверка статуса обучения
-        py::object train_status = IntegrationInterfaceInstance.attr("is_training")();
+        py::object train_status = IntegrationInterfaceInstance.attr("train_status")();
         TrainingStatus.v = boost::python::extract< int >(train_status);
-        Py_UNBLOCK_THREADS
+
         //если обучение идет, опрашиваем геттеры
         if(TrainingStatus.v)
         {
-            //Отключаем работу потоков питона, включаем по окончанию геттеров
-            if(_save!=nullptr)
-                Py_BLOCK_THREADS
-
             //Запуск геттеров для получения информации о состоянии обучения
             py::object epoch        = IntegrationInterfaceInstance.attr("get_epoch")();
             py::object train_acc    = IntegrationInterfaceInstance.attr("get_train_acc")();
@@ -153,7 +147,7 @@ bool TPyClassifierTrainer::APyCalculate(void)
             py::object val_loss     = IntegrationInterfaceInstance.attr("get_val_loss")();
             py::object progress     = IntegrationInterfaceInstance.attr("get_progess")();
 
-            Epoch       = boost::python::extract< int >(epoch) + 1;
+            Epoch       = boost::python::extract< int >(epoch);
             TrainAcc    = boost::python::extract< float >(train_acc);
             TrainLoss   = boost::python::extract< float >(train_loss);
             ValAcc      = boost::python::extract< float >(val_acc);
@@ -164,32 +158,29 @@ bool TPyClassifierTrainer::APyCalculate(void)
             if(StopTraining.v)
             {
                 IntegrationInterfaceInstance.attr("stop_training")();
+                StopTraining.v = false;
             }
             if(StopNow.v)
             {
                 IntegrationInterfaceInstance.attr("stop_now")();
+                StopNow.v = false;
             }
-            Py_UNBLOCK_THREADS
-
-            return true;
         }
         // Если обучение не идет - запускаем, если надо
         else
         {
             if(StartTraining.v)
             {
-                if(_save!=nullptr)
-                    Py_BLOCK_THREADS
                 // Проверки на входные аргументы
                 if(!CheckInputParameters())
                 {
-                    Py_UNBLOCK_THREADS
+                    Py_CUSTOM_UNBLOCK_THREADS
+                    StartTraining = false;
                     return true;
                 }
 
                 // Запуск обучения
-                StopTraining = false;
-
+                StopTraining = StopNow = false;
 
                 // Перевод аргументов в тип PyObject для последующего вызова функции обучения
                 py::list split_ratio;
@@ -239,14 +230,11 @@ bool TPyClassifierTrainer::APyCalculate(void)
                 py::object retval = IntegrationInterfaceInstance.attr("classification_train")
                                                                         (data_dir_tuple,
                                                                          func_params);
-                //Отпускаем поток исполняться
-                Py_UNBLOCK_THREADS
-
-                TrainingStatus = true;
+                TrainingStatus = 1;
                 StartTraining = false;
 
             }
-            return true;
+            //return true;
         }
     }
     catch (py::error_already_set const &)
@@ -254,15 +242,15 @@ bool TPyClassifierTrainer::APyCalculate(void)
         std::string perrorStr = parse_python_exception();
         LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPyClassifierTrainer error: ")+perrorStr);
         TrainingStatus = 0;
-        Py_UNBLOCK_THREADS
     }
     catch(...)
     {
         LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Unknown exception"));
         TrainingStatus = 0;
-        Py_UNBLOCK_THREADS
+
     }
-    //Py_UNBLOCK_THREADS
+    //Разрешаем потокам исполняться
+    Py_CUSTOM_UNBLOCK_THREADS
     return true;
 }
 
@@ -311,13 +299,13 @@ bool TPyClassifierTrainer::CheckInputParameters()
         return false;
     }
 
+    //Проверка на непустую директорию WorkingDir
     if(!boost::filesystem::is_empty(WorkingDir.v.c_str()))
     {
         LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("WorkingDir isn't empty, it contains some files"));
         return false;
     }
-    //возможно нужны еще проверки на отриц.значения и проч.
-    //TODO проверка на непустую директорию WorkingDir
+    //TODO возможно нужны еще проверки на отриц.значения и проч.
     //TODO проверки на пути относительные и т.д.
     return true;
 }
