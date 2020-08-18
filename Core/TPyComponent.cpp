@@ -56,6 +56,7 @@ bool TPyComponent::SetPythonClassName(const std::string& path)
 
 TPyComponent::~TPyComponent(void)
 {
+    Py_CUSTOM_BLOCK_THREADS
 }
 // --------------------------
 
