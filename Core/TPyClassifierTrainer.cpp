@@ -4,6 +4,7 @@
 #include "TPyClassifierTrainer.h"
 #include <iostream>
 #include <boost/filesystem.hpp>
+
 namespace RDK {
 
 // Методы
@@ -306,6 +307,7 @@ bool TPyClassifierTrainer::CheckInputParameters()
         return false;
     }
     //TODO возможно нужны еще проверки на отриц.значения и проч.
+    //TODO создавать WorkingDir при каких-либо условиях
     //TODO проверки на пути относительные и т.д.
     return true;
 }
