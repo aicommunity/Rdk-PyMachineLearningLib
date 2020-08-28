@@ -14,7 +14,7 @@
 
 namespace RDK {
 
-class TPyComponent: public RDK::UNet
+class TPyComponent: virtual public RDK::UNet
 {
 public: // Свойства
 /// Имя файла выполняемого скрипта, лежащего относительно папки конфигурации

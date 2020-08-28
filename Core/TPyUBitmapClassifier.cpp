@@ -16,14 +16,7 @@ namespace RDK {
 // Конструкторы и деструкторы
 // --------------------------  //DetectionClass("DetectionClass",this),
 TPyUBitmapClassifier::TPyUBitmapClassifier(void)
-: InputImage("InputImage",this),
-  InputImages("InputImages",this),
-  OutputClasses("OutputClasses",this),
-  ImageColorModel("ImageColorModel",this),
-  NumClasses("NumClasses",this),
-  ConfidenceThreshold("ConfidenceThreshold", this),
-  OutputConfidences("OutputConfidences", this),
-  ClassificationTime("ClassificationTime",this),
+: ImageColorModel("ImageColorModel",this),
   WeightsPath("WeightsPath", this),
   UseWeightsPath("UseWeightsPath", this),
   UseRelativeWeightsPath("UseRelativeWeightsPath", this)
@@ -109,6 +102,10 @@ bool TPyUBitmapClassifier::APyReset(void)
 // Выполняет расчет этого объекта
 bool TPyUBitmapClassifier::APyCalculate(void)
 {
+
+    OutputClasses->Resize(0,1);
+    OutputConfidences->Resize(0, NumClasses);
+
  ClassificationTime=0.0;
  clock_t start_frame = clock();
 
