@@ -14,17 +14,7 @@ namespace RDK {
 // Конструкторы и деструкторы
 // --------------------------
 TPyObjectDetector::TPyObjectDetector(void)
-: InputImage("InputImage",this),
-  OutputObjects("OutputObjects",this),
-  UseDebugImage("UseDebugImage",this),
-  ImageColorModel("ImageColorModel",this),
-  DebugImage("DebugImage",this),
-  UseRelativeCoords("UseRelativeCoords",this),
-  OutputRects("OutputRects",this),
-  OutputClasses("OutputClasses",this),
-  OutputReliability("OutputReliability",this)
-
-
+:ImageColorModel("ImageColorModel",this)
 {
 
 }
