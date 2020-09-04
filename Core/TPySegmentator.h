@@ -2,33 +2,27 @@
 #define RDK_TPySegmentatorH
 
 #include "TPyComponent.h"
+#include "../../Rdk-CRLib/Core/USegmentatorBase.h"
 
 namespace RDK {
 
 #define YOLOV2_INITTYPE 2
 #define YOLOV3_INITTYPE 3
 
-class TPySegmentator: public TPyComponent
+class TPySegmentator: public USegmentatorBase, public TPyComponent
 {
 public: // Свойства
-/// Входное изображение
-UPropertyInputData<UBitmap, TPySegmentator> InputImage;
 
-/// Выходное изображение c результирующей маской
-UPropertyOutputData<UBitmap, TPySegmentator> OutputImage;
 
 /// Целое число, определяющее цветовую модель, на которую рассчитана сеть
 /// ubmRGB24=3 - цветное изображение
 /// umbY8=400 - черно-белое изображение
 ULProperty<int,TPySegmentator, ptPubParameter> ImageColorModel;
 
-/// Соответствие классов и цветов
-ULProperty<std::vector<std::map<std::string, UColorT> >,TPySegmentator, ptPubParameter> ClassColors;
 
 protected: // Временные переменные
 UGraphics Graph;
 
-UBitmap ProcessedBmp;
 
 public: // Методы
 // --------------------------
@@ -59,7 +53,6 @@ virtual bool APyReset(void);
 virtual bool APyReset2(void);
 
 // Выполняет расчет этого объекта
-virtual bool APyCalculate(void);
 virtual bool Inference(UBitmap &bmp, UBitmap &mask);
 // --------------------------
 };

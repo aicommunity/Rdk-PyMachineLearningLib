@@ -159,11 +159,11 @@ bool TPyComponent::AReset(void)
 }
 
 // Выполняет расчет этого объекта
-bool TPyComponent::ACalculate(void)
+bool TPyComponent::ABeforeCalculate(void)
 {
  if(!PythonInitialized)
   return true;
- return APyCalculate();
+ return true;
 }
 // --------------------------
 

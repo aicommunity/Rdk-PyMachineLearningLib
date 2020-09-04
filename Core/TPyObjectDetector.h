@@ -18,7 +18,6 @@ ULProperty<int,TPyObjectDetector, ptPubParameter> ImageColorModel;
 
 protected: // Временные переменные
 
-UBitmap ProcessedBmp;
 
 public: // Методы
 // --------------------------
@@ -49,7 +48,6 @@ virtual bool APyReset(void);
 virtual bool APyReset2(void);
 
 // Выполняет расчет этого объекта
-virtual bool APyCalculate(void);
 virtual bool Detect(UBitmap &bmp, MDMatrix<double> &output_rects, MDMatrix<int> &output_classes, MDMatrix<double> &reliabilities);
 // --------------------------
 };

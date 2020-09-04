@@ -27,7 +27,6 @@ ULProperty<bool,TPyUBitmapClassifier, ptPubParameter> UseRelativeWeightsPath;
 
 protected: // Временные переменные
 
-UBitmap ProcessedBmp;
 cv::Mat ProcessedMat;
 
 UGraphics Graph;
@@ -66,8 +65,6 @@ virtual bool APyBuild(void);
 // Сброс процесса счета без потери настроек
 virtual bool APyReset(void);
 
-// Выполняет расчет этого объекта
-virtual bool APyCalculate(void);
 
 /// Обрабатывает одно изображение
 virtual bool ClassifyBitmap(UBitmap &bmp, MDVector<double> &output_confidences, double conf_thresh, int &class_id, bool &is_classified);

@@ -128,7 +128,7 @@ bool TPyClassifierTrainer::APyReset(void)
 }
 //TODO доразобраться с Py_BLOCK_THREADS и Py_UNBLOCK_THREADS
 // Выполняет расчет этого объекта
-bool TPyClassifierTrainer::APyCalculate(void)
+bool TPyClassifierTrainer::ACalculate(void)
 {
     try
     {   //Отключаем работу потоков питона в конце включаем
