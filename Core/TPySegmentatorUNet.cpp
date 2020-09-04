@@ -41,6 +41,8 @@ TPySegmentatorUNet* TPySegmentatorUNet::New(void)
 // --------------------------
 bool TPySegmentatorUNet::APythonInitialize(void)
 {
+    if(!PythonInitialized)
+        return false;
     try
     {
         py::object initialize;

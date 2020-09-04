@@ -99,6 +99,8 @@ bool TPySegmentatorProtobuf::APyReset2(void)
 // Выполняет обнаружение
 bool TPySegmentatorProtobuf::Inference(UBitmap &bmp, UBitmap &mask)
 {
+    if(!PythonInitialized)
+        return false;
  try
  {
   py::object retval = IntegrationInterfaceInstance.attr("inference")(bmp);

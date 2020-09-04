@@ -103,6 +103,9 @@ bool TPyUBitmapClassifier::APyReset(void)
 /// Обрабатывает одно изображение
 bool TPyUBitmapClassifier::ClassifyBitmap(UBitmap &bmp, MDVector<double> &output_confidences, double conf_thresh, int &class_id, bool &is_classified)
 {
+    if(!PythonInitialized)
+        return false;
+
     int w = bmp.GetWidth();
     int h = bmp.GetHeight();
 

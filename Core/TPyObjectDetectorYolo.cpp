@@ -110,6 +110,8 @@ bool TPyObjectDetectorYolo::APyReset2(void)
 // Выполняет обнаружение
 bool TPyObjectDetectorYolo::Detect(UBitmap &bmp, MDMatrix<double> &output_rects, MDMatrix<int> &output_classes, MDMatrix<double> &reliabilities)
 {
+    if(!PythonInitialized)
+        return false;
  // Тут считаем
  //std::vector<std::vector<double> > result;
  try
