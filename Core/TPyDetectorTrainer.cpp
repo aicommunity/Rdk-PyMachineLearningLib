@@ -1,7 +1,7 @@
-#ifndef RDK_TPyClassifierTrainerCPP
-#define RDK_TPyClassifierTrainerCPP
+#ifndef RDK_TPyDetectorTrainerCPP
+#define RDK_TPyDetectorTrainerCPP
 
-#include "TPyClassifierTrainer.h"
+#include "TPyDetectorTrainer.h"
 #include <iostream>
 #include <boost/filesystem.hpp>
 
@@ -11,7 +11,7 @@ namespace RDK {
 // --------------------------
 // Конструкторы и деструкторы
 // --------------------------
-TPyClassifierTrainer::TPyClassifierTrainer(void)
+TPyDetectorTrainer::TPyDetectorTrainer(void)
 : TrainDataDir("TrainDataDir",this),
   WorkingDir("WorkingDir",this),
   ArchitectureName("ArchitectureName",this),
@@ -39,12 +39,11 @@ TPyClassifierTrainer::TPyClassifierTrainer(void)
   ValAcc("ValAcc",this),
   ValLoss("ValLoss",this),
   Progress("Progress",this),
-  StopNow("StopNow",this),
-  PyExceptionString("PyExceptionString",this)
+  StopNow("StopNow",this)
 {
 }
 
-TPyClassifierTrainer::~TPyClassifierTrainer(void)
+TPyDetectorTrainer::~TPyDetectorTrainer(void)
 {
 }
 // --------------------------
@@ -53,22 +52,22 @@ TPyClassifierTrainer::~TPyClassifierTrainer(void)
 // Системные методы управления объектом
 // --------------------------
 // Выделяет память для новой чистой копии объекта этого класса
-TPyClassifierTrainer* TPyClassifierTrainer::New(void)
+TPyDetectorTrainer* TPyDetectorTrainer::New(void)
 {
- return new TPyClassifierTrainer;
+ return new TPyDetectorTrainer;
 }
 // --------------------------
 
 // --------------------------
 // Скрытые методы управления счетом
 // --------------------------
-bool TPyClassifierTrainer::APythonInitialize(void)
+bool TPyDetectorTrainer::APythonInitialize(void)
 {
     return true;
 }
 
 // Восстановление настроек по умолчанию и сброс процесса счета
-bool TPyClassifierTrainer::APyDefault(void)
+bool TPyDetectorTrainer::APyDefault(void)
 {
     PythonModuleName="classifier_interface_tf1";
     PythonClassName="ClassifierTrainer";
@@ -106,14 +105,14 @@ bool TPyClassifierTrainer::APyDefault(void)
 // после настройки параметров
 // Автоматически вызывает метод Reset() и выставляет Ready в true
 // в случае успешной сборки
-bool TPyClassifierTrainer::APyBuild(void)
+bool TPyDetectorTrainer::APyBuild(void)
 {
     //_custom_save = nullptr;
     return true;
 }
 
 // Сброс процесса счета без потери настроек
-bool TPyClassifierTrainer::APyReset(void)
+bool TPyDetectorTrainer::APyReset(void)
 {
     //TODO тут что-то надо, но как ниже не работает=(
     //Остановка обучения
@@ -124,36 +123,22 @@ bool TPyClassifierTrainer::APyReset(void)
 
     StopTraining = StopNow = false;
     StartTraining = false;
-    Py_CUSTOM_UNBLOCK_THREADS
+
     return true;
 }
 //TODO доразобраться с Py_BLOCK_THREADS и Py_UNBLOCK_THREADS
 // Выполняет расчет этого объекта
-bool TPyClassifierTrainer::ACalculate(void)
+bool TPyDetectorTrainer::ACalculate(void)
 {
     try
-    {   //Отключаем работу потоков питона (для возмонжости запуска функций) в конце включаем
+    {   //Отключаем работу потоков питона в конце включаем
         Py_CUSTOM_BLOCK_THREADS
         // Проверка статуса обучения
         py::object train_status = IntegrationInterfaceInstance.attr("train_status")();
-        TrainingStatus = boost::python::extract< int >(train_status);
+        TrainingStatus.v = boost::python::extract< int >(train_status);
 
-        // Ошибка по время обучения (сообщаем и обнуляем статус)
-        if(TrainingStatus == -1)
-        {
-            //
-            py::object except_string = IntegrationInterfaceInstance.attr("set_training_status_to_null")();
-            py::object res = IntegrationInterfaceInstance.attr("set_training_status_to_null")();
-        }
-        // Успешное обучение (сообщаем и обнуляем статус)
-        if(TrainingStatus == 3)
-        {
-            LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("Training completed or stopped correctly"));
-            py::object res = IntegrationInterfaceInstance.attr("set_training_status_to_null")();
-        }
-
-        //если обучение/тестирование идет, опрашиваем геттеры
-        if(TrainingStatus == 1 || TrainingStatus == 2)
+        //если обучение идет, опрашиваем геттеры
+        if(*TrainingStatus)
         {
             //Запуск геттеров для получения информации о состоянии обучения
             py::object epoch        = IntegrationInterfaceInstance.attr("get_epoch")();
@@ -171,27 +156,27 @@ bool TPyClassifierTrainer::ACalculate(void)
             Progress    = boost::python::extract< float >(progress);
 
             //Останавливаем обучение либо вообще все, если требуется
-            if(StopTraining)
+            if(*StopTraining)
             {
                 IntegrationInterfaceInstance.attr("stop_training")();
-                StopTraining = false;
+                *StopTraining = false;
             }
-            if(StopNow)
+            if(*StopNow)
             {
                 IntegrationInterfaceInstance.attr("stop_now")();
-                StopNow = false;
+                *StopNow = false;
             }
         }
         // Если обучение не идет - запускаем, если надо
         else
         {
-            if(StartTraining)
+            if(*StartTraining)
             {
                 // Проверки на входные аргументы
                 if(!CheckInputParameters())
                 {
                     Py_CUSTOM_UNBLOCK_THREADS
-                    StartTraining = false;
+                    *StartTraining = false;
                     return true;
                 }
 
@@ -256,7 +241,7 @@ bool TPyClassifierTrainer::ACalculate(void)
     catch (py::error_already_set const &)
     {
         std::string perrorStr = parse_python_exception();
-        LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPyClassifierTrainer error: ")+perrorStr);
+        LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPyDetectorTrainer error: ")+perrorStr);
         TrainingStatus = 0;
     }
     catch(...)
@@ -271,7 +256,7 @@ bool TPyClassifierTrainer::ACalculate(void)
 }
 
 
-bool TPyClassifierTrainer::CheckInputParameters()
+bool TPyDetectorTrainer::CheckInputParameters()
 {
     if(TrainDataDir->empty())
     {

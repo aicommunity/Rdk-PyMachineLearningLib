@@ -57,7 +57,8 @@ HEADERS += \
     ../../Core/TPySegmentatorUNet.h \
     ../../Core/Lib.h \
     ../../Core/TPyComponent.h   \
-    ../../Core/TPyClassifierTrainer.h
+    ../../Core/TPyClassifierTrainer.h \
+    ../../Core/TPyDetectorTrainer.h
 
 
 SOURCES += \
@@ -74,7 +75,8 @@ SOURCES += \
     ../../Core/TPySegmentatorUNet.cpp \
     ../../Core/Lib.cpp \
     ../../Core/TPyComponent.cpp \
-    ../../Core/TPyClassifierTrainer.cpp
+    ../../Core/TPyClassifierTrainer.cpp \
+    ../../Core/TPyDetectorTrainer.cpp
 }
 
 HEADERS += \
