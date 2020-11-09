@@ -12,34 +12,14 @@ namespace RDK {
 // Конструкторы и деструкторы
 // --------------------------
 TPyDetectorTrainer::TPyDetectorTrainer(void)
-: TrainDataDir("TrainDataDir",this),
-  WorkingDir("WorkingDir",this),
-  ArchitectureName("ArchitectureName",this),
-  DatasetName("DatasetName",this),
-  SplitRatio("SplitRatio",this),
-  SaveSplits("SaveSplits",this),
-  CopySplittedImages("CopySplittedImages",this),
-  TestEqualVal("TestEqualVal",this),
-  ImageSize("ImageSize",this),
-  Epochs("Epochs",this),
-  LearningRate("LearningRate",this),
-  BatchSizes("BatchSizes",this),
-  Weights("Weights",this),
-  LayersToBeTrained("LayersToBeTrained",this),
-  Classes("Classes",this),
-  EarlyStop("EarlyStop",this),
-  SavingInterval("SavingInterval",this),
-  SaveBestOnly("SaveBestOnly",this),
-  TrainingStatus("TrainingStatus",this),
-  StartTraining("StartTraining",this),
-  StopTraining("StopTraining",this),
-  Epoch("Epoch",this),
-  TrainAcc("TrainAcc",this),
-  TrainLoss("TrainLoss",this),
-  ValAcc("ValAcc",this),
-  ValLoss("ValLoss",this),
-  Progress("Progress",this),
-  StopNow("StopNow",this)
+: DatasetType("DatasetType",this),
+  Config("Config",this),
+  SavePredicted("SavePredicted",this),
+  Visualize("Visualize",this),
+  PaintGt("PaintGt",this),
+  LossNames("LossNames",this),
+  TrainLosses("TrainLosses",this),
+  ValLosses("ValLosses",this)
 {
 }
 
@@ -69,35 +49,34 @@ bool TPyDetectorTrainer::APythonInitialize(void)
 // Восстановление настроек по умолчанию и сброс процесса счета
 bool TPyDetectorTrainer::APyDefault(void)
 {
-    PythonModuleName="classifier_interface_tf1";
-    PythonClassName="ClassifierTrainer";
-    TrainDataDir = "";
+    PythonModuleName="detection_train";
+    PythonClassName="DetectionInterface";
+    TrainDataDir = {""};
     WorkingDir = "";
-    ArchitectureName= "MobileNet";
-    DatasetName = "dataset_ft";
-    SplitRatio = {70,20,10};
+    ArchitectureName= "SqueezeDet";
+    SplitRatio = {0.7f, 0.2f, 0.1f};
     SaveSplits = false;
-    CopySplittedImages = false;
-    TestEqualVal = false;
-    ImageSize = {224,224,3};
     Epochs = 5;
-    LearningRate = 0.0002f;
-    BatchSizes = {4,2,1};
-    Weights = "imagenet";
-    LayersToBeTrained = 0;
-    Classes = {};
+    Weights = "";
     EarlyStop = 0;
     SavingInterval = 1;
     SaveBestOnly = false;
     TrainingStatus = false;
     StartTraining = false;
     StopTraining = false;
+
+    DatasetType = "";
+    Config = "";
+    SavePredicted = false;
+    Visualize = 0;
+    PaintGt = false;
+
     Epoch = 0;
-    TrainAcc = 0.0;
-    TrainLoss = 0.0;
-    ValAcc = 0.0;
-    ValLoss = 0.0;
     Progress = 0.0;
+
+    LossNames = {""};
+    ValLosses = {0.0};
+    TrainLosses = {0.0};
     return true;
 }
 
@@ -111,74 +90,117 @@ bool TPyDetectorTrainer::APyBuild(void)
     return true;
 }
 
-// Сброс процесса счета без потери настроек
-bool TPyDetectorTrainer::APyReset(void)
-{
-    //TODO тут что-то надо, но как ниже не работает=(
-    //Остановка обучения
 
-    Py_CUSTOM_BLOCK_THREADS
-    IntegrationInterfaceInstance.attr("stop_now")();
-    //Py_CUSTOM_UNBLOCK_THREADS
-
-    StopTraining = StopNow = false;
-    StartTraining = false;
-
-    return true;
-}
 //TODO доразобраться с Py_BLOCK_THREADS и Py_UNBLOCK_THREADS
 // Выполняет расчет этого объекта
 bool TPyDetectorTrainer::ACalculate(void)
 {
+    if(!PythonInitialized)
+       return true;
+
     try
-    {   //Отключаем работу потоков питона в конце включаем
+    {   //Отключаем работу потоков питона (для возмонжости запуска функций) в конце включаем
         Py_CUSTOM_BLOCK_THREADS
         // Проверка статуса обучения
         py::object train_status = IntegrationInterfaceInstance.attr("train_status")();
-        TrainingStatus.v = boost::python::extract< int >(train_status);
+        TrainingStatus = boost::python::extract< int >(train_status);
 
-        //если обучение идет, опрашиваем геттеры
-        if(*TrainingStatus)
+        // Ошибка по время обучения (сообщаем и обнуляем статус)
+        if(TrainingStatus == -1)
         {
+            //сброс на случай выставления извне
+            StartTraining = false;
+
+            py::object except_string = IntegrationInterfaceInstance.attr("get_error_string")();
+
+            std::string PyExceptionString = boost::python::extract< std::string >(except_string);
+
+            LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Exception during function execution: ") + PyExceptionString);
+
+            TrainingStatus = 0;
+            py::object res = IntegrationInterfaceInstance.attr("set_training_status_to_null")();
+
+            Epoch = 0;
+            Progress = 0.0;
+
+            LossNames = {""};
+            ValLosses = {0.0};
+            TrainLosses = {0.0};
+        }
+        // Успешное завершение работы. После обработки в компоненте сбрасывается в 0
+        // (законечно обучение, либо успешное преждевременное завершение (stop_training, stop_now)
+        // Сообщаем и сбрасываем статус в 0
+        if(TrainingStatus == 3)
+        {
+            //сброс на случай выставления извне
+            StartTraining = false;
+
+            LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("Training completed or stopped correctly"));
+
+            TrainingStatus = 0;
+            py::object res = IntegrationInterfaceInstance.attr("set_training_status_to_null")();
+
+            Epoch = 0;
+            Progress = 0.0;
+
+            LossNames = {""};
+            ValLosses = {0.0};
+            TrainLosses = {0.0};
+        }
+
+        //если обучение/тестирование идет, опрашиваем геттеры
+        if(TrainingStatus == 1 || TrainingStatus == 2)
+        {
+            //сброс на случай выставления извне
+            StartTraining = false;
+
             //Запуск геттеров для получения информации о состоянии обучения
             py::object epoch        = IntegrationInterfaceInstance.attr("get_epoch")();
+            py::object progress     = IntegrationInterfaceInstance.attr("get_progess")();
+
             py::object train_acc    = IntegrationInterfaceInstance.attr("get_train_acc")();
             py::object train_loss   = IntegrationInterfaceInstance.attr("get_train_loss")();
             py::object val_acc      = IntegrationInterfaceInstance.attr("get_val_acc")();
             py::object val_loss     = IntegrationInterfaceInstance.attr("get_val_loss")();
-            py::object progress     = IntegrationInterfaceInstance.attr("get_progess")();
 
             Epoch       = boost::python::extract< int >(epoch);
+            Progress    = boost::python::extract< float >(progress);
+
             TrainAcc    = boost::python::extract< float >(train_acc);
             TrainLoss   = boost::python::extract< float >(train_loss);
             ValAcc      = boost::python::extract< float >(val_acc);
             ValLoss     = boost::python::extract< float >(val_loss);
-            Progress    = boost::python::extract< float >(progress);
+
 
             //Останавливаем обучение либо вообще все, если требуется
-            if(*StopTraining)
+            if(StopTraining)
             {
                 IntegrationInterfaceInstance.attr("stop_training")();
-                *StopTraining = false;
+                LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("Stop training initiated. Trained networks will be tested"));
+                StopTraining = false;
             }
-            if(*StopNow)
+            if(StopNow)
             {
                 IntegrationInterfaceInstance.attr("stop_now")();
-                *StopNow = false;
+                LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("Stop training/test initiated. Trained networks will not be tested. "
+                                                                  "All python-execution will be stopped"));
+                StopNow = false;
             }
         }
-        // Если обучение не идет - запускаем, если надо
+        // Если обучение не идет и запуск возможен (статус 0)
         else
         {
-            if(*StartTraining)
+            if(StartTraining)
             {
                 // Проверки на входные аргументы
                 if(!CheckInputParameters())
                 {
                     Py_CUSTOM_UNBLOCK_THREADS
-                    *StartTraining = false;
+                    StartTraining = false;
                     return true;
                 }
+
+                LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("Training started"));
 
                 // Запуск обучения
                 StopTraining = StopNow = false;
@@ -205,10 +227,10 @@ bool TPyDetectorTrainer::ACalculate(void)
                 //Заполнение словаря параметров (кроме data_dir у него свой кортеж)
                 py::dict func_params;
 
-                func_params["working_dir"]          =   py::str(WorkingDir->c_str());;
+                func_params["working_dir"]          =   py::str(WorkingDir->c_str());
                 func_params["image_size"]           =   py::make_tuple(ImageSize[0],ImageSize[1],ImageSize[2]);
-                func_params["architecture"]         =   py::str(ArchitectureName->c_str());;
-                func_params["dataset_name"]         =   py::str(DatasetName->c_str());;
+                func_params["architecture"]         =   py::str(ArchitectureName->c_str());
+                func_params["dataset_name"]         =   py::str(DatasetName->c_str());
                 func_params["split_ratio"]          =   split_ratio;
                 func_params["save_splits"]          =   py::object(SaveSplits.v);
                 func_params["copy_images"]          =   py::object(CopySplittedImages.v);
@@ -225,30 +247,42 @@ bool TPyDetectorTrainer::ACalculate(void)
                 func_params["save_best_only"]       =   py::object(SaveBestOnly.v);
                 func_params["online_augmentation"]  =   py::dict();
 
-                py::tuple data_dir_tuple = py::make_tuple((TrainDataDir->c_str()));
+                py::tuple data_dir_tuple = py::make_tuple((TrainDataDir->at(0).c_str()));
 
                 //Запуск обучения, внутри функции питона остоединение обучения в поток
                 py::object retval = IntegrationInterfaceInstance.attr("classification_train")
                                                                         (data_dir_tuple,
                                                                          func_params);
+
+                // проверка на исключительный (практически невозможный) случай
+                // если после выполнения функции classification_train() изменился TrainingStatus на -1
+                py::object train_status = IntegrationInterfaceInstance.attr("train_status")();
+                TrainingStatus = boost::python::extract< int >(train_status);
+                if(TrainingStatus == -1)
+                {
+                    py::object except_string = IntegrationInterfaceInstance.attr("get_error_string")();
+
+                    std::string PyExceptionString = boost::python::extract< std::string >(except_string);
+
+                    LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Exception during start of training: ") + PyExceptionString);
+                }
+
                 TrainingStatus = 1;
                 StartTraining = false;
 
             }
-            //return true;
         }
     }
     catch (py::error_already_set const &)
     {
         std::string perrorStr = parse_python_exception();
-        LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPyDetectorTrainer error: ")+perrorStr);
+        LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPyClassifierTrainer error: ")+perrorStr);
         TrainingStatus = 0;
     }
     catch(...)
     {
         LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Unknown exception"));
         TrainingStatus = 0;
-
     }
     //Разрешаем потокам исполняться
     Py_CUSTOM_UNBLOCK_THREADS
@@ -258,7 +292,7 @@ bool TPyDetectorTrainer::ACalculate(void)
 
 bool TPyDetectorTrainer::CheckInputParameters()
 {
-    if(TrainDataDir->empty())
+    if(TrainDataDir->empty() || TrainDataDir->at(0).empty())
     {
         LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("TrainDataDir is empty!"));
         return false;
@@ -276,27 +310,16 @@ bool TPyDetectorTrainer::CheckInputParameters()
         return false;
     }
 
-    if(DatasetName->empty())
+    if(DatasetType->empty())
     {
-        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("DatasetName is empty!"));
+        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("DatasetType is empty!"));
         return false;
     }
+
 
     if(SplitRatio.size()!=3)
     {
         LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("SplitRatio must have 3 values!"));
-        return false;
-    }
-
-    if(ImageSize.size()!=3)
-    {
-        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("ImageSize must have 3 values!"));
-        return false;
-    }
-
-    if(BatchSizes.size()!=3)
-    {
-        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("BatchSizes must have 3 values!"));
         return false;
     }
 

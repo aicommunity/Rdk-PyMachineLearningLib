@@ -12,35 +12,18 @@ namespace RDK {
 // Конструкторы и деструкторы
 // --------------------------
 TPyClassifierTrainer::TPyClassifierTrainer(void)
-: TrainDataDir("TrainDataDir",this),
-  WorkingDir("WorkingDir",this),
-  ArchitectureName("ArchitectureName",this),
-  DatasetName("DatasetName",this),
-  SplitRatio("SplitRatio",this),
-  SaveSplits("SaveSplits",this),
+: DatasetName("DatasetName",this),
   CopySplittedImages("CopySplittedImages",this),
   TestEqualVal("TestEqualVal",this),
   ImageSize("ImageSize",this),
-  Epochs("Epochs",this),
   LearningRate("LearningRate",this),
   BatchSizes("BatchSizes",this),
-  Weights("Weights",this),
   LayersToBeTrained("LayersToBeTrained",this),
   Classes("Classes",this),
-  EarlyStop("EarlyStop",this),
-  SavingInterval("SavingInterval",this),
-  SaveBestOnly("SaveBestOnly",this),
-  TrainingStatus("TrainingStatus",this),
-  StartTraining("StartTraining",this),
-  StopTraining("StopTraining",this),
-  Epoch("Epoch",this),
+  TrainLoss("Classes",this),
   TrainAcc("TrainAcc",this),
-  TrainLoss("TrainLoss",this),
-  ValAcc("ValAcc",this),
   ValLoss("ValLoss",this),
-  Progress("Progress",this),
-  StopNow("StopNow",this),
-  PyExceptionString("PyExceptionString",this)
+  ValAcc("ValAcc",this)
 {
 }
 
@@ -72,11 +55,11 @@ bool TPyClassifierTrainer::APyDefault(void)
 {
     PythonModuleName="classifier_interface_tf1";
     PythonClassName="ClassifierTrainer";
-    TrainDataDir = "";
+    TrainDataDir = {""};
     WorkingDir = "";
     ArchitectureName= "MobileNet";
     DatasetName = "dataset_ft";
-    SplitRatio = {70,20,10};
+    SplitRatio = {70.f,20.f,10.f};
     SaveSplits = false;
     CopySplittedImages = false;
     TestEqualVal = false;
@@ -93,12 +76,15 @@ bool TPyClassifierTrainer::APyDefault(void)
     TrainingStatus = false;
     StartTraining = false;
     StopTraining = false;
+
     Epoch = 0;
+    Progress = 0.0;
+
     TrainAcc = 0.0;
     TrainLoss = 0.0;
     ValAcc = 0.0;
     ValLoss = 0.0;
-    Progress = 0.0;
+
     return true;
 }
 
@@ -112,22 +98,7 @@ bool TPyClassifierTrainer::APyBuild(void)
     return true;
 }
 
-// Сброс процесса счета без потери настроек
-bool TPyClassifierTrainer::APyReset(void)
-{
-    //TODO тут что-то надо, но как ниже не работает=(
-    //Остановка обучения
-
-    Py_CUSTOM_BLOCK_THREADS
-    IntegrationInterfaceInstance.attr("stop_now")();
-    //Py_CUSTOM_UNBLOCK_THREADS
-
-    StopTraining = StopNow = false;
-    StartTraining = false;
-    Py_CUSTOM_UNBLOCK_THREADS
-    return true;
-}
-//TODO доразобраться с Py_BLOCK_THREADS и Py_UNBLOCK_THREADS
+//TODO доразобраться с Py_BLOCK_THREADS и Py_UNBLOCK_THREADS вроде разбрался
 // Выполняет расчет этого объекта
 bool TPyClassifierTrainer::ACalculate(void)
 {
@@ -149,12 +120,19 @@ bool TPyClassifierTrainer::ACalculate(void)
 
             py::object except_string = IntegrationInterfaceInstance.attr("get_error_string")();
 
-            PyExceptionString = boost::python::extract< std::string >(except_string);
+            std::string PyExceptionString = boost::python::extract< std::string >(except_string);
 
-            LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Exception during function execution: ") + *PyExceptionString);
+            LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Exception during function execution: ") + PyExceptionString);
 
             TrainingStatus = 0;
             py::object res = IntegrationInterfaceInstance.attr("set_training_status_to_null")();
+
+            Epoch = 0;
+            TrainAcc = 0.0;
+            TrainLoss = 0.0;
+            ValAcc = 0.0;
+            ValLoss = 0.0;
+            Progress = 0.0;
         }
         // Успешное завершение работы. После обработки в компоненте сбрасывается в 0
         // (законечно обучение, либо успешное преждевременное завершение (stop_training, stop_now)
@@ -168,6 +146,13 @@ bool TPyClassifierTrainer::ACalculate(void)
 
             TrainingStatus = 0;
             py::object res = IntegrationInterfaceInstance.attr("set_training_status_to_null")();
+
+            Epoch = 0;
+            TrainAcc = 0.0;
+            TrainLoss = 0.0;
+            ValAcc = 0.0;
+            ValLoss = 0.0;
+            Progress = 0.0;
         }
 
         //если обучение/тестирование идет, опрашиваем геттеры
@@ -266,17 +251,24 @@ bool TPyClassifierTrainer::ACalculate(void)
                 func_params["save_best_only"]       =   py::object(SaveBestOnly.v);
                 func_params["online_augmentation"]  =   py::dict();
 
-                py::tuple data_dir_tuple = py::make_tuple((TrainDataDir->c_str()));
+                py::tuple data_dir_tuple = py::make_tuple((TrainDataDir->at(0).c_str()));
 
                 //Запуск обучения, внутри функции питона остоединение обучения в поток
                 py::object retval = IntegrationInterfaceInstance.attr("classification_train")
                                                                         (data_dir_tuple,
                                                                          func_params);
-                // Если функция что-то вернула
-                if(retval != py::object())
+
+                // проверка на исключительный (практически невозможный) случай
+                // если после выполнения функции classification_train() изменился TrainingStatus на -1
+                py::object train_status = IntegrationInterfaceInstance.attr("train_status")();
+                TrainingStatus = boost::python::extract< int >(train_status);
+                if(TrainingStatus == -1)
                 {
-                    std::string check = boost::python::extract< std::string >(retval);
-                    LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string(check));
+                    py::object except_string = IntegrationInterfaceInstance.attr("get_error_string")();
+
+                    std::string PyExceptionString = boost::python::extract< std::string >(except_string);
+
+                    LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Exception during start of training: ") + PyExceptionString);
                 }
 
                 TrainingStatus = 1;
@@ -304,7 +296,7 @@ bool TPyClassifierTrainer::ACalculate(void)
 
 bool TPyClassifierTrainer::CheckInputParameters()
 {
-    if(TrainDataDir->empty())
+    if(TrainDataDir->empty() || TrainDataDir->at(0).empty())
     {
         LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("TrainDataDir is empty!"));
         return false;

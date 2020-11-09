@@ -125,8 +125,9 @@ void UPyMachineLearningLib::CreateClassSamples(UStorage *storage)
  UploadClass<TPySegmentatorProtobuf>("TPySegmentatorProtobuf","PySegmentatorProtobuf");
  UploadClass<TPySegmentatorUNet>("TPySegmentatorUNet","TPySegmentatorUNet");
  UploadClass<TPyClassifierTrainer>("TPyClassifierTrainer","TPyClassifierTrainer");
+ UploadClass<TPyDetectorTrainer>("TPyDetectorTrainer","TPyDetectorTrainer");
 #endif
-
+// TODO дорабоать TPyComponent (иногда sigfault при добавлении новхы компонентов)
 }
 // --------------------------
 

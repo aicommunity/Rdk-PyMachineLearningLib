@@ -1,128 +1,46 @@
 #ifndef RDK_TPyDetectorTrainerH
 #define RDK_TPyDetectorTrainerH
 
-#include "TPyComponent.h"
+#include "TPyBaseTrainer.h"
 
 
 
 
 namespace RDK {
 
-class TPyDetectorTrainer: public TPyComponent
+class TPyDetectorTrainer: public TPyBaseTrainer
 {
 public: // Свойства  
-/// Папка с изображениями для обучения
-/*
-может представлять собой исходную папку данных в формате
-    main_directory/
-    ...class_a/
-    ......a_image_1.jpg
-    ......a_image_2.jpg
-    ...class_b/
-    ......b_image_1.jpg
-    ......b_image_2.jpg
-*/
-/// Или три папки с аналогичной структурой train, val, test
-/// Или если вход - список, то три файла .txt файла со строчками "путь_до_картинки класс",
-/// содержащие разбиение для выборок train, val, tes
-ULProperty<std::string, TPyDetectorTrainer> TrainDataDir;
 
-/// Директория, куда сохранится перераспредленный датасет, также веса метрики, графики, матрица ошибок
-ULProperty<std::string, TPyDetectorTrainer> WorkingDir;
+/// Тип набора данных на данный момент список возможных значений: "xml_main_dirs", "xml_txt_splits", "xml_txt_main_lists", "xml_test_dirs", "xml_txt_test_splits"
+ULProperty<std::string, TPyDetectorTrainer, ptPubParameter> DatasetType;
 
-/// Имя архитектуры
-/// Варианты: SqueezeNet, MobileNet, MobileNetV2, InceptionV3, VGG16, ResNet50,
-/// ResNet101, DenseNet121, DenseNet169, NASNetMobile, NASNetLarge
-ULProperty<std::string, TPyDetectorTrainer> ArchitectureName;
+/// Конфиг с общими и специфическими параметрами для архитектуры
+ULProperty<std::string, TPyDetectorTrainer, ptPubParameter> Config;
 
-/// Имя набора данных для сохранения в файле конфига и названии весов
-ULProperty<std::string, TPyDetectorTrainer> DatasetName;
+/// Сохранять ли на этапе тестирования в подпапку /pred рабочей директории
+/// xml файлы содержащие предсказания нейросети на тестовом наборе данных
+ULProperty<bool, TPyDetectorTrainer, ptPubParameter> SavePredicted;
 
-/// [percent_train, percent_val, percent_test] - параметры разбиения выборки,
-/// если используется основная директория (без разбиения на train val test, по умолчанию 70, 20, 10)
-ULProperty<std::vector<int>, TPyDetectorTrainer> SplitRatio;
+/// Сохраняет в подпапку /images рабочей директории изображения с визуализациями обнаружений нейронной сети.
+/// Возможные параметры: 0 (false) или 9999 ("all") или другое целое число
+/// Если задано число n, то равномерно выбирается n картинок из тестового набора данных 
+ULProperty<int, TPyDetectorTrainer, ptPubParameter> Visualize;
 
-/// Сохранять ли текстовые файлы разбиений.
-ULProperty<bool, TPyDetectorTrainer> SaveSplits;
+/// Рисовать ли ограничивающие рамки для аннотаций на примерах обнаружения при активном параметре visualize
+/// (пусть аннотации рисуются белым всегда) может быть полезно при анализе полученных показателей точности,
+/// однако обычно сильно ухудшает наглядность необходимую для демонстрации
+ULProperty<bool, TPyDetectorTrainer, ptPubParameter> PaintGt;
 
-/// Копировать ли в рабочую директорию картинки разбитые на train val test
-/// согласно сгенерированным разбиениям из текстовых файлов
-ULProperty<bool, TPyDetectorTrainer> CopySplittedImages;
+// Переменные состояния
+/// Список названий функций потерь для конкретной архитектуры
+ULProperty<std::vector<std::string>, TPyDetectorTrainer, ptPubState> LossNames;
 
-/// Стоит ли приравнивать валидационную выборку тестовой.
-/// В случае если разбиение равно 70, 20, 10 и TestEqualVal=True, то 10% выборки не будет использовано.
-ULProperty<bool, TPyDetectorTrainer> TestEqualVal;
+/// Список названий функций потерь
+ULProperty<std::vector<float>, TPyDetectorTrainer, ptPubParameter> TrainLosses;
 
-/// Параметры изображения (width, height, channels)
-ULProperty<std::vector<int>, TPyDetectorTrainer> ImageSize;
-
-/// Кол-во эпох для обучения
-ULProperty<int, TPyDetectorTrainer> Epochs;
-
-/// Learning Rate
-ULProperty<float, TPyDetectorTrainer> LearningRate;
-
-/// Размеры трех batch-ей, для train, val и test
-ULProperty<std::vector<int>, TPyDetectorTrainer> BatchSizes;
-
-/// Начальные веса. По умолчанию "imagenet" иначе random или путь до конкретных весов
-ULProperty<std::string, TPyDetectorTrainer> Weights;
-
-/// Количество тренируемых слоев. N последних
-ULProperty<int, TPyDetectorTrainer> LayersToBeTrained;
-
-/// Классы, опционально(список), если учимся не на всех классах датасета
-ULProperty<std::vector<std::string>, TPyDetectorTrainer> Classes;
-
-/// Число, равное параметру patience
-/// (количество эпох, которое может быть проведено без улучшения значения функции потерь, до остановки обучения)
-ULProperty<int, TPyDetectorTrainer> EarlyStop;
-
-/// Интервал сохранения весов (в случае варианта для tf 1.* - n эпох) (в случае варианта tf 2.* - n батчей)
-ULProperty<int, TPyDetectorTrainer> SavingInterval;
-
-/// Cохранять ли только лучшую модель по параметру val_loss
-ULProperty<bool, TPyDetectorTrainer> SaveBestOnly;
-
-/// Флаг включения обучения
-// обучение начнется при StartTraining=true и TrainingInProgress=false
-// при запуске обучения данный флаг становится false
-ULProperty<bool, TPyDetectorTrainer> StartTraining;
-
-/// Флаг остановки обучения
-// останавливает обучение и делает тест, если прошло больше одной эпохи, потом завершается поток
-ULProperty<bool, TPyDetectorTrainer> StopTraining;
-
-/// Флаг остановки обучения (закончит без тестов)
-ULProperty<bool, TPyDetectorTrainer> StopNow;
-
-
-/// Статус обучения
-// 0 - ничего не происходит
-// 1 - обучение
-// 2 - тестирование после обучения
-// 3 -
-ULProperty<int, TPyDetectorTrainer, ptPubState> TrainingStatus;
-
-/// Текущая эпоха
-ULProperty<int, TPyDetectorTrainer, ptPubState> Epoch;
-
-/// Текущая ошибка на тренировочном наборе
-ULProperty<float, TPyDetectorTrainer, ptPubState> TrainLoss;
-
-/// Текущая точность на тренировочном наборе
-ULProperty<float, TPyDetectorTrainer, ptPubState> TrainAcc;
-
-/// Текущая ошибка на валидационном наборе
-ULProperty<float, TPyDetectorTrainer, ptPubState> ValLoss;
-
-/// Текущая точность на валидационном наборе
-ULProperty<float, TPyDetectorTrainer, ptPubState> ValAcc;
-
-/// Текущий прогресс
-ULProperty<float, TPyDetectorTrainer, ptPubState> Progress;
-
-
+/// Список названий функций
+ULProperty<std::vector<float>, TPyDetectorTrainer, ptPubParameter> ValLosses;
 
 protected: // Временные переменные
 
@@ -159,7 +77,7 @@ virtual bool APyDefault(void);
 virtual bool APyBuild(void);
 
 // Сброс процесса счета без потери настроек
-virtual bool APyReset(void);
+//virtual bool APyReset(void);
 
 // Выполняет расчет этого объекта
 virtual bool ACalculate(void);
