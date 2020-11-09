@@ -96,12 +96,16 @@ ULProperty<bool, TPyClassifierTrainer> StopTraining;
 /// Флаг остановки обучения (закончит без тестов)
 ULProperty<bool, TPyClassifierTrainer> StopNow;
 
+/// Описание исключения, возникшего во время выполнения обучения (потока)
 ULProperty<std::string, TPyClassifierTrainer, ptPubState> PyExceptionString;
+
 /// Статус обучения
-// 0 - ничего не происходит
+// -1 - ошибка (исключение внутри потока питона). После обработки в компоненте сбрасывается в 0
+// 0 - ничего не происходит (можно запускать обучеине)
 // 1 - обучение
 // 2 - тестирование после обучения
-// 3 -
+// 3 - успешное завершение работы. После обработки в компоненте сбрасывается в 0
+//     (законечно обучение, либо успешное преждевременное завершение (stop_training, stop_now)
 ULProperty<int, TPyClassifierTrainer, ptPubState> TrainingStatus;
 
 /// Текущая эпоха
@@ -121,7 +125,6 @@ ULProperty<float, TPyClassifierTrainer, ptPubState> ValAcc;
 
 /// Текущий прогресс
 ULProperty<float, TPyClassifierTrainer, ptPubState> Progress;
-
 
 
 protected: // Временные переменные
