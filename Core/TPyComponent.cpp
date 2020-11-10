@@ -21,7 +21,7 @@ TPyComponent::TPyComponent(void)
   PythonInitialized(false),
   _custom_save(nullptr)
 {
-
+    Py_CUSTOM_BLOCK_THREADS
 }
 // --------------------------
 

@@ -23,7 +23,10 @@ ULProperty<std::string, TPyDetectorTrainer, ptPubParameter> Config;
 ULProperty<bool, TPyDetectorTrainer, ptPubParameter> SavePredicted;
 
 /// Сохраняет в подпапку /images рабочей директории изображения с визуализациями обнаружений нейронной сети.
-/// Возможные параметры: 0 (false) или 9999 ("all") или другое целое число
+/// Возможные параметры:
+///     False   - не сохранять            - число 0
+///     All     - сохранить все           - число -1
+///     n       - сохранить n изображений - другое число n
 /// Если задано число n, то равномерно выбирается n картинок из тестового набора данных 
 ULProperty<int, TPyDetectorTrainer, ptPubParameter> Visualize;
 
@@ -36,11 +39,11 @@ ULProperty<bool, TPyDetectorTrainer, ptPubParameter> PaintGt;
 /// Список названий функций потерь для конкретной архитектуры
 ULProperty<std::vector<std::string>, TPyDetectorTrainer, ptPubState> LossNames;
 
-/// Список названий функций потерь
-ULProperty<std::vector<float>, TPyDetectorTrainer, ptPubParameter> TrainLosses;
+/// Список значений функций потерь на тренировочном наборе
+ULProperty<std::vector<double>, TPyDetectorTrainer, ptPubState> TrainLosses;
 
-/// Список названий функций
-ULProperty<std::vector<float>, TPyDetectorTrainer, ptPubParameter> ValLosses;
+/// Список значений функций потерь на валидационной наборе
+ULProperty<std::vector<double>, TPyDetectorTrainer, ptPubState> ValLosses;
 
 protected: // Временные переменные
 
@@ -84,7 +87,7 @@ virtual bool ACalculate(void);
 
 
 // Проверяет входные параметры перед запуском python-функции
-bool CheckInputParameters();
+virtual bool CheckInputParameters();
 // --------------------------
 };
 

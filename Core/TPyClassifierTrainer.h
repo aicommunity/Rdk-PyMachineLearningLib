@@ -11,32 +11,10 @@ class TPyClassifierTrainer: public TPyBaseTrainer
 {
 public: // Свойства  
 
-/* Папка с изображениями для обучения
-может представлять собой исходную папку данных в формате
-    main_directory/
-    ...class_a/
-    ......a_image_1.jpg
-    ......a_image_2.jpg
-    ...class_b/
-    ......b_image_1.jpg
-    ......b_image_2.jpg
-
-// Или три папки с аналогичной структурой train, val, test
-// Или если вход - список, то три файла .txt файла со строчками "путь_до_картинки класс",
-// содержащие разбиение для выборок train, val, tes
-//ULProperty<std::string, TPyClassifierTrainer> TrainDataDir;
-*/
-
-/* Имя архитектуры
-/// Варианты: SqueezeNet, MobileNet, MobileNetV2, InceptionV3, VGG16, ResNet50,
-/// ResNet101, DenseNet121, DenseNet169, NASNetMobile, NASNetLarge
-ULProperty<std::string, TPyClassifierTrainer> ArchitectureName;
-*/
-
 /// Имя набора данных для сохранения в файле конфига и названии весов
 ULProperty<std::string, TPyClassifierTrainer> DatasetName;
 
-/// Копировать ли в рабочую директорию картинки разбитые на train val test
+/// Копировать ли в рабочую директорию картинки разбитые на train, val, test
 /// согласно сгенерированным разбиениям из текстовых файлов
 ULProperty<bool, TPyClassifierTrainer> CopySplittedImages;
 

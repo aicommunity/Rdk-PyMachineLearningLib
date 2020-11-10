@@ -22,12 +22,12 @@ TPyBaseTrainer::TPyBaseTrainer(void)
   EarlyStop("EarlyStop",this),
   SavingInterval("SavingInterval",this),
   SaveBestOnly("SaveBestOnly",this),
-  TrainingStatus("TrainingStatus",this),
   StartTraining("StartTraining",this),
   StopTraining("StopTraining",this),
+  StopNow("StopNow",this),
+  TrainingStatus("TrainingStatus",this),
   Epoch("Epoch",this),
-  Progress("Progress",this),
-  StopNow("StopNow",this)
+  Progress("Progress",this)
 {
 }
 
@@ -70,7 +70,6 @@ bool TPyBaseTrainer::APyReset(void)
     //Остановка обучения
     Py_CUSTOM_BLOCK_THREADS
     IntegrationInterfaceInstance.attr("stop_now")();
-    //Py_CUSTOM_UNBLOCK_THREADS
 
     StopTraining = StopNow = false;
     StartTraining = false;

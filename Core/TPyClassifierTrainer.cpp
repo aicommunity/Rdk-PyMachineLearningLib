@@ -20,7 +20,7 @@ TPyClassifierTrainer::TPyClassifierTrainer(void)
   BatchSizes("BatchSizes",this),
   LayersToBeTrained("LayersToBeTrained",this),
   Classes("Classes",this),
-  TrainLoss("Classes",this),
+  TrainLoss("TrainLoss",this),
   TrainAcc("TrainAcc",this),
   ValLoss("ValLoss",this),
   ValAcc("ValAcc",this)
@@ -59,7 +59,7 @@ bool TPyClassifierTrainer::APyDefault(void)
     WorkingDir = "";
     ArchitectureName= "MobileNet";
     DatasetName = "dataset_ft";
-    SplitRatio = {70.f,20.f,10.f};
+    SplitRatio = {70,20,10};
     SaveSplits = false;
     CopySplittedImages = false;
     TestEqualVal = false;
@@ -94,21 +94,22 @@ bool TPyClassifierTrainer::APyDefault(void)
 // в случае успешной сборки
 bool TPyClassifierTrainer::APyBuild(void)
 {
-    //_custom_save = nullptr;
     return true;
 }
 
-//TODO доразобраться с Py_BLOCK_THREADS и Py_UNBLOCK_THREADS вроде разбрался
+//TODO доразобраться с Py_BLOCK_THREADS и Py_UNBLOCK_THREADS. вроде разбрался
 // Выполняет расчет этого объекта
 bool TPyClassifierTrainer::ACalculate(void)
 {
+    // Если питон не проинициализирован, то ничего не делаем. Надо чтобы нажали Reset для повторной попытки иницилизации
     if(!PythonInitialized)
        return true;
 
     try
-    {   //Отключаем работу потоков питона (для возмонжости запуска функций) в конце включаем
+    {   //Отключаем работу потоков питона (забираем GIL себе) для возмжности запуска функций
         Py_CUSTOM_BLOCK_THREADS
-        // Проверка статуса обучения
+
+        // Проверка статуса выполнения
         py::object train_status = IntegrationInterfaceInstance.attr("train_status")();
         TrainingStatus = boost::python::extract< int >(train_status);
 
@@ -124,15 +125,18 @@ bool TPyClassifierTrainer::ACalculate(void)
 
             LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Exception during function execution: ") + PyExceptionString);
 
+            // Сброс статуса
             TrainingStatus = 0;
             py::object res = IntegrationInterfaceInstance.attr("set_training_status_to_null")();
 
+            // Сброс переменных состояний
             Epoch = 0;
+            Progress = 0.0;
+
             TrainAcc = 0.0;
             TrainLoss = 0.0;
             ValAcc = 0.0;
             ValLoss = 0.0;
-            Progress = 0.0;
         }
         // Успешное завершение работы. После обработки в компоненте сбрасывается в 0
         // (законечно обучение, либо успешное преждевременное завершение (stop_training, stop_now)
@@ -144,39 +148,35 @@ bool TPyClassifierTrainer::ACalculate(void)
 
             LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("Training completed or stopped correctly"));
 
+            // Сброс статуса
             TrainingStatus = 0;
             py::object res = IntegrationInterfaceInstance.attr("set_training_status_to_null")();
 
+            // Сброс переменных состояний
             Epoch = 0;
+            Progress = 0.0;
+
             TrainAcc = 0.0;
             TrainLoss = 0.0;
             ValAcc = 0.0;
             ValLoss = 0.0;
-            Progress = 0.0;
         }
-
-        //если обучение/тестирование идет, опрашиваем геттеры
+        // Если обучение/тестирование идет, опрашиваем геттеры
         if(TrainingStatus == 1 || TrainingStatus == 2)
         {
             //сброс на случай выставления извне
             StartTraining = false;
 
-            //Запуск геттеров для получения информации о состоянии обучения
-            py::object epoch        = IntegrationInterfaceInstance.attr("get_epoch")();
-            py::object train_acc    = IntegrationInterfaceInstance.attr("get_train_acc")();
-            py::object train_loss   = IntegrationInterfaceInstance.attr("get_train_loss")();
-            py::object val_acc      = IntegrationInterfaceInstance.attr("get_val_acc")();
-            py::object val_loss     = IntegrationInterfaceInstance.attr("get_val_loss")();
-            py::object progress     = IntegrationInterfaceInstance.attr("get_progess")();
+            //Запуск геттеров для получения информации о состоянии выполнения
+            Epoch       = boost::python::extract< int >  (IntegrationInterfaceInstance.attr("get_epoch")());
+            Progress    = boost::python::extract< float >(IntegrationInterfaceInstance.attr("get_progess")());
 
-            Epoch       = boost::python::extract< int >(epoch);
-            TrainAcc    = boost::python::extract< float >(train_acc);
-            TrainLoss   = boost::python::extract< float >(train_loss);
-            ValAcc      = boost::python::extract< float >(val_acc);
-            ValLoss     = boost::python::extract< float >(val_loss);
-            Progress    = boost::python::extract< float >(progress);
+            TrainAcc    = boost::python::extract< float >(IntegrationInterfaceInstance.attr("get_train_acc")());
+            TrainLoss   = boost::python::extract< float >(IntegrationInterfaceInstance.attr("get_train_loss")());
+            ValAcc      = boost::python::extract< float >(IntegrationInterfaceInstance.attr("get_val_acc")());
+            ValLoss     = boost::python::extract< float >(IntegrationInterfaceInstance.attr("get_val_loss")());
 
-            //Останавливаем обучение либо вообще все, если требуется
+            //Останавливаем обучение либо вообще всю функцию, если требуется
             if(StopTraining)
             {
                 IntegrationInterfaceInstance.attr("stop_training")();
@@ -196,7 +196,7 @@ bool TPyClassifierTrainer::ACalculate(void)
         {
             if(StartTraining)
             {
-                // Проверки на входные аргументы
+                // Проверки на допустимость входных аргументов
                 if(!CheckInputParameters())
                 {
                     Py_CUSTOM_UNBLOCK_THREADS
@@ -206,10 +206,12 @@ bool TPyClassifierTrainer::ACalculate(void)
 
                 LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("Training started"));
 
-                // Запуск обучения
+                // Обнуление ненужных флагов
                 StopTraining = StopNow = false;
 
-                // Перевод аргументов в тип PyObject для последующего вызова функции обучения
+                // Подготовка аргументов для функции обучения
+
+                // Перевод аргументов в нужные типы PyObject
                 py::list split_ratio;
                     split_ratio.append(SplitRatio[0]);
                     split_ratio.append(SplitRatio[1]);
@@ -228,7 +230,7 @@ bool TPyClassifierTrainer::ACalculate(void)
                     split_ratio.append(Classes[2]);
                 }
 
-                //Заполнение словаря параметров (кроме data_dir у него свой кортеж)
+                //Заполнение словаря параметров ( именованные аргументы)
                 py::dict func_params;
 
                 func_params["working_dir"]          =   py::str(WorkingDir->c_str());
@@ -236,30 +238,31 @@ bool TPyClassifierTrainer::ACalculate(void)
                 func_params["architecture"]         =   py::str(ArchitectureName->c_str());
                 func_params["dataset_name"]         =   py::str(DatasetName->c_str());
                 func_params["split_ratio"]          =   split_ratio;
-                func_params["save_splits"]          =   py::object(SaveSplits.v);
-                func_params["copy_images"]          =   py::object(CopySplittedImages.v);
-                func_params["test_equal_to_val"]    =   py::object(TestEqualVal.v);
-                func_params["epochs"]               =   py::object(Epochs.v);
-                func_params["learning_rate"]        =   py::object(LearningRate.v);
+                func_params["save_splits"]          =   py::object(*SaveSplits);
+                func_params["copy_images"]          =   py::object(*CopySplittedImages);
+                func_params["test_equal_to_val"]    =   py::object(*TestEqualVal);
+                func_params["epochs"]               =   py::object(*Epochs);
+                func_params["learning_rate"]        =   py::object(*LearningRate);
                 func_params["batch_sizes"]          =   batch_sizes;
                 func_params["weights"]              =   py::object(Weights->c_str());
-                func_params["layers_to_be_trained"] =   LayersToBeTrained.v ? py::object(LayersToBeTrained.v) : py::str("default");
+                func_params["layers_to_be_trained"] =   *LayersToBeTrained ? py::object(*LayersToBeTrained) : py::str("default");
                 func_params["classes"]              =   classes;
-                func_params["early_stop"]           =   EarlyStop.v ? py::object(EarlyStop.v) : py::object(false);
+                func_params["early_stop"]           =   *EarlyStop ? py::object(*EarlyStop) : py::object(false);
                 func_params["preprocessing"]        =   py::object();
-                func_params["saving_interval"]      =   py::object(SavingInterval.v);
-                func_params["save_best_only"]       =   py::object(SaveBestOnly.v);
+                func_params["saving_interval"]      =   py::object(*SavingInterval);
+                func_params["save_best_only"]       =   py::object(*SaveBestOnly);
                 func_params["online_augmentation"]  =   py::dict();
 
-                py::tuple data_dir_tuple = py::make_tuple((TrainDataDir->at(0).c_str()));
+                // Позиционные аргументы
+                py::tuple data_dir_tuple = py::make_tuple(TrainDataDir->at(0).c_str());
 
-                //Запуск обучения, внутри функции питона остоединение обучения в поток
+                //Запуск обучения, внутри функции питона функция обучения отпускается в отдельный поток
                 py::object retval = IntegrationInterfaceInstance.attr("classification_train")
                                                                         (data_dir_tuple,
                                                                          func_params);
 
-                // проверка на исключительный (практически невозможный) случай
-                // если после выполнения функции classification_train() изменился TrainingStatus на -1
+                // Проверка на исключительный (практически невозможный) случай
+                // Если после выполнения функции classification_train() сразу изменился TrainingStatus на -1
                 py::object train_status = IntegrationInterfaceInstance.attr("train_status")();
                 TrainingStatus = boost::python::extract< int >(train_status);
                 if(TrainingStatus == -1)
@@ -273,7 +276,6 @@ bool TPyClassifierTrainer::ACalculate(void)
 
                 TrainingStatus = 1;
                 StartTraining = false;
-
             }
         }
     }
@@ -282,11 +284,13 @@ bool TPyClassifierTrainer::ACalculate(void)
         std::string perrorStr = parse_python_exception();
         LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPyClassifierTrainer error: ")+perrorStr);
         TrainingStatus = 0;
+        StartTraining = false;
     }
     catch(...)
     {
         LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Unknown exception"));
         TrainingStatus = 0;
+        StartTraining = false;
     }
     //Разрешаем потокам исполняться
     Py_CUSTOM_UNBLOCK_THREADS
@@ -339,7 +343,7 @@ bool TPyClassifierTrainer::CheckInputParameters()
     }
 
     //Проверка на непустую директорию WorkingDir
-    if(!boost::filesystem::is_empty(WorkingDir.v.c_str()))
+    if(!boost::filesystem::is_empty(WorkingDir->c_str()))
     {
         LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("WorkingDir isn't empty, it contains some files"));
         return false;
