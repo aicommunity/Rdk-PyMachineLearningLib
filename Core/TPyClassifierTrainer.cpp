@@ -54,7 +54,7 @@ bool TPyClassifierTrainer::APythonInitialize(void)
 bool TPyClassifierTrainer::APyDefault(void)
 {
     PythonModuleName="classifier_interface_tf1";
-    PythonClassName="ClassifierTrainer";
+    PythonClassName="ClassificationInterface";
     TrainDataDir = {""};
     WorkingDir = "";
     ArchitectureName= "MobileNet";
@@ -113,6 +113,8 @@ bool TPyClassifierTrainer::ACalculate(void)
         py::object train_status = IntegrationInterfaceInstance.attr("train_status")();
         TrainingStatus = boost::python::extract< int >(train_status);
 
+        ThreadIsAlive = boost::python::extract<bool>(IntegrationInterfaceInstance.attr("get_thread_is_alive")());
+
         // Ошибка по время обучения (сообщаем и обнуляем статус)
         if(TrainingStatus == -1)
         {
@@ -123,7 +125,7 @@ bool TPyClassifierTrainer::ACalculate(void)
 
             std::string PyExceptionString = boost::python::extract< std::string >(except_string);
 
-            LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Exception during function execution: ") + PyExceptionString);
+            LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Exception during python function execution: ") + PyExceptionString);
 
             // Сброс статуса
             TrainingStatus = 0;
@@ -176,6 +178,7 @@ bool TPyClassifierTrainer::ACalculate(void)
             ValAcc      = boost::python::extract< float >(IntegrationInterfaceInstance.attr("get_val_acc")());
             ValLoss     = boost::python::extract< float >(IntegrationInterfaceInstance.attr("get_val_loss")());
 
+
             //Останавливаем обучение либо вообще всю функцию, если требуется
             if(StopTraining)
             {
@@ -196,6 +199,16 @@ bool TPyClassifierTrainer::ACalculate(void)
         {
             if(StartTraining)
             {
+                if(ThreadIsAlive)
+                {
+                    LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Python thread is alive. "
+                                                                         "Set \"StopNow\" paramenter to true or activate \"Reset\". "
+                                                                         "It will cause stopping of thread"));
+                    Py_CUSTOM_UNBLOCK_THREADS
+                    StartTraining = false;
+                    return true;
+                }
+
                 // Проверки на допустимость входных аргументов
                 if(!CheckInputParameters())
                 {

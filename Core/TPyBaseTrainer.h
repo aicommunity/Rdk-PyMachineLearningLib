@@ -63,6 +63,11 @@ ULProperty<bool, TPyBaseTrainer> StopNow;
 //     (законечно обучение, либо успешное преждевременное завершение (stop_training, stop_now))
 ULProperty<int, TPyBaseTrainer, ptPubState> TrainingStatus;
 
+/// Текущее состояния потока обучение/тестировани и т.д.
+// true  - поток исполняется
+// false - поток не исполянется
+ULProperty<bool, TPyBaseTrainer, ptPubState> ThreadIsAlive;
+
 /// Текущая эпоха
 ULProperty<int, TPyBaseTrainer, ptPubState> Epoch;
 

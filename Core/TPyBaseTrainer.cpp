@@ -26,6 +26,7 @@ TPyBaseTrainer::TPyBaseTrainer(void)
   StopTraining("StopTraining",this),
   StopNow("StopNow",this),
   TrainingStatus("TrainingStatus",this),
+  ThreadIsAlive("ThreadIsAlive",this),
   Epoch("Epoch",this),
   Progress("Progress",this)
 {
@@ -33,6 +34,47 @@ TPyBaseTrainer::TPyBaseTrainer(void)
 
 TPyBaseTrainer::~TPyBaseTrainer(void)
 {
+    // √арантировано дожидаемс€ завершени€ потока питона
+    Py_CUSTOM_BLOCK_THREADS
+    try
+    {
+        // ѕосылаем команду на остановку исполнени€
+        IntegrationInterfaceInstance.attr("stop_now")();
+
+        ThreadIsAlive = boost::python::extract<bool>(IntegrationInterfaceInstance.attr("get_thread_is_alive")());
+
+        // ‘лаг оставноки потока именно в данном месте
+        bool stopped = false;
+
+        // ∆дем пока поток завершитьс€
+        while(ThreadIsAlive)
+        {
+            // ѕосылаем команду на остановку потока
+            IntegrationInterfaceInstance.attr("stop_now")();
+
+            stopped = true;
+
+            Py_CUSTOM_UNBLOCK_THREADS
+            // даем возможность потоку завершитьс€
+            Sleep(100);
+            Py_CUSTOM_BLOCK_THREADS
+
+            ThreadIsAlive = boost::python::extract<bool>(IntegrationInterfaceInstance.attr("get_thread_is_alive")());
+        }
+        if(stopped)
+        {
+            LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPyBaseTrainer desctruction: python thread stopped successful"));
+        }
+    }
+    catch (py::error_already_set const &)
+    {
+        std::string perrorStr = parse_python_exception();
+        LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPyBaseTrainer destructor error: ")+perrorStr);
+    }
+    catch(...)
+    {
+        LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Unknown exception in TPyBaseTrainer destructor:"));
+    }
 }
 // --------------------------
 
@@ -66,14 +108,50 @@ bool TPyBaseTrainer::APyBuild(void)
 bool TPyBaseTrainer::APyReset(void)
 {
     //TODO тут что-то надо, но как ниже не работает=( уже работает
+    StopTraining = StopNow = false;
+    StartTraining = false;
 
     //ќстановка обучени€
     Py_CUSTOM_BLOCK_THREADS
-    IntegrationInterfaceInstance.attr("stop_now")();
+    try
+    {
+        // ѕосылаем команду на остановку потока
+        IntegrationInterfaceInstance.attr("stop_now")();
 
-    StopTraining = StopNow = false;
-    StartTraining = false;
-    Py_CUSTOM_UNBLOCK_THREADS
+        ThreadIsAlive = boost::python::extract<bool>(IntegrationInterfaceInstance.attr("get_thread_is_alive")());
+
+        // ‘лаг оставноки потока именно в данном месте
+        bool stopped = false;
+
+        // ∆дем пока поток завершитьс€
+        while(ThreadIsAlive)
+        {
+            stopped = true;
+            // ѕосылаем команду на остановку потока
+            IntegrationInterfaceInstance.attr("stop_now")();
+
+            Py_CUSTOM_UNBLOCK_THREADS
+            // даем возможность потоку завершитьс€
+            Sleep(100);
+            Py_CUSTOM_BLOCK_THREADS
+
+            ThreadIsAlive = boost::python::extract<bool>(IntegrationInterfaceInstance.attr("get_thread_is_alive")());
+        }
+        if(stopped)
+        {
+            LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPyBaseTrainer reset: python thread stopped successful"));
+        }
+    }
+    catch (py::error_already_set const &)
+    {
+        std::string perrorStr = parse_python_exception();
+        LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPyBaseTrainer reset error: ")+perrorStr);
+    }
+    catch(...)
+    {
+        LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Unknown exception in TPyBaseTrainer reset:"));
+    }
+
     return true;
 }
 

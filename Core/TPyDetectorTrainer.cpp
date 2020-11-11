@@ -117,7 +117,7 @@ bool TPyDetectorTrainer::ACalculate(void)
 
             std::string PyExceptionString = boost::python::extract< std::string >(except_string);
 
-            LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Exception during function execution: ") + PyExceptionString);
+            LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Exception during python function execution: ") + PyExceptionString);
 
             // Сброс статуса
             TrainingStatus = 0;
@@ -324,11 +324,18 @@ bool TPyDetectorTrainer::CheckInputParameters()
         return false;
     }
 
-    if(WorkingDir->empty()) // TODO дописать слэш для пути к папке
+    if(WorkingDir->empty())
     {
         LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("WorkingDir is empty!"));
         return false;
     }
+
+    // Если нет слэша в конце - ставим
+    if(WorkingDir->back() != '/')
+    {
+        WorkingDir->push_back('/');
+    }
+
 
     if(ArchitectureName->empty())
     {

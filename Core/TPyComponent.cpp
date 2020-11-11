@@ -18,11 +18,12 @@ TPyComponent::TPyComponent(void)
   PythonModuleName("PythonModuleName",this, &TPyComponent::SetPythonModuleName),
   PythonClassName("PythonClassName",this, &TPyComponent::SetPythonClassName),
   UseFullPath("UseFullPath", this),
-  PythonInitialized(false),
-  _custom_save(nullptr)
+  PythonInitialized(false)
 {
     Py_CUSTOM_BLOCK_THREADS
 }
+
+PyThreadState* TPyComponent::_custom_save = nullptr;
 // --------------------------
 
 // ---------------------

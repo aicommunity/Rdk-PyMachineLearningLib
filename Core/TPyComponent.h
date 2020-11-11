@@ -4,8 +4,9 @@
 #include "TPythonIntegrationInclude.h"
 #include "TPythonIntegrationUtil.h"
 
-//кастомные дефайны дл€ управлени€ испонением потоков питона
-//оригинал Py_BLOCK_THREADS и Py_UNBLOCK_THREADS
+// кастомные дефайны дл€ управлени€ испонением потоков питона
+// исходное состо€ние дл€ любого компонента с питоном - это Py_CUSTOM_BLOCK_THREADS (то есть дестркуторах и конструкторах вызываетс€)
+// оригинал в boost Py_BLOCK_THREADS и Py_UNBLOCK_THREADS
 #define Py_CUSTOM_BLOCK_THREADS        if(_custom_save!=nullptr){PyEval_RestoreThread(_custom_save);\
                                                                 _custom_save=nullptr;}
 
@@ -35,7 +36,7 @@ ULProperty<bool, TPyComponent> UseFullPath;
 protected: // ¬ременные переменные
 //—осто€ние потока
 //Ќужен чтобы отключать/включать исполнение потоков питона
-PyThreadState *_custom_save;
+static PyThreadState *_custom_save;
 
 /// ‘лаг взводитс€ при успешной инициализации подсистемы питона
 bool PythonInitialized;
