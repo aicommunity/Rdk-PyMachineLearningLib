@@ -127,7 +127,6 @@ void UPyMachineLearningLib::CreateClassSamples(UStorage *storage)
  UploadClass<TPyClassifierTrainer>("TPyClassifierTrainer","TPyClassifierTrainer");
  UploadClass<TPyDetectorTrainer>("TPyDetectorTrainer","TPyDetectorTrainer");
 #endif
-// TODO дорабоать TPyComponent (иногда sigfault при добавлении новхы компонентов)
 }
 // --------------------------
 

@@ -97,7 +97,7 @@ bool TPyClassifierTrainer::APyBuild(void)
     return true;
 }
 
-//TODO доразобраться с Py_BLOCK_THREADS и Py_UNBLOCK_THREADS. вроде разбрался
+
 // Выполняет расчет этого объекта
 bool TPyClassifierTrainer::ACalculate(void)
 {

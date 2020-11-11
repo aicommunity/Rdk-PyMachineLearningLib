@@ -91,7 +91,6 @@ bool TPyDetectorTrainer::APyBuild(void)
 }
 
 
-//TODO доразобраться с Py_BLOCK_THREADS и Py_UNBLOCK_THREADS
 // Выполняет расчет этого объекта
 bool TPyDetectorTrainer::ACalculate(void)
 {

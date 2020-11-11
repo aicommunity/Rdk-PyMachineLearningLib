@@ -107,7 +107,6 @@ bool TPyBaseTrainer::APyBuild(void)
 // —брос процесса счета без потери настроек
 bool TPyBaseTrainer::APyReset(void)
 {
-    //TODO тут что-то надо, но как ниже не работает=( уже работает
     StopTraining = StopNow = false;
     StartTraining = false;
 

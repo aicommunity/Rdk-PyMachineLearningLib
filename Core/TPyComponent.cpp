@@ -159,7 +159,6 @@ bool TPyComponent::AReset(void)
  return APyReset();
 }
 
-// TODO добавить данную проверку на инициализацию в наследниках
 
 // Выполняет расчет этого объекта
 bool TPyComponent::ABeforeCalculate(void)
