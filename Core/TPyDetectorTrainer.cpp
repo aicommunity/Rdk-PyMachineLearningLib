@@ -107,6 +107,8 @@ bool TPyDetectorTrainer::ACalculate(void)
         py::object train_status = IntegrationInterfaceInstance.attr("train_status")();
         TrainingStatus = boost::python::extract< int >(train_status);
 
+        ThreadIsAlive = boost::python::extract<bool>(IntegrationInterfaceInstance.attr("get_thread_is_alive")());
+
         // Ошибка по время обучения (сообщаем и обнуляем статус)
         if(TrainingStatus == -1)
         {
@@ -216,10 +218,22 @@ bool TPyDetectorTrainer::ACalculate(void)
         {
             if(StartTraining)
             {
+                if(ThreadIsAlive)
+                {
+                    LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Python thread is alive. "
+                                                                         "Set \"StopNow\" paramenter to true or activate \"Reset\". "
+                                                                         "It will cause stopping of thread"));
+                    Py_CUSTOM_UNBLOCK_THREADS
+
+                    StartTraining = false;
+                    return true;
+                }
+
                 // Проверки на входные аргументы
                 if(!CheckInputParameters())
                 {
                     Py_CUSTOM_UNBLOCK_THREADS
+
                     StartTraining = false;
                     return true;
                 }
@@ -312,6 +326,7 @@ bool TPyDetectorTrainer::ACalculate(void)
     }
     //Разрешаем потокам исполняться
     Py_CUSTOM_UNBLOCK_THREADS
+
     return true;
 }
 
