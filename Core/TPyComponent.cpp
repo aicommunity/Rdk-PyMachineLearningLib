@@ -87,7 +87,7 @@ void TPyComponent::PythonInitialize(void)
         if(!PyEval_ThreadsInitialized())
         {
          LogMessageEx(RDK_EX_FATAL,__FUNCTION__,std::string("Python Py_Initialize didn't called!"));
-         LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Python init fail"));
+         LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("Python init fail"));
          return;
         }
 
@@ -116,19 +116,19 @@ void TPyComponent::PythonInitialize(void)
     catch (py::error_already_set const &)
     {
         std::string perrorStr = parse_python_exception();
-        LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Python init fail: ")+perrorStr);
+        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("Python init fail: ")+perrorStr);
         PythonInitialized=false;
     }
     catch(...)
     {
         PythonInitialized=false;
-        LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Python init fail: Unhandled exception"));
+        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("Python init fail: Unhandled exception"));
     }
 
     if(PythonInitialized)
      LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("...Python init finished successful!"));
     else
-     LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("...Python init FAILED!"));
+     LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("...Python init FAILED!"));
 }
 
 // Восстановление настроек по умолчанию и сброс процесса счета
