@@ -109,6 +109,7 @@ bool TPyDetectorTrainer::ACalculate(void)
         ThreadIsAlive = boost::python::extract<bool>(IntegrationInterfaceInstance.attr("get_thread_is_alive")());
 
         // Ошибка по время обучения (сообщаем и обнуляем статус)
+        // Либо правильно сработало stop_now или stop_training
         if(TrainingStatus == -1)
         {
             //сброс на случай выставления извне
@@ -118,7 +119,7 @@ bool TPyDetectorTrainer::ACalculate(void)
 
             std::string PyExceptionString = boost::python::extract< std::string >(except_string);
 
-            LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Exception during python function execution: ") + PyExceptionString);
+            LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Exception or proper stop: ") + PyExceptionString);
 
             // Сброс статуса
             TrainingStatus = 0;
@@ -133,8 +134,7 @@ bool TPyDetectorTrainer::ACalculate(void)
             TrainLosses = {0.0};
 
         }
-        // Успешное завершение работы. После обработки в компоненте сбрасывается в 0
-        // (законечно обучение, либо успешное преждевременное завершение (stop_training, stop_now)
+        // Успешное завершение обучения. После обработки в компоненте сбрасывается в 0
         // Сообщаем и сбрасываем статус в 0
         if(TrainingStatus == 3)
         {

@@ -1,7 +1,7 @@
-#ifndef RDK_TPyClassifierTrainerCPP
-#define RDK_TPyClassifierTrainerCPP
+#ifndef RDK_TPySegmenterTrainerCPP
+#define RDK_TPySegmenterTrainerCPP
 
-#include "TPyClassifierTrainer.h"
+#include "TPySegmenterTrainer.h"
 #include <iostream>
 #include <boost/filesystem.hpp>
 
@@ -11,23 +11,19 @@ namespace RDK {
 // --------------------------
 // Конструкторы и деструкторы
 // --------------------------
-TPyClassifierTrainer::TPyClassifierTrainer(void)
-: DatasetName("DatasetName",this),
-  CopySplittedImages("CopySplittedImages",this),
-  TestEqualVal("TestEqualVal",this),
-  ImageSize("ImageSize",this),
-  LearningRate("LearningRate",this),
-  BatchSizes("BatchSizes",this),
-  LayersToBeTrained("LayersToBeTrained",this),
-  Classes("Classes",this),
-  TrainLoss("TrainLoss",this),
-  TrainAcc("TrainAcc",this),
-  ValLoss("ValLoss",this),
-  ValAcc("ValAcc",this)
+TPySegmenterTrainer::TPySegmenterTrainer(void)
+: DatasetType("DatasetType",this),
+  Config("Config",this),
+  SavePredicted("SavePredicted",this),
+  Visualize("Visualize",this),
+  PaintGt("PaintGt",this),
+  LossNames("LossNames",this),
+  TrainLosses("TrainLosses",this),
+  ValLosses("ValLosses",this)
 {
 }
 
-TPyClassifierTrainer::~TPyClassifierTrainer(void)
+TPySegmenterTrainer::~TPySegmenterTrainer(void)
 {
 }
 // --------------------------
@@ -36,40 +32,32 @@ TPyClassifierTrainer::~TPyClassifierTrainer(void)
 // Системные методы управления объектом
 // --------------------------
 // Выделяет память для новой чистой копии объекта этого класса
-TPyClassifierTrainer* TPyClassifierTrainer::New(void)
+TPySegmenterTrainer* TPySegmenterTrainer::New(void)
 {
- return new TPyClassifierTrainer;
+ return new TPySegmenterTrainer;
 }
 // --------------------------
 
 // --------------------------
 // Скрытые методы управления счетом
 // --------------------------
-bool TPyClassifierTrainer::APythonInitialize(void)
+bool TPySegmenterTrainer::APythonInitialize(void)
 {
     return true;
 }
 
 // Восстановление настроек по умолчанию и сброс процесса счета
-bool TPyClassifierTrainer::APyDefault(void)
+bool TPySegmenterTrainer::APyDefault(void)
 {
-    PythonModuleName="classifier_interface_tf1";
-    PythonClassName="ClassificationInterface";
+    PythonModuleName="detection_train";
+    PythonClassName="DetectionInterface";
     TrainDataDir = {""};
     WorkingDir = "";
-    ArchitectureName= "MobileNet";
-    DatasetName = "dataset_ft";
-    SplitRatio = {70,20,10};
+    ArchitectureName= "SqueezeDet";
+    SplitRatio = {70, 20, 10};
     SaveSplits = false;
-    CopySplittedImages = false;
-    TestEqualVal = false;
-    ImageSize = {224,224,3};
     Epochs = 5;
-    LearningRate = 0.0002f;
-    BatchSizes = {4,2,1};
-    Weights = "imagenet";
-    LayersToBeTrained = 0;
-    Classes = {};
+    Weights = "";
     EarlyStop = 0;
     SavingInterval = 1;
     SaveBestOnly = false;
@@ -77,13 +65,26 @@ bool TPyClassifierTrainer::APyDefault(void)
     StartTraining = false;
     StopTraining = false;
 
-    Epoch = 0;
-    Progress = 0.0;
+    DatasetName = "";
+    Model = "";
+    TrainingSize = 0;
+    OutputSize = {0};
+    NumClasses = 0;
+    Classes = {""};
+    SplitBase = false;
+    TrainList = "";
+    ValList = "";
+    TestList = "";
+    BatchSize = 0;
+    BatchesInEpoch = 0;
 
-    TrainAcc = 0.0;
-    TrainLoss = 0.0;
-    ValAcc = 0.0;
-    ValLoss = 0.0;
+    Epoch    = 0;
+    Progress = 0.0;
+    TestLoss = 0.0;
+    TestAcc  = 0.0;
+    ValLoss  = 0.0;
+    ValAcc   = 0.0;
+    FPS      = 0.0;
 
     return true;
 }
@@ -92,14 +93,14 @@ bool TPyClassifierTrainer::APyDefault(void)
 // после настройки параметров
 // Автоматически вызывает метод Reset() и выставляет Ready в true
 // в случае успешной сборки
-bool TPyClassifierTrainer::APyBuild(void)
+bool TPySegmenterTrainer::APyBuild(void)
 {
     return true;
 }
 
 
 // Выполняет расчет этого объекта
-bool TPyClassifierTrainer::ACalculate(void)
+bool TPySegmenterTrainer::ACalculate(void)
 {
     // Если питон не проинициализирован, то ничего не делаем. Надо чтобы нажали Reset для повторной попытки иницилизации
     if(!PythonInitialized)
@@ -109,14 +110,13 @@ bool TPyClassifierTrainer::ACalculate(void)
     {   //Отключаем работу потоков питона (забираем GIL себе) для возмжности запуска функций
         Py_CUSTOM_BLOCK_THREADS
 
-        // Проверка статуса выполнения
+        // Проверка статуса обучения
         py::object train_status = IntegrationInterfaceInstance.attr("train_status")();
         TrainingStatus = boost::python::extract< int >(train_status);
 
         ThreadIsAlive = boost::python::extract<bool>(IntegrationInterfaceInstance.attr("get_thread_is_alive")());
 
         // Ошибка по время обучения (сообщаем и обнуляем статус)
-        // Либо правильно сработало stop_now или stop_training
         if(TrainingStatus == -1)
         {
             //сброс на случай выставления извне
@@ -136,10 +136,12 @@ bool TPyClassifierTrainer::ACalculate(void)
             Epoch = 0;
             Progress = 0.0;
 
-            TrainAcc = 0.0;
-            TrainLoss = 0.0;
-            ValAcc = 0.0;
-            ValLoss = 0.0;
+            TestLoss = 0.0;
+            TestAcc  = 0.0;
+            ValLoss  = 0.0;
+            ValAcc   = 0.0;
+            FPS      = 0.0;
+
         }
         // Успешное завершение обучения. После обработки в компоненте сбрасывается в 0
         // Сообщаем и сбрасываем статус в 0
@@ -148,7 +150,7 @@ bool TPyClassifierTrainer::ACalculate(void)
             //сброс на случай выставления извне
             StartTraining = false;
 
-            LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("Training completed correctly"));
+            LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("Training completed or stopped correctly"));
 
             // Сброс статуса
             TrainingStatus = 0;
@@ -158,26 +160,22 @@ bool TPyClassifierTrainer::ACalculate(void)
             Epoch = 0;
             Progress = 0.0;
 
-            TrainAcc = 0.0;
-            TrainLoss = 0.0;
-            ValAcc = 0.0;
-            ValLoss = 0.0;
+            TestLoss = 0.0;
+            TestAcc  = 0.0;
+            ValLoss  = 0.0;
+            ValAcc   = 0.0;
+            FPS      = 0.0;
         }
+
         // Если обучение/тестирование идет, опрашиваем геттеры
         if(TrainingStatus == 1 || TrainingStatus == 2)
         {
             //сброс на случай выставления извне
             StartTraining = false;
 
-            //Запуск геттеров для получения информации о состоянии выполнения
-            Epoch       = boost::python::extract< int >  (IntegrationInterfaceInstance.attr("get_epoch")());
-            Progress    = boost::python::extract< float >(IntegrationInterfaceInstance.attr("get_progess")());
-
-            TrainAcc    = boost::python::extract< float >(IntegrationInterfaceInstance.attr("get_train_acc")());
-            TrainLoss   = boost::python::extract< float >(IntegrationInterfaceInstance.attr("get_train_loss")());
-            ValAcc      = boost::python::extract< float >(IntegrationInterfaceInstance.attr("get_val_acc")());
-            ValLoss     = boost::python::extract< float >(IntegrationInterfaceInstance.attr("get_val_loss")());
-
+            /*
+             TODO фунционал геттеров
+             */
 
             //Останавливаем обучение либо вообще всю функцию, если требуется
             if(StopTraining)
@@ -205,14 +203,16 @@ bool TPyClassifierTrainer::ACalculate(void)
                                                                          "Set \"StopNow\" paramenter to true or activate \"Reset\". "
                                                                          "It will cause stopping of thread"));
                     Py_CUSTOM_UNBLOCK_THREADS
+
                     StartTraining = false;
                     return true;
                 }
 
-                // Проверки на допустимость входных аргументов
+                // Проверки на входные аргументы
                 if(!CheckInputParameters())
                 {
                     Py_CUSTOM_UNBLOCK_THREADS
+
                     StartTraining = false;
                     return true;
                 }
@@ -222,57 +222,10 @@ bool TPyClassifierTrainer::ACalculate(void)
                 // Обнуление ненужных флагов
                 StopTraining = StopNow = false;
 
-                // Подготовка аргументов для функции обучения
 
-                // Перевод аргументов в нужные типы PyObject
-                py::list split_ratio;
-                    split_ratio.append(SplitRatio[0]);
-                    split_ratio.append(SplitRatio[1]);
-                    split_ratio.append(SplitRatio[2]);
-
-                py::list batch_sizes;
-                    batch_sizes.append(BatchSizes[0]);
-                    batch_sizes.append(BatchSizes[1]);
-                    batch_sizes.append(BatchSizes[2]);
-
-                py::object classes;
-                if(!Classes.empty())
-                {
-                    split_ratio.append(Classes[0]);
-                    split_ratio.append(Classes[1]);
-                    split_ratio.append(Classes[2]);
-                }
-
-                //Заполнение словаря параметров ( именованные аргументы)
-                py::dict func_params;
-
-                func_params["working_dir"]          =   py::str(WorkingDir->c_str());
-                func_params["image_size"]           =   py::make_tuple(ImageSize[0],ImageSize[1],ImageSize[2]);
-                func_params["architecture"]         =   py::str(ArchitectureName->c_str());
-                func_params["dataset_name"]         =   py::str(DatasetName->c_str());
-                func_params["split_ratio"]          =   split_ratio;
-                func_params["save_splits"]          =   py::object(*SaveSplits);
-                func_params["copy_images"]          =   py::object(*CopySplittedImages);
-                func_params["test_equal_to_val"]    =   py::object(*TestEqualVal);
-                func_params["epochs"]               =   py::object(*Epochs);
-                func_params["learning_rate"]        =   py::object(*LearningRate);
-                func_params["batch_sizes"]          =   batch_sizes;
-                func_params["weights"]              =   py::object(Weights->c_str());
-                func_params["layers_to_be_trained"] =   *LayersToBeTrained ? py::object(*LayersToBeTrained) : py::str("default");
-                func_params["classes"]              =   classes;
-                func_params["early_stop"]           =   *EarlyStop ? py::object(*EarlyStop) : py::object(false);
-                func_params["preprocessing"]        =   py::object();
-                func_params["saving_interval"]      =   py::object(*SavingInterval);
-                func_params["save_best_only"]       =   py::object(*SaveBestOnly);
-                func_params["online_augmentation"]  =   py::dict();
-
-                // Позиционные аргументы
-                py::tuple data_dir_tuple = py::make_tuple(TrainDataDir->at(0).c_str());
-
-                //Запуск обучения, внутри функции питона функция обучения отпускается в отдельный поток
-                py::object retval = IntegrationInterfaceInstance.attr("classification_train")
-                                                                        (data_dir_tuple,
-                                                                         func_params);
+                /*
+                TODO подготовка пргументов и вызов основной функции
+                 */
 
                 // Проверка на исключительный (практически невозможный) случай
                 // Если после выполнения функции classification_train() сразу изменился TrainingStatus на -1
@@ -307,11 +260,12 @@ bool TPyClassifierTrainer::ACalculate(void)
     }
     //Разрешаем потокам исполняться
     Py_CUSTOM_UNBLOCK_THREADS
+
     return true;
 }
 
 
-bool TPyClassifierTrainer::CheckInputParameters()
+bool TPySegmenterTrainer::CheckInputParameters()
 {
     if(TrainDataDir->empty() || TrainDataDir->at(0).empty())
     {
@@ -325,9 +279,23 @@ bool TPyClassifierTrainer::CheckInputParameters()
         return false;
     }
 
+    // Если нет слэша в конце - ставим
+    if(WorkingDir->back() != '/')
+    {
+        WorkingDir->push_back('/');
+    }
+
+
     if(ArchitectureName->empty())
     {
         LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("ArchitectureName is empty!"));
+        return false;
+    }
+
+
+    if(SplitRatio.size()!=3)
+    {
+        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("SplitRatio must have 3 values!"));
         return false;
     }
 
@@ -337,30 +305,15 @@ bool TPyClassifierTrainer::CheckInputParameters()
         return false;
     }
 
-    if(SplitRatio.size()!=3)
-    {
-        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("SplitRatio must have 3 values!"));
-        return false;
-    }
-
-    if(ImageSize.size()!=3)
-    {
-        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("ImageSize must have 3 values!"));
-        return false;
-    }
-
-    if(BatchSizes.size()!=3)
-    {
-        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("BatchSizes must have 3 values!"));
-        return false;
-    }
-
+    // для дектектора не должна быть пустой
+/*
     //Проверка на непустую директорию WorkingDir
     if(!boost::filesystem::is_empty(WorkingDir->c_str()))
     {
         LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("WorkingDir isn't empty, it contains some files"));
         return false;
     }
+    */
     //TODO возможно нужны еще проверки на отриц.значения и проч.
     //TODO создавать WorkingDir при каких-либо условиях
     //TODO проверки на пути относительные и т.д.
