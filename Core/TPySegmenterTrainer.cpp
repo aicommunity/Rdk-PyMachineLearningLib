@@ -12,14 +12,23 @@ namespace RDK {
 // Конструкторы и деструкторы
 // --------------------------
 TPySegmenterTrainer::TPySegmenterTrainer(void)
-: DatasetType("DatasetType",this),
-  Config("Config",this),
-  SavePredicted("SavePredicted",this),
-  Visualize("Visualize",this),
-  PaintGt("PaintGt",this),
-  LossNames("LossNames",this),
-  TrainLosses("TrainLosses",this),
-  ValLosses("ValLosses",this)
+: DatasetName("DatasetName",this),
+  Model("Model",this),
+  TrainingSize("TrainingSize",this),
+  OutputSize("OutputSize",this),
+  NumClasses("NumClasses",this),
+  Classes("Classes",this),
+  SplitBase("SplitBase",this),
+  TrainList("TrainList",this),
+  ValList("ValList",this),
+  TestList("TestList",this),
+  BatchSize("BatchSize",this),
+  BatchesInEpoch("BatchesInEpoch",this),
+  TestLoss("TestLoss",this),
+  TestAcc("TestAcc",this),
+  ValLoss("ValLoss",this),
+  ValAcc("ValAcc",this),
+  FPS("FPS",this)
 {
 }
 
