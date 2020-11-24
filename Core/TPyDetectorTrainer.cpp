@@ -51,6 +51,8 @@ bool TPyDetectorTrainer::APyDefault(void)
 {
     PythonModuleName="detection_train";
     PythonClassName="DetectionInterface";
+
+    // Общие параметры для всех тренеров
     TrainDataDir = {""};
     WorkingDir = "";
     ArchitectureName= "SqueezeDet";
@@ -61,15 +63,19 @@ bool TPyDetectorTrainer::APyDefault(void)
     EarlyStop = 0;
     SavingInterval = 1;
     SaveBestOnly = false;
-    TrainingStatus = false;
-    StartTraining = false;
-    StopTraining = false;
 
+    // Специфические параметры для обучения детекторов
     DatasetType = "";
     Config = "";
     SavePredicted = false;
     Visualize = 0;
     PaintGt = false;
+
+
+    TrainingStatus = 0;
+    StartTraining = false;
+    StopTraining = false;
+
 
     Epoch = 0;
     Progress = 0.0;
@@ -313,7 +319,7 @@ bool TPyDetectorTrainer::ACalculate(void)
     catch (py::error_already_set const &)
     {
         std::string perrorStr = parse_python_exception();
-        LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPyClassifierTrainer error: ")+perrorStr);
+        LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPyDetectorTrainer error: ")+perrorStr);
         TrainingStatus = 0;
         StartTraining = false;
     }

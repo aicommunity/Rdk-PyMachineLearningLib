@@ -16,57 +16,41 @@ public: // Свойства
     //      "basedir_ann" - путь к аннотациям базы
     //      "basedir_img" - путь к изображениям базы
 
-/// Название обучающей базы
+
+/// Путь к конфигурационному файлу
+ULProperty<std::string, TPySegmenterTrainer> Config;
+
+/// Тип базы из возможных значений: "txt_data", "split_data", "not_split_data".
+ULProperty<std::string, TPySegmenterTrainer> DatasetType;
+
+/// Имя набора данных для сохранения в файле конфига и названии весовых коэффициентов
 ULProperty<std::string, TPySegmenterTrainer> DatasetName;
 
-/// Модель архитектуры (актуально только для unet)
-ULProperty<std::string, TPySegmenterTrainer> Model;
-
-/// размер, на котором будут обучаться изображения
-ULProperty<int, TPySegmenterTrainer> TrainingSize;
-
-/// Выходной размер (необязательные данные)
-ULProperty<std::vector<int>, TPySegmenterTrainer> OutputSize;
-
-/// количество классов
-ULProperty<int, TPySegmenterTrainer> NumClasses;
+/// Размер, на котором будут обучаться изображения, формат: [height,width,channels].
+ULProperty<std::vector<int>, TPySegmenterTrainer> InputRes;
 
 /// Названия классов
 ULProperty<std::vector<std::string>, TPySegmenterTrainer> Classes;
 
-/// Надо ли разбивать базу на train val test
-ULProperty<bool, TPySegmenterTrainer> SplitBase;
-
-/// Путь к обучающему списку (если нет, оставляем "")
-ULProperty<std::string, TPySegmenterTrainer> TrainList;
-
-/// Путь к валидационному списку (если нет, оставляем "")
-ULProperty<std::string, TPySegmenterTrainer> ValList;
-
-/// Путь к тестовому списку (если нет, оставляем "")
-ULProperty<std::string, TPySegmenterTrainer> TestList;
-
 /// Количество изображений в батче
 ULProperty<int, TPySegmenterTrainer> BatchSize;
 
-/// Количество батчей в эпохе (TODO вектор с 3-мя значениями?)
+/// Количество батчей в эпохе
 ULProperty<int, TPySegmenterTrainer> BatchesInEpoch;
 
-// Переменные состояния
-/// Ошибка на тестовом подмножестве
-ULProperty<float, TPyBaseTrainer, ptPubState> TestLoss;
 
-/// Точность на тестовом подмножестве
-ULProperty<float, TPyBaseTrainer, ptPubState> TestAcc;
+// Переменные состояния
+/// Ошибка на обучающем подмножестве
+ULProperty<float, TPyBaseTrainer, ptPubState> TrainLoss;
+
+/// Точность на обучающем подмножестве
+ULProperty<float, TPyBaseTrainer, ptPubState> TrainAcc;
 
 /// Ошибка на валидационном подмножестве
 ULProperty<float, TPyBaseTrainer, ptPubState> ValLoss;
 
 /// Точность на валидационном подмножестве
 ULProperty<float, TPyBaseTrainer, ptPubState> ValAcc;
-
-/// Скорость работы модели
-ULProperty<float, TPyBaseTrainer, ptPubState> FPS;
 
 protected: // Временные переменные
 

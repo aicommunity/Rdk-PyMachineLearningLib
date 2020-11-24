@@ -13,6 +13,7 @@
 #include "TPySegmentatorUNet.h"
 #include "TPyClassifierTrainer.h"
 #include "TPyDetectorTrainer.h"
+#include "TPySegmenterTrainer.h"
 #endif
 
 namespace RDK {

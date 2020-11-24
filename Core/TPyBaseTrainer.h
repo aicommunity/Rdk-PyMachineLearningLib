@@ -11,6 +11,7 @@ class TPyBaseTrainer: public TPyComponent
 {
 public: // Свойства
 
+// Базовые параметры для всех тренеров
 /// Папка с изображениями для обучения (может быть несколько путей)
 ULProperty<std::vector<std::string>, TPyBaseTrainer> TrainDataDir;
 
@@ -43,6 +44,7 @@ ULProperty<int, TPyBaseTrainer> SavingInterval;
 /// Cохранять ли только лучшую модель по параметру val_loss
 ULProperty<bool, TPyBaseTrainer> SaveBestOnly;
 
+// Управляющие обучением параметры (и информационные)
 /// Флаг включения обучения
 // обучение начнется при StartTraining=true и TrainingInProgress=0
 ULProperty<bool, TPyBaseTrainer> StartTraining;
@@ -68,6 +70,8 @@ ULProperty<int, TPyBaseTrainer, ptPubState> TrainingStatus;
 // false - поток не исполянется
 ULProperty<bool, TPyBaseTrainer, ptPubState> ThreadIsAlive;
 
+
+// Перменные состояния
 /// Текущая эпоха
 ULProperty<int, TPyBaseTrainer, ptPubState> Epoch;
 

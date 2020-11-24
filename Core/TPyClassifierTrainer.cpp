@@ -55,27 +55,35 @@ bool TPyClassifierTrainer::APyDefault(void)
 {
     PythonModuleName="classifier_interface_tf1";
     PythonClassName="ClassificationInterface";
+
+    // Общие параметры для всех тренеров
     TrainDataDir = {""};
     WorkingDir = "";
     ArchitectureName= "MobileNet";
-    DatasetName = "dataset_ft";
     SplitRatio = {70,20,10};
     SaveSplits = false;
+    Epochs = 5;
+    Weights = "imagenet";
+    EarlyStop = 0;
+    SavingInterval = 1;
+    SaveBestOnly = false;
+
+    // Специфические параметры для обучения классификаторов
+    DatasetName = "dataset_ft";
     CopySplittedImages = false;
     TestEqualVal = false;
     ImageSize = {224,224,3};
     Epochs = 5;
     LearningRate = 0.0002f;
     BatchSizes = {4,2,1};
-    Weights = "imagenet";
     LayersToBeTrained = 0;
     Classes = {};
-    EarlyStop = 0;
-    SavingInterval = 1;
-    SaveBestOnly = false;
-    TrainingStatus = false;
+
+
+    TrainingStatus = 0;
     StartTraining = false;
     StopTraining = false;
+
 
     Epoch = 0;
     Progress = 0.0;
@@ -235,12 +243,13 @@ bool TPyClassifierTrainer::ACalculate(void)
                     batch_sizes.append(BatchSizes[1]);
                     batch_sizes.append(BatchSizes[2]);
 
-                py::object classes;
+                py::list classes;
                 if(!Classes.empty())
                 {
-                    split_ratio.append(Classes[0]);
-                    split_ratio.append(Classes[1]);
-                    split_ratio.append(Classes[2]);
+                    for(int i = 0; i < Classes.size(); i++)
+                    {
+                        classes.append(Classes[i]);
+                    }
                 }
 
                 //Заполнение словаря параметров ( именованные аргументы)
