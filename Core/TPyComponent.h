@@ -12,6 +12,10 @@
 
 #define Py_CUSTOM_UNBLOCK_THREADS      if(_custom_save==nullptr){_custom_save = PyEval_SaveThread();}
 
+#define Py_BLOCK_GIL      _state=PyGILState_Ensure();
+#define Py_UNBLOCK_GIL    PyGILState_Release(_state);
+
+
 
 namespace RDK {
 
@@ -34,9 +38,9 @@ ULProperty<std::string, TPyComponent> PythonClassName;
 ULProperty<bool, TPyComponent> UseFullPath;
 
 protected: // Временные переменные
-//Состояние потока
-//Нужен чтобы отключать/включать исполнение потоков питона
-static PyThreadState *_custom_save;
+
+//Нужен чтобы забирать/отдавать GIL
+PyGILState_STATE _state;
 
 /// Флаг взводится при успешной инициализации подсистемы питона
 bool PythonInitialized;
@@ -49,6 +53,7 @@ boost::python::object IntegrationInterfaceInstance;
 
 /// Полный путь до имени скрипта
 std::string FullPythonScriptFileName;
+
 
 public: // Методы
 // --------------------------

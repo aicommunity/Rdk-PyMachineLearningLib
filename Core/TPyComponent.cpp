@@ -6,6 +6,7 @@
 #include "TPyComponent.h"
 #include <iostream>
 
+
 namespace RDK {
 
 // Методы
@@ -20,10 +21,9 @@ TPyComponent::TPyComponent(void)
   UseFullPath("UseFullPath", this),
   PythonInitialized(false)
 {
-    Py_CUSTOM_BLOCK_THREADS
 }
 
-PyThreadState* TPyComponent::_custom_save = nullptr;
+
 // --------------------------
 
 // ---------------------
@@ -57,7 +57,6 @@ bool TPyComponent::SetPythonClassName(const std::string& path)
 
 TPyComponent::~TPyComponent(void)
 {
-    Py_CUSTOM_BLOCK_THREADS
 }
 // --------------------------
 
@@ -66,7 +65,8 @@ TPyComponent::~TPyComponent(void)
 // --------------------------
 void TPyComponent::PythonInitialize(void)
 {
-    Py_CUSTOM_BLOCK_THREADS
+    Py_BLOCK_GIL
+
     try
     {
         LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("Python init started..."));
@@ -129,6 +129,8 @@ void TPyComponent::PythonInitialize(void)
      LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("...Python init finished successful!"));
     else
      LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("...Python init FAILED!"));
+
+    Py_UNBLOCK_GIL
 }
 
 // Восстановление настроек по умолчанию и сброс процесса счета

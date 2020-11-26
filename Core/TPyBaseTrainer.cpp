@@ -35,7 +35,7 @@ TPyBaseTrainer::TPyBaseTrainer(void)
 TPyBaseTrainer::~TPyBaseTrainer(void)
 {
     // Гарантировано дожидаемся завершения потока питона
-    Py_CUSTOM_BLOCK_THREADS
+    Py_BLOCK_GIL
     try
     {
         // Посылаем команду на остановку исполнения
@@ -54,10 +54,10 @@ TPyBaseTrainer::~TPyBaseTrainer(void)
 
             stopped = true;
 
-            Py_CUSTOM_UNBLOCK_THREADS
+            Py_UNBLOCK_GIL
             // даем возможность потоку завершиться
             Sleep(100);
-            Py_CUSTOM_BLOCK_THREADS
+            Py_BLOCK_GIL
 
             ThreadIsAlive = boost::python::extract<bool>(IntegrationInterfaceInstance.attr("get_thread_is_alive")());
         }
@@ -75,6 +75,7 @@ TPyBaseTrainer::~TPyBaseTrainer(void)
     {
         LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Unknown exception in TPyBaseTrainer destructor:"));
     }
+    Py_UNBLOCK_GIL
 }
 // --------------------------
 
@@ -111,7 +112,8 @@ bool TPyBaseTrainer::APyReset(void)
     StartTraining = false;
 
     //Остановка обучения
-    Py_CUSTOM_BLOCK_THREADS
+    //
+    Py_BLOCK_GIL
     try
     {
         // Посылаем команду на остановку потока
@@ -129,10 +131,12 @@ bool TPyBaseTrainer::APyReset(void)
             // Посылаем команду на остановку потока
             IntegrationInterfaceInstance.attr("stop_now")();
 
-            Py_CUSTOM_UNBLOCK_THREADS
+            //
+            Py_UNBLOCK_GIL
             // даем возможность потоку завершиться
             Sleep(100);
-            Py_CUSTOM_BLOCK_THREADS
+            //
+            Py_BLOCK_GIL
 
             ThreadIsAlive = boost::python::extract<bool>(IntegrationInterfaceInstance.attr("get_thread_is_alive")());
         }
@@ -150,7 +154,7 @@ bool TPyBaseTrainer::APyReset(void)
     {
         LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Unknown exception in TPyBaseTrainer reset:"));
     }
-
+    Py_UNBLOCK_GIL
     return true;
 }
 

@@ -112,10 +112,9 @@ bool TPyClassifierTrainer::ACalculate(void)
     // Если питон не проинициализирован, то ничего не делаем. Надо чтобы нажали Reset для повторной попытки иницилизации
     if(!PythonInitialized)
        return true;
-
+    Py_BLOCK_GIL
     try
     {   //Отключаем работу потоков питона (забираем GIL себе) для возмжности запуска функций
-        Py_CUSTOM_BLOCK_THREADS
 
         // Проверка статуса выполнения
         py::object train_status = IntegrationInterfaceInstance.attr("train_status")();
@@ -212,7 +211,7 @@ bool TPyClassifierTrainer::ACalculate(void)
                     LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Python thread is alive. "
                                                                          "Set \"StopNow\" paramenter to true or activate \"Reset\". "
                                                                          "It will cause stopping of thread"));
-                    Py_CUSTOM_UNBLOCK_THREADS
+                    Py_UNBLOCK_GIL
                     StartTraining = false;
                     return true;
                 }
@@ -220,7 +219,7 @@ bool TPyClassifierTrainer::ACalculate(void)
                 // Проверки на допустимость входных аргументов
                 if(!CheckInputParameters())
                 {
-                    Py_CUSTOM_UNBLOCK_THREADS
+                    Py_UNBLOCK_GIL
                     StartTraining = false;
                     return true;
                 }
@@ -314,8 +313,7 @@ bool TPyClassifierTrainer::ACalculate(void)
         TrainingStatus = 0;
         StartTraining = false;
     }
-    //Разрешаем потокам исполняться
-    Py_CUSTOM_UNBLOCK_THREADS
+    Py_UNBLOCK_GIL
     return true;
 }
 
