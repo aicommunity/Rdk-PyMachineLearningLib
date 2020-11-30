@@ -79,6 +79,20 @@ bool TPyObjectDetectorYoloEx::APythonInitialize(void)
                 change_classes.insert(i, (*ChangeClassesYOLO)[i]);
             }
         }
+
+        if(!UseFullPath)
+        {
+            *ModelPathYOLO = GetEnvironment()->GetCurrentDataDir()+*ModelPathYOLO;
+            if(*AnchorsPathYOLO!="")
+            {
+                *AnchorsPathYOLO = GetEnvironment()->GetCurrentDataDir()+*AnchorsPathYOLO;
+            }
+            if(*ClassesPathYOLO!="")
+            {
+                *ClassesPathYOLO = GetEnvironment()->GetCurrentDataDir()+*ClassesPathYOLO;
+            }
+        }
+
         py::object initialize = IntegrationInterfaceInstance.attr("initialize_predictor")(*ModelPathYOLO, *AnchorsPathYOLO, *ClassesPathYOLO, target_classes, change_classes);
         if(!initialize.is_none())
         {
@@ -94,12 +108,12 @@ bool TPyObjectDetectorYoloEx::APythonInitialize(void)
     catch (py::error_already_set const &)
     {
         std::string perrorStr = parse_python_exception();
-        LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Python init fail: ")+perrorStr);
+        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("Python init fail: ")+perrorStr);
         return false;
     }
     catch(...)
     {
-        LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Python init fail: Undandled exception"));
+        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("Python init fail: Undandled exception"));
         return false;
     }
     LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("...Python init finished successful!"));

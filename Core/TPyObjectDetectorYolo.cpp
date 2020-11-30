@@ -45,6 +45,16 @@ bool TPyObjectDetectorYolo::APythonInitialize(void)
     try
     {
         py::object initialize;
+
+        if(!UseFullPath)
+        {
+            *ConfigPathYOLO = GetEnvironment()->GetCurrentDataDir()+*ConfigPathYOLO;
+            if(*WeightsPathYOLO!="")
+            {
+                *WeightsPathYOLO = GetEnvironment()->GetCurrentDataDir()+*WeightsPathYOLO;
+            }
+        }
+
         switch(InitializationTypeYOLO)
         {
             case YOLOV2_INITTYPE:
@@ -72,12 +82,12 @@ bool TPyObjectDetectorYolo::APythonInitialize(void)
     catch (py::error_already_set const &)
     {
         std::string perrorStr = parse_python_exception();
-        LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Python init fail: ")+perrorStr);
+        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("Python init fail: ")+perrorStr);
         return false;
     }
     catch(...)
     {
-        LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Python init fail: Undandled exception"));
+        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("Python init fail: Undandled exception"));
         return false;
     }
 

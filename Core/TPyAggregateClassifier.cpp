@@ -75,7 +75,7 @@ bool TPyAggregateClassifier::Initialize(void)
         if(!PyEval_ThreadsInitialized())
         {
          LogMessageEx(RDK_EX_FATAL,__FUNCTION__,std::string("Python Py_Initialize didn't called!"));
-         LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Python init fail"));
+         LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("Python init fail"));
          return false;
         }
 //        init_py();
@@ -108,12 +108,12 @@ bool TPyAggregateClassifier::Initialize(void)
     {
         Initialized = false;
         std::string perrorStr = parse_python_exception();
-        LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Python init fail: ")+perrorStr);
+        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("Python init fail: ")+perrorStr);
     }
     catch(...)
     {
         Initialized = false;
-        LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Python init fail: Undandled exception"));
+        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("Python init fail: Undandled exception"));
     }
  LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("...Python init finished successful!"));
  return true;
