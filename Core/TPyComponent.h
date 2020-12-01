@@ -4,17 +4,6 @@
 #include "TPythonIntegrationInclude.h"
 #include "TPythonIntegrationUtil.h"
 
-// кастомные дефайны дл€ управлени€ испонением потоков питона
-// исходное состо€ние дл€ любого компонента с питоном - это Py_CUSTOM_BLOCK_THREADS (то есть дестркуторах и конструкторах вызываетс€)
-// оригинал в boost Py_BLOCK_THREADS и Py_UNBLOCK_THREADS
-#define Py_CUSTOM_BLOCK_THREADS        if(_custom_save!=nullptr){PyEval_RestoreThread(_custom_save);\
-                                                                _custom_save=nullptr;}
-
-#define Py_CUSTOM_UNBLOCK_THREADS      if(_custom_save==nullptr){_custom_save = PyEval_SaveThread();}
-
-#define Py_BLOCK_GIL      _state=PyGILState_Ensure();
-#define Py_UNBLOCK_GIL    PyGILState_Release(_state);
-
 
 
 namespace RDK {
@@ -40,7 +29,7 @@ ULProperty<bool, TPyComponent> UseFullPath;
 protected: // ¬ременные переменные
 
 //Ќужен чтобы забирать/отдавать GIL
-PyGILState_STATE _state;
+PyGILState_STATE gil_state;
 
 /// ‘лаг взводитс€ при успешной инициализации подсистемы питона
 bool PythonInitialized;

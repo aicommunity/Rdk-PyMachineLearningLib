@@ -316,6 +316,7 @@ bool TPyDetectorTrainer::ACalculate(void)
     }
     catch (py::error_already_set const &)
     {
+        Py_UNBLOCK_GIL
         std::string perrorStr = parse_python_exception();
         LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPyDetectorTrainer error: ")+perrorStr);
         TrainingStatus = 0;

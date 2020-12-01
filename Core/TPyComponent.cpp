@@ -57,6 +57,7 @@ bool TPyComponent::SetPythonClassName(const std::string& path)
 
 TPyComponent::~TPyComponent(void)
 {
+    //Py_BLOCK_GIL
 }
 // --------------------------
 
@@ -65,9 +66,7 @@ TPyComponent::~TPyComponent(void)
 // --------------------------
 void TPyComponent::PythonInitialize(void)
 {
-    Py_BLOCK_GIL
-
-    try
+     try
     {
         LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("Python init started..."));
         PythonInitialized=false;
@@ -90,6 +89,7 @@ void TPyComponent::PythonInitialize(void)
          LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("Python init fail"));
          return;
         }
+        Py_BLOCK_GIL
 
         py::object MainModule = py::import("__main__");  // импортируем main-scope, см. https://docs.python.org/3/library/__main__.html
         py::object MainNamespace = MainModule.attr("__dict__");  // извлекаем область имен
@@ -115,12 +115,14 @@ void TPyComponent::PythonInitialize(void)
     }
     catch (py::error_already_set const &)
     {
+        Py_UNBLOCK_GIL
         std::string perrorStr = parse_python_exception();
         LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("Python init fail: ")+perrorStr);
         PythonInitialized=false;
     }
     catch(...)
     {
+        Py_UNBLOCK_GIL
         PythonInitialized=false;
         LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("Python init fail: Unhandled exception"));
     }

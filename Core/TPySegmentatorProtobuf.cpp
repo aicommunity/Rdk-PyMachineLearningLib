@@ -44,17 +44,20 @@ bool TPySegmentatorProtobuf::APythonInitialize(void)
     try
     {
         py::object initialize;
+        Py_BLOCK_GIL
         initialize = IntegrationInterfaceInstance.attr("initialize_config")(*ProtobufPath, *JSONPath);
-
+        Py_UNBLOCK_GIL
 
         if(!initialize.is_none())
         {
             LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Python init success"));
+            Py_UNBLOCK_GIL
             return true;
         }
         else
         {
             LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Python initialization failed"));
+            Py_UNBLOCK_GIL
             return false;
         }
     }
@@ -101,9 +104,12 @@ bool TPySegmentatorProtobuf::Inference(UBitmap &bmp, UBitmap &mask)
 {
     if(!PythonInitialized)
         return false;
+
  try
  {
+  Py_BLOCK_GIL
   py::object retval = IntegrationInterfaceInstance.attr("inference")(bmp);
+  Py_UNBLOCK_GIL
 
   cv::Mat result_mat = pbcvt::fromNDArrayToMat(retval.ptr());
 
@@ -136,10 +142,12 @@ bool TPySegmentatorProtobuf::Inference(UBitmap &bmp, UBitmap &mask)
  }
  catch (py::error_already_set const &)
  {
+  Py_UNBLOCK_GIL
   std::string perrorStr = parse_python_exception();
   LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPySegmentatorProtobuf error: ")+perrorStr);
  }
 
+ Py_UNBLOCK_GIL
  return true;
 }
 // --------------------------

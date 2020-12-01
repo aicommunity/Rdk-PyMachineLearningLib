@@ -54,7 +54,7 @@ bool TPyObjectDetectorYolo::APythonInitialize(void)
                 *WeightsPathYOLO = GetEnvironment()->GetCurrentDataDir()+*WeightsPathYOLO;
             }
         }
-
+        Py_BLOCK_GIL
         switch(InitializationTypeYOLO)
         {
             case YOLOV2_INITTYPE:
@@ -65,8 +65,10 @@ bool TPyObjectDetectorYolo::APythonInitialize(void)
             break;
         default:
             LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Chosen initialization type not supported by selected detector interface file"));
+            Py_UNBLOCK_GIL
             return false;
         }
+        Py_UNBLOCK_GIL
 
         if(!initialize.is_none())
         {
@@ -81,6 +83,7 @@ bool TPyObjectDetectorYolo::APythonInitialize(void)
     }
     catch (py::error_already_set const &)
     {
+        Py_UNBLOCK_GIL
         std::string perrorStr = parse_python_exception();
         LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("Python init fail: ")+perrorStr);
         return false;
@@ -127,7 +130,9 @@ bool TPyObjectDetectorYolo::Detect(UBitmap &bmp, MDMatrix<double> &output_rects,
  try
  {
   //import_array();
+  Py_BLOCK_GIL
   py::object retval = IntegrationInterfaceInstance.attr("detect")(bmp);
+  Py_UNBLOCK_GIL
 
   //std::vector<float> res = boost::python::extract<std::vector<float> >(retval);
   np::ndarray ndarr = boost::python::extract< np::ndarray  >(retval);
@@ -170,6 +175,7 @@ bool TPyObjectDetectorYolo::Detect(UBitmap &bmp, MDMatrix<double> &output_rects,
  }
  catch (py::error_already_set const &)
  {
+  Py_UNBLOCK_GIL
   std::string perrorStr = parse_python_exception();
   LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPyObjectDetectorYolo error: ")+perrorStr);
  }

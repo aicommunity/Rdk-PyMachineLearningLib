@@ -7,6 +7,9 @@
 
 #include <vector>
 
+#define Py_BLOCK_GIL      if(!PyGILState_Check()){ gil_state=PyGILState_Ensure(); }
+#define Py_UNBLOCK_GIL    if(PyGILState_Check()) { PyGILState_Release(gil_state); }
+
 namespace RDK {
     std::string parse_python_exception();
 

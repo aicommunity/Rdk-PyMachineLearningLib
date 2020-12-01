@@ -43,37 +43,35 @@ TPyUBitmapClassifier* TPyUBitmapClassifier::New(void)
 // --------------------------
 bool TPyUBitmapClassifier::APythonInitialize(void)
 {
-    Py_BLOCK_GIL
-
     if((*UseWeightsPath))
     {
         py::object initialize;
         if((*UseRelativeWeightsPath))
         {
+            Py_BLOCK_GIL
             initialize = IntegrationInterfaceInstance.attr("initialize_weights")(GetEnvironment()->GetCurrentDataDir()+*WeightsPath);
+            Py_UNBLOCK_GIL
             if(!initialize.is_none())
             {
-                Py_UNBLOCK_GIL
                 return true;
             }
             else
             {
-                Py_UNBLOCK_GIL
                 return false;
             }
 
         }
         else
         {
+            Py_BLOCK_GIL
             initialize = IntegrationInterfaceInstance.attr("initialize_weights")(*WeightsPath);
+            Py_UNBLOCK_GIL
             if(!initialize.is_none())
             {
-                Py_UNBLOCK_GIL
                 return true;
             }
             else
             {
-                Py_UNBLOCK_GIL
                 return false;
             }
     }
@@ -81,10 +79,8 @@ bool TPyUBitmapClassifier::APythonInitialize(void)
     }
     else
     {
-        Py_UNBLOCK_GIL
         return true;
     }
-    Py_UNBLOCK_GIL
     return true;
 }
 
@@ -123,8 +119,6 @@ bool TPyUBitmapClassifier::ClassifyBitmap(UBitmap &bmp, MDVector<double> &output
     if(!PythonInitialized)
         return false;
 
-    Py_BLOCK_GIL
-
     int w = bmp.GetWidth();
     int h = bmp.GetHeight();
 
@@ -151,7 +145,6 @@ bool TPyUBitmapClassifier::ClassifyBitmap(UBitmap &bmp, MDVector<double> &output
     else
     {
         LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPyUBitmapClassifier error: Incorrect UBitmap color model: ")+sntoa(ProcessedBmp.GetColorModel()));
-        Py_UNBLOCK_GIL
         return false;
     }
 
@@ -160,7 +153,9 @@ bool TPyUBitmapClassifier::ClassifyBitmap(UBitmap &bmp, MDVector<double> &output
     try
     {
         clock_t start = clock();
+        Py_BLOCK_GIL
         py::object retval = IntegrationInterfaceInstance.attr("classify")(ProcessedMat);
+        Py_UNBLOCK_GIL
         clock_t end = clock();
         double cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
         //std::vector<float> res = boost::python::extract<std::vector<float> >(retval);
@@ -171,7 +166,6 @@ bool TPyUBitmapClassifier::ClassifyBitmap(UBitmap &bmp, MDVector<double> &output
         if(dms>2)
         {
             LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPyUBitmapClassifier error: Returned array with incorrect dimensions"));
-            Py_UNBLOCK_GIL
             return false;
         }
 
@@ -198,7 +192,6 @@ bool TPyUBitmapClassifier::ClassifyBitmap(UBitmap &bmp, MDVector<double> &output
         if(result.size() != NumClasses)
         {
             LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPyUBitmapClassifier error: NumClasses "+sntoa(*NumClasses)+" not equals to returned confidences count "+sntoa(result.size())));
-            Py_UNBLOCK_GIL
             return false;
         }
 
@@ -230,14 +223,15 @@ bool TPyUBitmapClassifier::ClassifyBitmap(UBitmap &bmp, MDVector<double> &output
     }
     catch (py::error_already_set const &)
     {
+        Py_UNBLOCK_GIL
         std::string perrorStr = parse_python_exception();
         LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPyUBitmapClassifier error: ")+perrorStr);
     }
     catch(...)
     {
+        Py_UNBLOCK_GIL
         LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Unknown exception"));
     }
-    Py_UNBLOCK_GIL
     return true;
 }
 // --------------------------

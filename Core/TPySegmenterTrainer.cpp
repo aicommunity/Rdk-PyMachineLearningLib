@@ -317,6 +317,7 @@ bool TPySegmenterTrainer::ACalculate(void)
     }
     catch (py::error_already_set const &)
     {
+        Py_UNBLOCK_GIL
         std::string perrorStr = parse_python_exception();
         LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPySegmenterTrainer error: ")+perrorStr);
         TrainingStatus = 0;
@@ -324,6 +325,7 @@ bool TPySegmenterTrainer::ACalculate(void)
     }
     catch(...)
     {
+        Py_UNBLOCK_GIL
         LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Unknown exception"));
         TrainingStatus = 0;
         StartTraining = false;

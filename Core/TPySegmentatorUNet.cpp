@@ -43,11 +43,13 @@ bool TPySegmentatorUNet::APythonInitialize(void)
 {
     if(!PythonInitialized)
         return false;
+
     try
     {
         py::object initialize;
+        Py_BLOCK_GIL
         initialize = IntegrationInterfaceInstance.attr("initialize_config")(GetEnvironment()->GetCurrentDataDir()+*WeightsPath);
-
+        Py_UNBLOCK_GIL
 
         if(!initialize.is_none())
         {
@@ -62,8 +64,10 @@ bool TPySegmentatorUNet::APythonInitialize(void)
     }
     catch (py::error_already_set const &)
     {
+        Py_UNBLOCK_GIL
         std::string perrorStr = parse_python_exception();
         LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("Python init fail: ")+perrorStr);
+
         return false;
     }
     catch(...)
@@ -104,7 +108,9 @@ bool TPySegmentatorUNet::Inference(UBitmap &bmp, UBitmap &mask)
 {
  try
  {
+  Py_BLOCK_GIL
   py::object retval = IntegrationInterfaceInstance.attr("inference")(bmp);
+  Py_UNBLOCK_GIL
 
   cv::Mat res_grayscale = pbcvt::fromNDArrayToMat(retval.ptr());
 
@@ -142,6 +148,7 @@ bool TPySegmentatorUNet::Inference(UBitmap &bmp, UBitmap &mask)
  }
  catch (py::error_already_set const &)
  {
+  Py_UNBLOCK_GIL
   std::string perrorStr = parse_python_exception();
   LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPySegmentatorUNet error: ")+perrorStr);
  }

@@ -68,6 +68,7 @@ TPyBaseTrainer::~TPyBaseTrainer(void)
     }
     catch (py::error_already_set const &)
     {
+        Py_UNBLOCK_GIL
         std::string perrorStr = parse_python_exception();
         LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPyBaseTrainer destructor error: ")+perrorStr);
     }
@@ -147,6 +148,7 @@ bool TPyBaseTrainer::APyReset(void)
     }
     catch (py::error_already_set const &)
     {
+        Py_UNBLOCK_GIL
         std::string perrorStr = parse_python_exception();
         LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPyBaseTrainer reset error: ")+perrorStr);
     }
