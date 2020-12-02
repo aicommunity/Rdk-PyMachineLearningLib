@@ -92,9 +92,9 @@ UPyMachineLearningLib::UPyMachineLearningLib(void)
 UPyMachineLearningLib::~UPyMachineLearningLib(void)
 {
     PyEval_RestoreThread( mThreadState );   // восстанавливаем состояние главного потока и забираем себе GIL
-    PyGILState_Release( mGilState );        // отпускаем блокировку GIL с сохранённым состоянием
-
-    Py_Finalize();
+    //PyGILState_Release( mGilState );        // отпускаем блокировку GIL с сохранённым состоянием
+    //mGilState = PyGILState_Ensure();
+    //Py_Finalize();
 }
 // --------------------------
 
