@@ -85,17 +85,16 @@ UPyMachineLearningLib::UPyMachineLearningLib(void)
  : ULibrary("PyMachineLearningLib","1.0", GetGlobalVersion())
 {
  PythonInit();
- mGilState = PyGILState_Ensure();
- //PyGILState_Release( mGilState ); // забираем себе GIL сразу для настройки многопоточности
- //mThreadState = PyEval_SaveThread();  // сохраняем состояние главного потока и отпускаем GIL
+ mGilState = PyGILState_Ensure();     // забираем себе GIL сразу для настройки многопоточности
+ mThreadState = PyEval_SaveThread();  // сохраняем состояние главного потока и отпускаем GIL
 }
 
 UPyMachineLearningLib::~UPyMachineLearningLib(void)
 {
- //PyEval_RestoreThread( mThreadState );   // восстанавливаем состояние главного потока и забираем себе GIL
- //PyGILState_Release( mGilState );        // отпускаем блокировку GIL с сохранённым состоянием
- //mGilState = PyGILState_Ensure();
- //Py_Finalize();
+    PyEval_RestoreThread( mThreadState );   // восстанавливаем состояние главного потока и забираем себе GIL
+    PyGILState_Release( mGilState );        // отпускаем блокировку GIL с сохранённым состоянием
+
+    Py_Finalize();
 }
 // --------------------------
 

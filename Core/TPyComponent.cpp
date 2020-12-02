@@ -70,9 +70,10 @@ TPyComponent::~TPyComponent(void)
 // --------------------------
 void TPyComponent::PythonInitialize(void)
 {
-    gil_lock lock;
-     try
-    {
+   gil_lock lock;
+
+   try
+   {
         LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("Python init started..."));
         PythonInitialized=false;
 
