@@ -41,21 +41,20 @@ TPyObjectDetectorSqueezeDet* TPyObjectDetectorSqueezeDet::New(void)
 // --------------------------
 bool TPyObjectDetectorSqueezeDet::APythonInitialize(void)
 {
+    gil_lock lock;
     try
     {
-        Py_BLOCK_GIL
         py::object initialize;
 
         if(!UseFullPath)
         {
-            initialize = IntegrationInterfaceInstance.attr("initialize_config")(GetEnvironment()->GetCurrentDataDir()+*ConfigPath,
+            initialize = IntegrationInterfaceInstance->attr("initialize_config")(GetEnvironment()->GetCurrentDataDir()+*ConfigPath,
                                                                             GetEnvironment()->GetCurrentDataDir()+*WeightsPath);
         }
         else
         {
-            initialize = IntegrationInterfaceInstance.attr("initialize_config")(*ConfigPath, *WeightsPath);
+            initialize = IntegrationInterfaceInstance->attr("initialize_config")(*ConfigPath, *WeightsPath);
         }
-        Py_UNBLOCK_GIL
 
 
         if(!initialize.is_none())
@@ -71,7 +70,6 @@ bool TPyObjectDetectorSqueezeDet::APythonInitialize(void)
     }
     catch (py::error_already_set const &)
     {
-        Py_UNBLOCK_GIL
         std::string perrorStr = parse_python_exception();
         LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("Python init fail: ")+perrorStr);
         return false;
@@ -114,13 +112,12 @@ bool TPyObjectDetectorSqueezeDet::Detect(UBitmap &bmp, MDMatrix<double> &output_
     if(!PythonInitialized)
         return false;
  // Тут считаем
+ gil_lock lock;
  //std::vector<std::vector<double> > result;
  try
  {
   //import_array();
-  Py_BLOCK_GIL
-  py::object retval = IntegrationInterfaceInstance.attr("detect")(bmp);
-  Py_UNBLOCK_GIL
+  py::object retval = IntegrationInterfaceInstance->attr("detect")(bmp);
 
   //std::vector<float> res = boost::python::extract<std::vector<float> >(retval);
   np::ndarray ndarr = boost::python::extract< np::ndarray  >(retval);
@@ -169,7 +166,6 @@ bool TPyObjectDetectorSqueezeDet::Detect(UBitmap &bmp, MDMatrix<double> &output_
  }
  catch (py::error_already_set const &)
  {
-  Py_UNBLOCK_GIL
   std::string perrorStr = parse_python_exception();
   LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPyObjectDetectorSqueezeDet error: ")+perrorStr);
  }

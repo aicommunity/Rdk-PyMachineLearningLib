@@ -39,9 +39,9 @@ TPyBaseTrainer::~TPyBaseTrainer(void)
     try
     {
         // ѕосылаем команду на остановку исполнени€
-        IntegrationInterfaceInstance.attr("stop_now")();
+        IntegrationInterfaceInstance->attr("stop_now")();
 
-        ThreadIsAlive = boost::python::extract<bool>(IntegrationInterfaceInstance.attr("get_thread_is_alive")());
+        ThreadIsAlive = boost::python::extract<bool>(IntegrationInterfaceInstance->attr("get_thread_is_alive")());
 
         // ‘лаг оставноки потока именно в данном месте
         bool stopped = false;
@@ -50,7 +50,7 @@ TPyBaseTrainer::~TPyBaseTrainer(void)
         while(ThreadIsAlive)
         {
             // ѕосылаем команду на остановку потока
-            IntegrationInterfaceInstance.attr("stop_now")();
+            IntegrationInterfaceInstance->attr("stop_now")();
 
             stopped = true;
 
@@ -59,7 +59,7 @@ TPyBaseTrainer::~TPyBaseTrainer(void)
             Sleep(100);
             Py_BLOCK_GIL
 
-            ThreadIsAlive = boost::python::extract<bool>(IntegrationInterfaceInstance.attr("get_thread_is_alive")());
+            ThreadIsAlive = boost::python::extract<bool>(IntegrationInterfaceInstance->attr("get_thread_is_alive")());
         }
         if(stopped)
         {
@@ -118,9 +118,9 @@ bool TPyBaseTrainer::APyReset(void)
     try
     {
         // ѕосылаем команду на остановку потока
-        IntegrationInterfaceInstance.attr("stop_now")();
+        IntegrationInterfaceInstance->attr("stop_now")();
 
-        ThreadIsAlive = boost::python::extract<bool>(IntegrationInterfaceInstance.attr("get_thread_is_alive")());
+        ThreadIsAlive = boost::python::extract<bool>(IntegrationInterfaceInstance->attr("get_thread_is_alive")());
 
         // ‘лаг оставноки потока именно в данном месте
         bool stopped = false;
@@ -130,7 +130,7 @@ bool TPyBaseTrainer::APyReset(void)
         {
             stopped = true;
             // ѕосылаем команду на остановку потока
-            IntegrationInterfaceInstance.attr("stop_now")();
+            IntegrationInterfaceInstance->attr("stop_now")();
 
             //
             Py_UNBLOCK_GIL
@@ -139,7 +139,7 @@ bool TPyBaseTrainer::APyReset(void)
             //
             Py_BLOCK_GIL
 
-            ThreadIsAlive = boost::python::extract<bool>(IntegrationInterfaceInstance.attr("get_thread_is_alive")());
+            ThreadIsAlive = boost::python::extract<bool>(IntegrationInterfaceInstance->attr("get_thread_is_alive")());
         }
         if(stopped)
         {

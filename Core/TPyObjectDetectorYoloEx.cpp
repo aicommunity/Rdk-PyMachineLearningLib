@@ -63,6 +63,7 @@ TPyObjectDetectorYoloEx* TPyObjectDetectorYoloEx::New(void)
 // --------------------------
 bool TPyObjectDetectorYoloEx::APythonInitialize(void)
 {
+    gil_lock lock;
     try
     {
         py::list target_classes = py::list();
@@ -92,9 +93,9 @@ bool TPyObjectDetectorYoloEx::APythonInitialize(void)
                 *ClassesPathYOLO = GetEnvironment()->GetCurrentDataDir()+*ClassesPathYOLO;
             }
         }
-        Py_BLOCK_GIL
-        py::object initialize = IntegrationInterfaceInstance.attr("initialize_predictor")(*ModelPathYOLO, *AnchorsPathYOLO, *ClassesPathYOLO, target_classes, change_classes);
-        Py_UNBLOCK_GIL
+
+        py::object initialize = IntegrationInterfaceInstance->attr("initialize_predictor")(*ModelPathYOLO, *AnchorsPathYOLO, *ClassesPathYOLO, target_classes, change_classes);
+
         if(!initialize.is_none())
         {
             LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Python init success"));
@@ -108,7 +109,6 @@ bool TPyObjectDetectorYoloEx::APythonInitialize(void)
     }
     catch (py::error_already_set const &)
     {
-        Py_UNBLOCK_GIL
         std::string perrorStr = parse_python_exception();
         LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("Python init fail: ")+perrorStr);
         return false;
@@ -175,12 +175,13 @@ bool TPyObjectDetectorYoloEx::Detect(UBitmap &bmp, MDMatrix<double> &output_rect
     if(!PythonInitialized)
         return false;
  /// Тут считаем
+ gil_lock lock;
 // std::vector<std::vector<double> > result;
  try
  {
-  Py_BLOCK_GIL
-  py::object retval = IntegrationInterfaceInstance.attr("detect")(bmp);
-  Py_UNBLOCK_GIL
+
+  py::object retval = IntegrationInterfaceInstance->attr("detect")(bmp);
+
 
   np::ndarray ndarr = boost::python::extract< np::ndarray  >(retval);
   int dms = ndarr.get_nd();
@@ -262,7 +263,6 @@ bool TPyObjectDetectorYoloEx::Detect(UBitmap &bmp, MDMatrix<double> &output_rect
  }
  catch (py::error_already_set const &)
  {
-  Py_UNBLOCK_GIL
   std::string perrorStr = parse_python_exception();
   LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Python error: ")+perrorStr);
  }

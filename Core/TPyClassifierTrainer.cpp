@@ -112,15 +112,15 @@ bool TPyClassifierTrainer::ACalculate(void)
     // Если питон не проинициализирован, то ничего не делаем. Надо чтобы нажали Reset для повторной попытки иницилизации
     if(!PythonInitialized)
        return true;
-    Py_BLOCK_GIL
+    gil_lock lock;
     try
     {   //Отключаем работу потоков питона (забираем GIL себе) для возмжности запуска функций
 
         // Проверка статуса выполнения
-        py::object train_status = IntegrationInterfaceInstance.attr("train_status")();
+        py::object train_status = IntegrationInterfaceInstance->attr("train_status")();
         TrainingStatus = boost::python::extract< int >(train_status);
 
-        ThreadIsAlive = boost::python::extract<bool>(IntegrationInterfaceInstance.attr("get_thread_is_alive")());
+        ThreadIsAlive = boost::python::extract<bool>(IntegrationInterfaceInstance->attr("get_thread_is_alive")());
 
         // Ошибка по время обучения (сообщаем и обнуляем статус)
         // Либо правильно сработало stop_now или stop_training
@@ -129,7 +129,7 @@ bool TPyClassifierTrainer::ACalculate(void)
             //сброс на случай выставления извне
             StartTraining = false;
 
-            py::object except_string = IntegrationInterfaceInstance.attr("get_error_string")();
+            py::object except_string = IntegrationInterfaceInstance->attr("get_error_string")();
 
             std::string PyExceptionString = boost::python::extract< std::string >(except_string);
 
@@ -137,7 +137,7 @@ bool TPyClassifierTrainer::ACalculate(void)
 
             // Сброс статуса
             TrainingStatus = 0;
-            py::object res = IntegrationInterfaceInstance.attr("set_training_status_to_null")();
+            py::object res = IntegrationInterfaceInstance->attr("set_training_status_to_null")();
 
             // Сброс переменных состояний
             Epoch = 0;
@@ -159,7 +159,7 @@ bool TPyClassifierTrainer::ACalculate(void)
 
             // Сброс статуса
             TrainingStatus = 0;
-            py::object res = IntegrationInterfaceInstance.attr("set_training_status_to_null")();
+            py::object res = IntegrationInterfaceInstance->attr("set_training_status_to_null")();
 
             // Сброс переменных состояний
             Epoch = 0;
@@ -177,25 +177,25 @@ bool TPyClassifierTrainer::ACalculate(void)
             StartTraining = false;
 
             //Запуск геттеров для получения информации о состоянии выполнения
-            Epoch       = boost::python::extract< int >  (IntegrationInterfaceInstance.attr("get_epoch")());
-            Progress    = boost::python::extract< float >(IntegrationInterfaceInstance.attr("get_progess")());
+            Epoch       = boost::python::extract< int >  (IntegrationInterfaceInstance->attr("get_epoch")());
+            Progress    = boost::python::extract< float >(IntegrationInterfaceInstance->attr("get_progess")());
 
-            TrainAcc    = boost::python::extract< float >(IntegrationInterfaceInstance.attr("get_train_acc")());
-            TrainLoss   = boost::python::extract< float >(IntegrationInterfaceInstance.attr("get_train_loss")());
-            ValAcc      = boost::python::extract< float >(IntegrationInterfaceInstance.attr("get_val_acc")());
-            ValLoss     = boost::python::extract< float >(IntegrationInterfaceInstance.attr("get_val_loss")());
+            TrainAcc    = boost::python::extract< float >(IntegrationInterfaceInstance->attr("get_train_acc")());
+            TrainLoss   = boost::python::extract< float >(IntegrationInterfaceInstance->attr("get_train_loss")());
+            ValAcc      = boost::python::extract< float >(IntegrationInterfaceInstance->attr("get_val_acc")());
+            ValLoss     = boost::python::extract< float >(IntegrationInterfaceInstance->attr("get_val_loss")());
 
 
             //Останавливаем обучение либо вообще всю функцию, если требуется
             if(StopTraining)
             {
-                IntegrationInterfaceInstance.attr("stop_training")();
+                IntegrationInterfaceInstance->attr("stop_training")();
                 LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("Stop training initiated. Trained networks will be tested"));
                 StopTraining = false;
             }
             if(StopNow)
             {
-                IntegrationInterfaceInstance.attr("stop_now")();
+                IntegrationInterfaceInstance->attr("stop_now")();
                 LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("Stop training/test initiated. Trained networks will not be tested. "
                                                                   "All python-execution will be stopped"));
                 StopNow = false;
@@ -211,7 +211,7 @@ bool TPyClassifierTrainer::ACalculate(void)
                     LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Python thread is alive. "
                                                                          "Set \"StopNow\" paramenter to true or activate \"Reset\". "
                                                                          "It will cause stopping of thread"));
-                    Py_UNBLOCK_GIL
+
                     StartTraining = false;
                     return true;
                 }
@@ -219,7 +219,6 @@ bool TPyClassifierTrainer::ACalculate(void)
                 // Проверки на допустимость входных аргументов
                 if(!CheckInputParameters())
                 {
-                    Py_UNBLOCK_GIL
                     StartTraining = false;
                     return true;
                 }
@@ -278,17 +277,17 @@ bool TPyClassifierTrainer::ACalculate(void)
                 py::tuple data_dir_tuple = py::make_tuple(TrainDataDir->at(0).c_str());
 
                 //Запуск обучения, внутри функции питона функция обучения отпускается в отдельный поток
-                py::object retval = IntegrationInterfaceInstance.attr("classification_train")
+                py::object retval = IntegrationInterfaceInstance->attr("classification_train")
                                                                         (data_dir_tuple,
                                                                          func_params);
 
                 // Проверка на исключительный (практически невозможный) случай
                 // Если после выполнения функции classification_train() сразу изменился TrainingStatus на -1
-                py::object train_status = IntegrationInterfaceInstance.attr("train_status")();
+                py::object train_status = IntegrationInterfaceInstance->attr("train_status")();
                 TrainingStatus = boost::python::extract< int >(train_status);
                 if(TrainingStatus == -1)
                 {
-                    py::object except_string = IntegrationInterfaceInstance.attr("get_error_string")();
+                    py::object except_string = IntegrationInterfaceInstance->attr("get_error_string")();
 
                     std::string PyExceptionString = boost::python::extract< std::string >(except_string);
 
@@ -302,7 +301,6 @@ bool TPyClassifierTrainer::ACalculate(void)
     }
     catch (py::error_already_set const &)
     {
-        Py_UNBLOCK_GIL
         std::string perrorStr = parse_python_exception();
         LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPyClassifierTrainer error: ")+perrorStr);
         TrainingStatus = 0;
@@ -314,7 +312,7 @@ bool TPyClassifierTrainer::ACalculate(void)
         TrainingStatus = 0;
         StartTraining = false;
     }
-    Py_UNBLOCK_GIL
+
     return true;
 }
 

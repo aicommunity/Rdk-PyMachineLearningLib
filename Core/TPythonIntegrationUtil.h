@@ -18,6 +18,15 @@ py::object import(const std::string& module, const std::string& path, py::object
 template<class T> py::list stdvector2pylist(const std::vector<T>& v);
 
     template<typename T> inline std::vector<T> pyiterable2stdvector(const py::object& iterable);
+
+class gil_lock
+{
+public:
+  gil_lock();
+  ~gil_lock();
+private:
+  PyGILState_STATE state_;
+};
 }
 
 #endif

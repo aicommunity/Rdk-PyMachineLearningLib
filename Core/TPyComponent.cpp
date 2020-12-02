@@ -21,6 +21,8 @@ TPyComponent::TPyComponent(void)
   UseFullPath("UseFullPath", this),
   PythonInitialized(false)
 {
+    IntegrationInterface = new boost::python::object;
+    IntegrationInterfaceInstance = new boost::python::object;
 }
 
 
@@ -57,7 +59,9 @@ bool TPyComponent::SetPythonClassName(const std::string& path)
 
 TPyComponent::~TPyComponent(void)
 {
-    //Py_BLOCK_GIL
+    gil_lock lock;
+    delete IntegrationInterface;
+    delete IntegrationInterfaceInstance;
 }
 // --------------------------
 
@@ -66,6 +70,7 @@ TPyComponent::~TPyComponent(void)
 // --------------------------
 void TPyComponent::PythonInitialize(void)
 {
+    gil_lock lock;
      try
     {
         LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("Python init started..."));
@@ -89,7 +94,6 @@ void TPyComponent::PythonInitialize(void)
          LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("Python init fail"));
          return;
         }
-        Py_BLOCK_GIL
 
         py::object MainModule = py::import("__main__");  // импортируем main-scope, см. https://docs.python.org/3/library/__main__.html
         py::object MainNamespace = MainModule.attr("__dict__");  // извлекаем область имен
@@ -107,22 +111,20 @@ void TPyComponent::PythonInitialize(void)
 
         // экземпляр питоновского класса, через который активируется виртуальная среда и загружается модель
         // TODO: пусть до среды брать из конфига
-        IntegrationInterface = DetectorInterfaceModule.attr(PythonClassName->c_str());
-        if(!IntegrationInterface.is_none())
-         IntegrationInterfaceInstance = IntegrationInterface(); // DetectorEmbeddingInterface
+        (*IntegrationInterface) = DetectorInterfaceModule.attr(PythonClassName->c_str());
+        if(!IntegrationInterface->is_none())
+         (*IntegrationInterfaceInstance) = (*IntegrationInterface)(); // DetectorEmbeddingInterface
 
         PythonInitialized=APythonInitialize();
     }
     catch (py::error_already_set const &)
     {
-        Py_UNBLOCK_GIL
         std::string perrorStr = parse_python_exception();
         LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("Python init fail: ")+perrorStr);
         PythonInitialized=false;
     }
     catch(...)
     {
-        Py_UNBLOCK_GIL
         PythonInitialized=false;
         LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("Python init fail: Unhandled exception"));
     }
@@ -132,7 +134,6 @@ void TPyComponent::PythonInitialize(void)
     else
      LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("...Python init FAILED!"));
 
-    Py_UNBLOCK_GIL
 }
 
 // Восстановление настроек по умолчанию и сброс процесса счета

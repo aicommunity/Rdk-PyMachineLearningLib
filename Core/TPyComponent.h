@@ -35,10 +35,10 @@ PyGILState_STATE gil_state;
 bool PythonInitialized;
 
 /// Интерфейс 1
-boost::python::object IntegrationInterface;
+boost::python::object* IntegrationInterface;
 
 /// Интерфейс 2
-boost::python::object IntegrationInterfaceInstance;
+boost::python::object* IntegrationInterfaceInstance;
 
 /// Полный путь до имени скрипта
 std::string FullPythonScriptFileName;

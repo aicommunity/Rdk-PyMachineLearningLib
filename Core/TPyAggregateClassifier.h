@@ -27,8 +27,8 @@ UPropertyOutputData<MDMatrix<int>,TPyAggregateClassifier> Detections;
 
 UPropertyOutputData<UBitmap,TPyAggregateClassifier> DebugImage;
 
-boost::python::object IntegrationInterface;
-boost::python::object IntegrationInterfaceInstance;
+boost::python::object* IntegrationInterface;
+boost::python::object* IntegrationInterfaceInstance;
 
 protected: // Переменные состояния
 
