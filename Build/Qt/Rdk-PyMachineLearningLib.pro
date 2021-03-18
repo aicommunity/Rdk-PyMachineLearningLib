@@ -60,7 +60,8 @@ HEADERS += \
     ../../Core/TPyBaseTrainer.h \
     ../../Core/TPyClassifierTrainer.h \
     ../../Core/TPyDetectorTrainer.h \
-    ../../Core/TPySegmenterTrainer.h
+    ../../Core/TPySegmenterTrainer.h \
+    ../../Core/TPyPredictSort.h
 
 
 SOURCES += \
@@ -80,7 +81,8 @@ SOURCES += \
     ../../Core/TPyBaseTrainer.cpp \
     ../../Core/TPyClassifierTrainer.cpp \
     ../../Core/TPyDetectorTrainer.cpp \
-    ../../Core/TPySegmenterTrainer.cpp
+    ../../Core/TPySegmenterTrainer.cpp \
+    ../../Core/TPyPredictSort.cpp
 }
 
 HEADERS += \

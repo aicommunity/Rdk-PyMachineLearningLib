@@ -14,6 +14,7 @@
 #include "TPyClassifierTrainer.h"
 #include "TPyDetectorTrainer.h"
 #include "TPySegmenterTrainer.h"
+#include "TPyPredictSort.h"
 #endif
 
 namespace RDK {
