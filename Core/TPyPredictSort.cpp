@@ -171,7 +171,7 @@ bool TPyPredictSort::ACalculate(void)
             //сброс на случай выставления извне
             StartPredict = false;
 
-            LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("Training completed correctly"));
+            LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("Prediction completed correctly"));
 
             // Сброс статуса
             PredictStatus = 0;
@@ -213,7 +213,7 @@ bool TPyPredictSort::ACalculate(void)
                     return true;
                 }
 
-                LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("Training started"));
+                LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("Prediction started"));
 
                 // Обнуление ненужных флагов
                 StopNow = false;
@@ -249,7 +249,7 @@ bool TPyPredictSort::ACalculate(void)
     catch (py::error_already_set const &)
     {
         std::string perrorStr = parse_python_exception();
-        LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPyClassifierTrainer error: ")+perrorStr);
+        LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPyPredictSort error: ")+perrorStr);
         PredictStatus = 0;
         StartPredict = false;
     }
@@ -274,19 +274,19 @@ bool TPyPredictSort::CheckInputParameters()
 
     if(ConfigPath->empty())
     {
-        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("WorkingDir is empty!"));
+        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("ConfigPath is empty!"));
         return false;
     }
 
     if(WeightPath->empty())
     {
-        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("WorkingDir is empty!"));
+        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("WeightPath is empty!"));
         return false;
     }
 
     if(ImagesDir->empty())
     {
-        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("WorkingDir is empty!"));
+        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("ImagesDir is empty!"));
         return false;
     }
 
