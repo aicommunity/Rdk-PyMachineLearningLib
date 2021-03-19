@@ -219,14 +219,20 @@ bool TPyPredictSort::ACalculate(void)
                 StopNow = false;
 
 
+                //Заполнение словаря параметров ( именованные аргументы)
+                py::dict func_params;
+
+                func_params["image_dir"]          =   py::str(ImagesDir->c_str());
+                func_params["working_dir"]        =   py::str(WorkingDir->c_str());
+                func_params["sort_images"]        =   py::object(*SortImages);
+
+                // Позиционные аргументы
+                py::tuple data_dir_tuple = py::make_tuple(py::str(ConfigPath->c_str()), py::str(WeightPath->c_str()));
+
                 //Запуск обучения, внутри функции питона функция обучения отпускается в отдельный поток
-                py::object retval = IntegrationInterfaceInstance->attr("predict_and_sort")
-                                                                        (py::str(ConfigPath->c_str()),
-                                                                         py::str(WeightPath->c_str()),
-                                                                         py::str(ImagesDir->c_str()),
-                                                                         py::str(WorkingDir->c_str()),
-                                                                         py::object(true),
-                                                                         py::object(*SortImages));
+                py::object retval = IntegrationInterfaceInstance->attr("predict_and_sort_wrapper")
+                                                                      (data_dir_tuple,
+                                                                       func_params);
 
                 // Проверка на исключительный (практически невозможный) случай
                 // Если после выполнения функции classification_train() сразу изменился TrainingStatus на -1
