@@ -89,7 +89,7 @@ bool TPyPredictSort::APyReset(void)
     try
     {
         // Посылаем команду на остановку потока
-        IntegrationInterfaceInstance->attr("stop_now")();
+        //IntegrationInterfaceInstance->attr("stop_now")();
 
         ThreadIsAlive = boost::python::extract<bool>(IntegrationInterfaceInstance->attr("get_thread_is_alive")());
 
