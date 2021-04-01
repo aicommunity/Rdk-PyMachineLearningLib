@@ -38,9 +38,6 @@ TPyBaseTrainer::~TPyBaseTrainer(void)
     Py_BLOCK_GIL
     try
     {
-        // ѕосылаем команду на остановку исполнени€
-        IntegrationInterfaceInstance->attr("stop_now")();
-
         ThreadIsAlive = boost::python::extract<bool>(IntegrationInterfaceInstance->attr("get_thread_is_alive")());
 
         // ‘лаг оставноки потока именно в данном месте

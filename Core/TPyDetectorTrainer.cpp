@@ -295,8 +295,8 @@ bool TPyDetectorTrainer::ACalculate(void)
                                                                         (args_tuple,
                                                                          func_params);
 
-                // Проверка на исключительный (практически невозможный) случай
-                // Если после выполнения функции classification_train() сразу изменился TrainingStatus на -1
+                // Проверка на исключительный случай
+                // Если после выполнения функции detection_train() сразу изменился TrainingStatus на -1
                 py::object train_status = IntegrationInterfaceInstance->attr("train_status")();
                 TrainingStatus = boost::python::extract< int >(train_status);
                 if(TrainingStatus == -1)
@@ -335,13 +335,13 @@ bool TPyDetectorTrainer::CheckInputParameters()
 {
     if(TrainDataDir->empty() || TrainDataDir->at(0).empty())
     {
-        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("TrainDataDir is empty!"));
+        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("TrainDataDir parameter is empty!"));
         return false;
     }
 
     if(WorkingDir->empty())
     {
-        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("WorkingDir is empty!"));
+        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("WorkingDir parameter is empty!"));
         return false;
     }
 
@@ -354,13 +354,13 @@ bool TPyDetectorTrainer::CheckInputParameters()
 
     if(ArchitectureName->empty())
     {
-        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("ArchitectureName is empty!"));
+        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("ArchitectureName parameter is empty!"));
         return false;
     }
 
     if(DatasetType->empty())
     {
-        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("DatasetType is empty!"));
+        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("DatasetType parameter is empty!"));
         return false;
     }
 

@@ -295,7 +295,7 @@ bool TPySegmenterTrainer::ACalculate(void)
                                                                         (args_tuple,
                                                                          func_params);
 
-                // Проверка на исключительный (практически невозможный) случай
+                // Проверка на исключительный случай
                 // Если после выполнения функции segmentation_train() сразу изменился TrainingStatus на -1
                 py::object train_status = IntegrationInterfaceInstance->attr("train_status")();
                 TrainingStatus = boost::python::extract< int >(train_status);
@@ -335,13 +335,13 @@ bool TPySegmenterTrainer::CheckInputParameters()
 {
     if(TrainDataDir->empty() || TrainDataDir->at(0).empty())
     {
-        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("TrainDataDir is empty!"));
+        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("TrainDataDir parameter is empty!"));
         return false;
     }
 
     if(WorkingDir->empty())
     {
-        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("WorkingDir is empty!"));
+        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("WorkingDir parameter is empty!"));
         return false;
     }
 
@@ -353,7 +353,7 @@ bool TPySegmenterTrainer::CheckInputParameters()
 
     if(ArchitectureName->empty())
     {
-        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("ArchitectureName is empty!"));
+        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("ArchitectureName parameter is empty!"));
         return false;
     }
 
@@ -365,7 +365,7 @@ bool TPySegmenterTrainer::CheckInputParameters()
 
     if(DatasetName->empty())
     {
-        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("DatasetName is empty!"));
+        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("DatasetName parameter is empty!"));
         return false;
     }
 

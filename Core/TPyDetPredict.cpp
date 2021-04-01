@@ -1,7 +1,7 @@
 #ifndef RDK_TPyPredictSortCPP
 #define RDK_TPyPredictSortCPP
 
-#include "TPyPredictSort.h"
+#include "TPyDetPredict.h"
 #include <iostream>
 #include <boost/filesystem.hpp>
 
@@ -11,10 +11,9 @@ namespace RDK {
 // --------------------------
 // Конструкторы и деструкторы
 // --------------------------
-TPyPredictSort::TPyPredictSort(void)
+TPyDetPredict::TPyDetPredict(void)
 : WorkingDir("WorkingDir",this),
   ImagesDir("ImagesDir",this),
-  SortImages("SortImages",this),
   ConfigPath("ConfigPath",this),
   WeightPath("WeightPath",this),
   StopNow("StopNow",this),
@@ -24,7 +23,7 @@ TPyPredictSort::TPyPredictSort(void)
 {
 }
 
-TPyPredictSort::~TPyPredictSort(void)
+TPyDetPredict::~TPyDetPredict(void)
 {
 }
 // --------------------------
@@ -33,22 +32,22 @@ TPyPredictSort::~TPyPredictSort(void)
 // Системные методы управления объектом
 // --------------------------
 // Выделяет память для новой чистой копии объекта этого класса
-TPyPredictSort* TPyPredictSort::New(void)
+TPyDetPredict* TPyDetPredict::New(void)
 {
- return new TPyPredictSort;
+ return new TPyDetPredict;
 }
 // --------------------------
 
 // --------------------------
 // Скрытые методы управления счетом
 // --------------------------
-bool TPyPredictSort::APythonInitialize(void)
+bool TPyDetPredict::APythonInitialize(void)
 {
     return true;
 }
 
 // Восстановление настроек по умолчанию и сброс процесса счета
-bool TPyPredictSort::APyDefault(void)
+bool TPyDetPredict::APyDefault(void)
 {
     PythonModuleName="classifier_interface_tf1";
     PythonClassName="ClassificationInterface";
@@ -58,7 +57,6 @@ bool TPyPredictSort::APyDefault(void)
     ImagesDir = "";
     ConfigPath = "";
     WeightPath = "";
-    SortImages = false;
     StopNow = false;
     StartPredict = false;
     PredictStatus = 0;
@@ -71,14 +69,14 @@ bool TPyPredictSort::APyDefault(void)
 // после настройки параметров
 // Автоматически вызывает метод Reset() и выставляет Ready в true
 // в случае успешной сборки
-bool TPyPredictSort::APyBuild(void)
+bool TPyDetPredict::APyBuild(void)
 {
     return true;
 }
 
 
 // Сброс процесса счета без потери настроек
-bool TPyPredictSort::APyReset(void)
+bool TPyDetPredict::APyReset(void)
 {
     StopNow = false;
     StartPredict = false;
@@ -132,7 +130,7 @@ bool TPyPredictSort::APyReset(void)
 }
 
 // Выполняет расчет этого объекта
-bool TPyPredictSort::ACalculate(void)
+bool TPyDetPredict::ACalculate(void)
 {
     // Если питон не проинициализирован, то ничего не делаем. Надо чтобы нажали Reset для повторной попытки иницилизации
     if(!PythonInitialized)
@@ -222,20 +220,23 @@ bool TPyPredictSort::ACalculate(void)
                 //Заполнение словаря параметров ( именованные аргументы)
                 py::dict func_params;
 
-                func_params["image_dir"]          =   py::str(ImagesDir->c_str());
-                func_params["working_dir"]        =   py::str(WorkingDir->c_str());
-                func_params["sort_images"]        =   py::object(*SortImages);
+                func_params["config"]       =   py::str(ConfigPath->c_str());
+                func_params["weights"]      =   py::str(WeightPath->c_str());
+                func_params["image_dir"]    =   py::str(ImagesDir->c_str());
+                func_params["working_dir"]  =   py::str(WorkingDir->c_str());
+                func_params["visualize"]    =   py::object(false);
+
 
                 // Позиционные аргументы
-                py::tuple data_dir_tuple = py::make_tuple(py::str(ConfigPath->c_str()), py::str(WeightPath->c_str()));
+                py::tuple data_dir_tuple = py::make_tuple();
 
                 //Запуск обучения, внутри функции питона функция обучения отпускается в отдельный поток
-                py::object retval = IntegrationInterfaceInstance->attr("predict_and_sort_wrapper")
+                py::object retval = IntegrationInterfaceInstance->attr("predict_from_folder")
                                                                       (data_dir_tuple,
                                                                        func_params);
 
                 // Проверка на исключительный случай
-                // Если после выполнения функции predict_and_sort_wrapper() сразу изменился TrainingStatus на -1
+                // Если после выполнения функции predict_from_folder() сразу изменился TrainingStatus на -1
                 py::object train_status = IntegrationInterfaceInstance->attr("train_status")();
                 PredictStatus = boost::python::extract< int >(train_status);
                 if(PredictStatus == -1)
@@ -270,7 +271,7 @@ bool TPyPredictSort::ACalculate(void)
 }
 
 
-bool TPyPredictSort::CheckInputParameters()
+bool TPyDetPredict::CheckInputParameters()
 {
     if(WorkingDir->empty())
     {

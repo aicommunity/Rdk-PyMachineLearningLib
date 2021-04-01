@@ -140,6 +140,7 @@ void UPyMachineLearningLib::CreateClassSamples(UStorage *storage)
  UploadClass<TPyDetectorTrainer>("TPyDetectorTrainer","TPyDetectorTrainer");
  UploadClass<TPySegmenterTrainer>("TPySegmenterTrainer","TPySegmenterTrainer");
  UploadClass<TPyPredictSort>("TPyPredictSort","TPyPredictSort");
+ UploadClass<TPyDetPredict>("TPyDetPredict","TPyDetPredict");
 #endif
 }
 // --------------------------
