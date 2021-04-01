@@ -1,5 +1,5 @@
-#ifndef RDK_TPyPredictSortCPP
-#define RDK_TPyPredictSortCPP
+#ifndef RDK_TPyDetPredictCPP
+#define RDK_TPyDetPredictCPP
 
 #include "TPyDetPredict.h"
 #include <iostream>
@@ -49,8 +49,8 @@ bool TPyDetPredict::APythonInitialize(void)
 // Восстановление настроек по умолчанию и сброс процесса счета
 bool TPyDetPredict::APyDefault(void)
 {
-    PythonModuleName="classifier_interface_tf1";
-    PythonClassName="ClassificationInterface";
+    PythonModuleName="detection_train";
+    PythonClassName="DetectionInterface";
 
 
     WorkingDir = "";
@@ -112,18 +112,18 @@ bool TPyDetPredict::APyReset(void)
         }
         if(stopped)
         {
-            LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPyPredictSort reset: python thread stopped successful"));
+            LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPyDetPredict reset: python thread stopped successful"));
         }
     }
     catch (py::error_already_set const &)
     {
         Py_UNBLOCK_GIL
         std::string perrorStr = parse_python_exception();
-        LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPyPredictSort reset error: ")+perrorStr);
+        LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPyDetPredict reset error: ")+perrorStr);
     }
     catch(...)
     {
-        LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Unknown exception in TPyPredictSort reset:"));
+        LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Unknown exception in TPyDetPredict reset:"));
     }
     Py_UNBLOCK_GIL
     return true;
@@ -256,7 +256,7 @@ bool TPyDetPredict::ACalculate(void)
     catch (py::error_already_set const &)
     {
         std::string perrorStr = parse_python_exception();
-        LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPyPredictSort error: ")+perrorStr);
+        LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPyDetPredict error: ")+perrorStr);
         PredictStatus = 0;
         StartPredict = false;
     }
