@@ -109,7 +109,6 @@ bool TPyClassifierTrainer::APyBuild(void)
 // Выполняет расчет этого объекта
 bool TPyClassifierTrainer::ACalculate(void)
 {
-    std::cout << "check" <<std::endl;
     // Если питон не проинициализирован, то ничего не делаем. Надо чтобы нажали Reset для повторной попытки иницилизации
     if(!PythonInitialized)
        return true;
