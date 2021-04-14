@@ -103,6 +103,12 @@ bool TPyDetectorTrainer::ACalculate(void)
     // Если питон не проинициализирован, то ничего не делаем. Надо чтобы нажали Reset для повторной попытки иницилизации
     if(!PythonInitialized)
        return true;
+
+    if(WorkingDir->empty())
+    {
+        WorkingDir = Environment->GetCurrentDataDir()+"Results/";
+    }
+
     gil_lock lock;
     try
     {   //Отключаем работу потоков питона (забираем GIL себе) для возмжности запуска функций
@@ -339,19 +345,6 @@ bool TPyDetectorTrainer::CheckInputParameters()
         return false;
     }
 
-    if(WorkingDir->empty())
-    {
-        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("WorkingDir parameter is empty!"));
-        return false;
-    }
-
-    // Если нет слэша в конце - ставим
-    if(WorkingDir->back() != '/')
-    {
-        WorkingDir->push_back('/');
-    }
-
-
     if(ArchitectureName->empty())
     {
         LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("ArchitectureName parameter is empty!"));
@@ -370,17 +363,9 @@ bool TPyDetectorTrainer::CheckInputParameters()
         LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("SplitRatio must have 3 values!"));
         return false;
     }
-    // для дектектора не должна быть пустой
-/*
-    //Проверка на непустую директорию WorkingDir
-    if(!boost::filesystem::is_empty(WorkingDir->c_str()))
-    {
-        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("WorkingDir isn't empty, it contains some files"));
-        return false;
-    }
-    */
+
     //TODO возможно нужны еще проверки на отриц.значения и проч.
-    //TODO создавать WorkingDir при каких-либо условиях
+
     //TODO проверки на пути относительные и т.д.
     return true;
 }

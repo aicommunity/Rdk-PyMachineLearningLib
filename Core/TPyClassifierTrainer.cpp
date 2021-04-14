@@ -112,6 +112,12 @@ bool TPyClassifierTrainer::ACalculate(void)
     // ≈сли питон не проинициализирован, то ничего не делаем. Ќадо чтобы нажали Reset дл€ повторной попытки иницилизации
     if(!PythonInitialized)
        return true;
+
+    if(WorkingDir->empty())
+    {
+        WorkingDir = Environment->GetCurrentDataDir()+"Results/";
+    }
+
     gil_lock lock;
     try
     {   //ќтключаем работу потоков питона (забираем GIL себе) дл€ возмжности запуска функций
@@ -325,12 +331,6 @@ bool TPyClassifierTrainer::CheckInputParameters()
         return false;
     }
 
-    if(WorkingDir->empty())
-    {
-        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("WorkingDir parameter is empty!"));
-        return false;
-    }
-
     if(ArchitectureName->empty())
     {
         LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("ArchitectureName parameter is empty!"));
@@ -368,7 +368,6 @@ bool TPyClassifierTrainer::CheckInputParameters()
         return false;
     }
     //TODO возможно нужны еще проверки на отриц.значени€ и проч.
-    //TODO создавать WorkingDir при каких-либо услови€х
     //TODO проверки на пути относительные и т.д.
     return true;
 }
