@@ -137,6 +137,12 @@ bool TPyPredictSort::ACalculate(void)
     // Если питон не проинициализирован, то ничего не делаем. Надо чтобы нажали Reset для повторной попытки иницилизации
     if(!PythonInitialized)
        return true;
+
+    if(*WorkingDir != Environment->GetCurrentDataDir()+"Results/")
+    {
+        WorkingDir = Environment->GetCurrentDataDir()+"Results/";
+    }
+
     gil_lock lock;
     try
     {   //Отключаем работу потоков питона (забираем GIL себе) для возмжности запуска функций

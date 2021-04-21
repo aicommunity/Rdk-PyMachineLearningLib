@@ -113,7 +113,7 @@ bool TPyClassifierTrainer::ACalculate(void)
     if(!PythonInitialized)
        return true;
 
-    if(WorkingDir->empty())
+    if(*WorkingDir != Environment->GetCurrentDataDir()+"Results/")
     {
         WorkingDir = Environment->GetCurrentDataDir()+"Results/";
     }
