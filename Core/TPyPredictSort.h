@@ -38,6 +38,9 @@ ULProperty<bool, TPyPredictSort, ptPubState> ThreadIsAlive;
 // обучение начнется при StartTraining=true и PredictStatus=0
 ULProperty<bool, TPyPredictSort> StartPredict;
 
+/// Флаг завершения предсказания
+ULProperty<bool, TPyPredictSort, ptPubState> PredictionEnded;
+
 /// Статус предсказания
 // -1 - ошибка (исключение внутри потока питона) либо успешное преждевременное завершение (stop_training, stop_now)).
 // После обработки в компоненте сбрасывается в 0

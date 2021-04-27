@@ -20,8 +20,10 @@ TPyPredictSort::TPyPredictSort(void)
   StopNow("StopNow",this),
   StartPredict("StartPredict",this),
   PredictStatus("PredictStatus",this),
-  ThreadIsAlive("ThreadIsAlive",this)
+  ThreadIsAlive("ThreadIsAlive",this),
+  PredictionEnded("PredictionEnded",this)
 {
+    PredictionEnded=false;
 }
 
 TPyPredictSort::~TPyPredictSort(void)
@@ -182,6 +184,7 @@ bool TPyPredictSort::ACalculate(void)
             // Сброс статуса
             PredictStatus = 0;
             py::object res = IntegrationInterfaceInstance->attr("set_predicting_status_to_null")();
+            PredictionEnded = true;
         }
         // Если предсказание идет, опрашиваем геттеры
         if(PredictStatus == 1)
@@ -252,6 +255,7 @@ bool TPyPredictSort::ACalculate(void)
 
                     LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Exception during start of predicting: ") + PyExceptionString);
                 }
+                PredictionEnded = false;
 
                 PredictStatus = 1;
                 StartPredict = false;
@@ -300,6 +304,11 @@ bool TPyPredictSort::CheckInputParameters()
     {
         LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("ImagesDir parameter is empty!"));
         return false;
+    }
+
+    if(ImagesDir->back() != '/')
+    {
+        ImagesDir->push_back('/');
     }
 
     return true;
