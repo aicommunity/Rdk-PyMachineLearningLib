@@ -48,10 +48,10 @@ bool TPyObjectDetectorYolo::APythonInitialize(void)
         switch(InitializationTypeYOLO)
         {
             case YOLOV2_INITTYPE:
-                initialize = IntegrationInterfaceInstance.attr("initialize_config")(GetEnvironment()->GetCurrentDataDir()+*ConfigPathYOLO, GetEnvironment()->GetCurrentDataDir()+*WeightsPathYOLO);
+                initialize = IntegrationInterfaceInstance.attr("initialize_config")(*ConfigPathYOLO, *WeightsPathYOLO);
             break;
             case YOLOV3_INITTYPE:
-                initialize = IntegrationInterfaceInstance.attr("initialize_config")(GetEnvironment()->GetCurrentDataDir()+*ConfigPathYOLO);
+                initialize = IntegrationInterfaceInstance.attr("initialize_config")(*ConfigPathYOLO);
             break;
         default:
             LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Chosen initialization type not supported by selected detector interface file"));

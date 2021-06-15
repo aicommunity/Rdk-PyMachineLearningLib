@@ -38,6 +38,17 @@ UPropertyOutputData<MDMatrix<double>, TPyUBitmapClassifier> OutputConfidences;
 /// Время, затраченное на классификацию, секунды
 ULProperty<double,TPyUBitmapClassifier, ptPubState> ClassificationTime;
 
+/// Путь (прямой или относительный) к файлу с весами
+ULProperty<std::string,TPyUBitmapClassifier, ptPubParameter> WeightsPath;
+
+/// Включает передачу пути к конфигурации в скрипт
+/// если используется - в скрипте д.б. реализован метод initialize_weights(self, weights_path)
+/// метод в Питоне должен вернуть что-либо (напр. True) в знак штатного завершения работы
+ULProperty<bool,TPyUBitmapClassifier, ptPubParameter> UseWeightsPath;
+
+/// Включает использование пути к весам от папки проекта
+ULProperty<bool,TPyUBitmapClassifier, ptPubParameter> UseRelativeWeightsPath;
+
 protected: // Временные переменные
 
 UBitmap ProcessedBmp;

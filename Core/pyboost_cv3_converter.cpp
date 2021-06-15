@@ -3,7 +3,7 @@
 
 #include "pyboostcvconverter.hpp"
 
-#if CV_VERSION_MAJOR == 3
+#if (CV_VERSION_MAJOR == 3 || CV_VERSION_MAJOR == 4)
 namespace pbcvt {
 using namespace cv;
 //===================   ERROR HANDLING     =========================================================
@@ -84,15 +84,27 @@ public:
 		u->userdata = o;
 		return u;
 	}
+#if(CV_VERSION_MAJOR == 4)
+    UMatData* allocate(int dims0, const int* sizes, int type, void* data,
+            size_t* step, AccessFlag flags, UMatUsageFlags usageFlags) const {
+        if (data != 0) {
+            CV_Error(Error::StsAssert, "The data should normally be NULL!");
+            // probably this is safe to do in such extreme case
+            return stdAllocator->allocate(dims0, sizes, type, data, step, flags,
+                    usageFlags);
+        }
 
-	UMatData* allocate(int dims0, const int* sizes, int type, void* data,
-			size_t* step, int flags, UMatUsageFlags usageFlags) const {
-		if (data != 0) {
-			CV_Error(Error::StsAssert, "The data should normally be NULL!");
-			// probably this is safe to do in such extreme case
-			return stdAllocator->allocate(dims0, sizes, type, data, step, flags,
-					usageFlags);
-		}
+#else
+    UMatData* allocate(int dims0, const int* sizes, int type, void* data,
+            size_t* step, int flags, UMatUsageFlags usageFlags) const {
+        if (data != 0) {
+            CV_Error(Error::StsAssert, "The data should normally be NULL!");
+            // probably this is safe to do in such extreme case
+            return stdAllocator->allocate(dims0, sizes, type, data, step, flags,
+                    usageFlags);
+        }
+#endif
+
 //        PyEnsureGIL gil;
 
 		int depth = CV_MAT_DEPTH(type);
@@ -122,11 +134,18 @@ public:
 					("The numpy array of typenum=%d, ndims=%d can not be created", typenum, dims));
 		return allocate(o, dims0, sizes, type, step);
 	}
+#if(CV_VERSION_MAJOR==4)
+    bool allocate(cv::UMatData* u, cv::AccessFlag accessFlags, cv::UMatUsageFlags usageFlags) const
+        {
+            return stdAllocator->allocate(u, accessFlags, usageFlags);
+        }
+#else
+    bool allocate(UMatData* u, int accessFlags,
+            UMatUsageFlags usageFlags) const {
+        return stdAllocator->allocate(u, accessFlags, usageFlags);
+    }
+#endif
 
-	bool allocate(UMatData* u, int accessFlags,
-			UMatUsageFlags usageFlags) const {
-		return stdAllocator->allocate(u, accessFlags, usageFlags);
-	}
 
 	void deallocate(UMatData* u) const {
 		if (u) {

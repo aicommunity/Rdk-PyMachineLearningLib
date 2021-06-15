@@ -4,6 +4,14 @@
 #include "TPythonIntegrationInclude.h"
 #include "TPythonIntegrationUtil.h"
 
+//кастомные дефайны для управления испонением потоков питона
+//оригинал Py_BLOCK_THREADS и Py_UNBLOCK_THREADS
+#define Py_CUSTOM_BLOCK_THREADS        if(_custom_save!=nullptr){PyEval_RestoreThread(_custom_save);\
+                                                                _custom_save=nullptr;}
+
+#define Py_CUSTOM_UNBLOCK_THREADS      if(_custom_save==nullptr){_custom_save = PyEval_SaveThread();}
+
+
 namespace RDK {
 
 class TPyComponent: public RDK::UNet
@@ -21,7 +29,14 @@ ULProperty<std::string, TPyComponent> PythonModuleName;
 /// Имя питон-класса
 ULProperty<std::string, TPyComponent> PythonClassName;
 
+/// Использовать путь к файлу "как есть". Вкл по умолчанию, надо переключать для старых проектов
+ULProperty<bool, TPyComponent> UseFullPath;
+
 protected: // Временные переменные
+//Состояние потока
+//Нужен чтобы отключать/включать исполнение потоков питона
+PyThreadState *_custom_save;
+
 /// Флаг взводится при успешной инициализации подсистемы питона
 bool PythonInitialized;
 

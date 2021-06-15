@@ -54,8 +54,10 @@ HEADERS += \
     ../../Core/TPyObjectDetectorYoloEx.h \
     ../../Core/TPyObjectDetectorSqueezeDet.h \
     ../../Core/TPySegmentatorProtobuf.h \
+    ../../Core/TPySegmentatorUNet.h \
     ../../Core/Lib.h \
-    ../../Core/TPyComponent.h
+    ../../Core/TPyComponent.h   \
+    ../../Core/TPyClassifierTrainer.h
 
 
 SOURCES += \
@@ -69,8 +71,10 @@ SOURCES += \
     ../../Core/TPyObjectDetectorYoloEx.cpp \
     ../../Core/TPyObjectDetectorSqueezeDet.cpp \
     ../../Core/TPySegmentatorProtobuf.cpp \
+    ../../Core/TPySegmentatorUNet.cpp \
     ../../Core/Lib.cpp \
-    ../../Core/TPyComponent.cpp
+    ../../Core/TPyComponent.cpp \
+    ../../Core/TPyClassifierTrainer.cpp
 }
 
 HEADERS += \

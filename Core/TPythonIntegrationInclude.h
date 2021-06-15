@@ -11,6 +11,10 @@
 #ifndef BOOST_PYTHON_STATIC_LIB
 #define BOOST_PYTHON_STATIC_LIB
 #endif
+
+//максимальное кол-во передаваемых параметров в функцию (перегруженный оператор () )
+#define BOOST_PYTHON_MAX_ARITY 21
+
 #include <boost/python.hpp>
 #ifdef WIN32
 #include <boost/python/numpy.hpp>

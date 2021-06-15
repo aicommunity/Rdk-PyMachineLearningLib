@@ -1,9 +1,9 @@
 #define NO_IMPORT_ARRAY
 
-#ifndef RDK_TPySegmentatorProtobufCPP
-#define RDK_TPySegmentatorProtobufCPP
+#ifndef RDK_TPySegmentatorUNetCPP
+#define RDK_TPySegmentatorUNetCPP
 
-#include "TPySegmentatorProtobuf.h"
+#include "TPySegmentatorUNet.h"
 #include <iostream>
 
 namespace RDK {
@@ -13,15 +13,15 @@ namespace RDK {
 // --------------------------
 // Конструкторы и деструкторы
 // --------------------------
-TPySegmentatorProtobuf::TPySegmentatorProtobuf(void):
-  JSONPath("JSONPath",this),
-  ProtobufPath("ProtobufPath",this)
+TPySegmentatorUNet::TPySegmentatorUNet(void):
+  WeightsPath("WeightsPath",this),
+  RespondThreshold("RespondThreshold", this)
 {
 
 }
 
 
-TPySegmentatorProtobuf::~TPySegmentatorProtobuf(void)
+TPySegmentatorUNet::~TPySegmentatorUNet(void)
 {
 }
 // --------------------------
@@ -30,21 +30,21 @@ TPySegmentatorProtobuf::~TPySegmentatorProtobuf(void)
 // Системные методы управления объектом
 // --------------------------
 // Выделяет память для новой чистой копии объекта этого класса
-TPySegmentatorProtobuf* TPySegmentatorProtobuf::New(void)
+TPySegmentatorUNet* TPySegmentatorUNet::New(void)
 {
- return new TPySegmentatorProtobuf;
+ return new TPySegmentatorUNet;
 }
 // --------------------------
 
 // --------------------------
 // Скрытые методы управления счетом
 // --------------------------
-bool TPySegmentatorProtobuf::APythonInitialize(void)
+bool TPySegmentatorUNet::APythonInitialize(void)
 {
     try
     {
         py::object initialize;
-        initialize = IntegrationInterfaceInstance.attr("initialize_config")(*ProtobufPath, *JSONPath);
+        initialize = IntegrationInterfaceInstance.attr("initialize_config")(GetEnvironment()->GetCurrentDataDir()+*WeightsPath);
 
 
         if(!initialize.is_none())
@@ -75,8 +75,9 @@ bool TPySegmentatorProtobuf::APythonInitialize(void)
 }
 
 // Восстановление настроек по умолчанию и сброс процесса счета
-bool TPySegmentatorProtobuf::APyDefault2(void)
+bool TPySegmentatorUNet::APyDefault2(void)
 {
+ (*RespondThreshold)=64.0;
  return true;
 }
 
@@ -84,36 +85,40 @@ bool TPySegmentatorProtobuf::APyDefault2(void)
 // после настройки параметров
 // Автоматически вызывает метод Reset() и выставляет Ready в true
 // в случае успешной сборки
-bool TPySegmentatorProtobuf::APyBuild2(void)
+bool TPySegmentatorUNet::APyBuild2(void)
 {
  return true;
 }
 
 // Сброс процесса счета без потери настроек
-bool TPySegmentatorProtobuf::APyReset2(void)
+bool TPySegmentatorUNet::APyReset2(void)
 {
  return true;
 }
 
 // Выполняет расчет этого объекта
 // Выполняет обнаружение
-bool TPySegmentatorProtobuf::Inference(UBitmap &bmp, UBitmap &mask)
+bool TPySegmentatorUNet::Inference(UBitmap &bmp, UBitmap &mask)
 {
  try
  {
   py::object retval = IntegrationInterfaceInstance.attr("inference")(bmp);
 
-  cv::Mat result_mat = pbcvt::fromNDArrayToMat(retval.ptr());
+  cv::Mat res_grayscale = pbcvt::fromNDArrayToMat(retval.ptr());
 
-  int type = result_mat.type();
+  cv::Mat result_grey;
+  cv::threshold(res_grayscale, result_grey, (*RespondThreshold), 255, cv::ThresholdTypes::THRESH_BINARY);
+
+
+  int type = result_grey.type();
   uchar depth = type & CV_MAT_DEPTH_MASK;
   uchar chans = 1 + (type >> CV_CN_SHIFT);
   if(depth==CV_8U && chans==3)
   {
       UBitmap temp;
-      temp.SetRes(result_mat.cols, result_mat.rows, RDK::ubmRGB24);
-      temp.AttachBuffer(result_mat.data);
-      mask.SetRes(result_mat.cols, result_mat.rows, RDK::ubmRGB24);
+      temp.SetRes(result_grey.cols, result_grey.rows, RDK::ubmRGB24);
+      temp.AttachBuffer(result_grey.data);
+      mask.SetRes(result_grey.cols, result_grey.rows, RDK::ubmRGB24);
       temp.ConvertTo(mask);
       temp.DetachBuffer();
       mask.SwapRGBChannels();
@@ -121,21 +126,22 @@ bool TPySegmentatorProtobuf::Inference(UBitmap &bmp, UBitmap &mask)
   else if(depth==CV_8U && chans==1)
   {
       UBitmap temp;
-      temp.SetRes(result_mat.cols, result_mat.rows, RDK::ubmY8);
-      temp.AttachBuffer(result_mat.data);
-      mask.SetRes(result_mat.cols, result_mat.rows, RDK::ubmY8);
+      temp.SetRes(result_grey.cols, result_grey.rows, RDK::ubmY8);
+      temp.AttachBuffer(result_grey.data);
+      mask.SetRes(result_grey.cols, result_grey.rows, RDK::ubmY8);
       temp.ConvertTo(mask);
+      temp.DetachBuffer();
   }
   else
   {
-    LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPySegmentatorProtobuf: Received numpy array with incorrect color model"));
+    LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPySegmentatorUNet: Received numpy array with incorrect color model"));
   }
 
  }
  catch (py::error_already_set const &)
  {
   std::string perrorStr = parse_python_exception();
-  LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPySegmentatorProtobuf error: ")+perrorStr);
+  LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPySegmentatorUNet error: ")+perrorStr);
  }
 
  return true;

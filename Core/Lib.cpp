@@ -123,6 +123,8 @@ void UPyMachineLearningLib::CreateClassSamples(UStorage *storage)
  UploadClass<TPyObjectDetectorYolo>("TPyObjectDetector","PyObjectDetector");
  UploadClass<TPyObjectDetectorSqueezeDet>("TPyObjectDetectorSqueezeDet","PyObjectDetectorSqueezeDet");
  UploadClass<TPySegmentatorProtobuf>("TPySegmentatorProtobuf","PySegmentatorProtobuf");
+ UploadClass<TPySegmentatorUNet>("TPySegmentatorUNet","TPySegmentatorUNet");
+ UploadClass<TPyClassifierTrainer>("TPyClassifierTrainer","TPyClassifierTrainer");
 #endif
 
 }

@@ -17,8 +17,11 @@ TPyComponent::TPyComponent(void)
 //  PythonScriptPath("PythonScriptPath",this,&TPyComponent::SetPythonClassifierScriptPath),
   PythonModuleName("PythonModuleName",this, &TPyComponent::SetPythonModuleName),
   PythonClassName("PythonClassName",this, &TPyComponent::SetPythonClassName),
-  PythonInitialized(false)
+  UseFullPath("UseFullPath", this),
+  PythonInitialized(false),
+  _custom_save(nullptr)
 {
+
 }
 // --------------------------
 
@@ -53,6 +56,7 @@ bool TPyComponent::SetPythonClassName(const std::string& path)
 
 TPyComponent::~TPyComponent(void)
 {
+    Py_CUSTOM_BLOCK_THREADS
 }
 // --------------------------
 
@@ -61,6 +65,7 @@ TPyComponent::~TPyComponent(void)
 // --------------------------
 void TPyComponent::PythonInitialize(void)
 {
+    Py_CUSTOM_BLOCK_THREADS
     try
     {
         LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("Python init started..."));
@@ -89,7 +94,14 @@ void TPyComponent::PythonInitialize(void)
         py::object MainNamespace = MainModule.attr("__dict__");  // извлекаем область имен
 
         // загрузка кода из файла в извлеченную область имен
-        FullPythonScriptFileName = GetEnvironment()->GetCurrentDataDir()+PythonScriptFileName->c_str();
+        if(*UseFullPath)
+        {
+         FullPythonScriptFileName = PythonScriptFileName->c_str();
+        }
+        else
+        {
+         FullPythonScriptFileName = GetEnvironment()->GetCurrentDataDir()+PythonScriptFileName->c_str();
+        }
         py::object DetectorInterfaceModule = import(*PythonModuleName,FullPythonScriptFileName,MainNamespace);
 
         // экземпл€р питоновского класса, через который активируетс€ виртуальна€ среда и загружаетс€ модель
@@ -122,6 +134,7 @@ void TPyComponent::PythonInitialize(void)
 bool TPyComponent::ADefault(void)
 {
  PythonInitialized=false;
+ UseFullPath=true;
  return APyDefault();
 }
 
@@ -133,6 +146,7 @@ bool TPyComponent::ABuild(void)
 {
  if(IsInit())
   PythonInitialize();
+
  return APyBuild();
 }
 
