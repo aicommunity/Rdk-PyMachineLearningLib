@@ -56,6 +56,7 @@ namespace np = boost::python::numpy;
 //        {
             PyEval_InitThreads();
 //        }
+
         import_array();
         np::initialize();
 
@@ -84,6 +85,16 @@ UPyMachineLearningLib::UPyMachineLearningLib(void)
  : ULibrary("PyMachineLearningLib","1.0", GetGlobalVersion())
 {
  PythonInit();
+ mGilState = PyGILState_Ensure();     // забираем себе GIL сразу дл€ настройки многопоточности
+ mThreadState = PyEval_SaveThread();  // сохран€ем состо€ние главного потока и отпускаем GIL
+}
+
+UPyMachineLearningLib::~UPyMachineLearningLib(void)
+{
+    PyEval_RestoreThread( mThreadState );   // восстанавливаем состо€ние главного потока и забираем себе GIL
+    //PyGILState_Release( mGilState );        // отпускаем блокировку GIL с сохранЄнным состо€нием
+    //mGilState = PyGILState_Ensure();
+    //Py_Finalize();
 }
 // --------------------------
 
@@ -99,6 +110,7 @@ void UPyMachineLearningLib::PythonInit(void)
      try
      {
       init_py(); // ¬ызывать только из главного потока приложени€!!!
+
      }
      catch(...)
      {
@@ -125,8 +137,9 @@ void UPyMachineLearningLib::CreateClassSamples(UStorage *storage)
  UploadClass<TPySegmentatorProtobuf>("TPySegmentatorProtobuf","PySegmentatorProtobuf");
  UploadClass<TPySegmentatorUNet>("TPySegmentatorUNet","TPySegmentatorUNet");
  UploadClass<TPyClassifierTrainer>("TPyClassifierTrainer","TPyClassifierTrainer");
+ UploadClass<TPyDetectorTrainer>("TPyDetectorTrainer","TPyDetectorTrainer");
+ UploadClass<TPySegmenterTrainer>("TPySegmenterTrainer","TPySegmenterTrainer");
 #endif
-
 }
 // --------------------------
 

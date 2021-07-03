@@ -6,6 +6,7 @@
 #include "TPyComponent.h"
 #include <iostream>
 
+
 namespace RDK {
 
 // Методы
@@ -18,11 +19,13 @@ TPyComponent::TPyComponent(void)
   PythonModuleName("PythonModuleName",this, &TPyComponent::SetPythonModuleName),
   PythonClassName("PythonClassName",this, &TPyComponent::SetPythonClassName),
   UseFullPath("UseFullPath", this),
-  PythonInitialized(false),
-  _custom_save(nullptr)
+  PythonInitialized(false)
 {
-
+    IntegrationInterface = new boost::python::object;
+    IntegrationInterfaceInstance = new boost::python::object;
 }
+
+
 // --------------------------
 
 // ---------------------
@@ -56,7 +59,9 @@ bool TPyComponent::SetPythonClassName(const std::string& path)
 
 TPyComponent::~TPyComponent(void)
 {
-    Py_CUSTOM_BLOCK_THREADS
+    gil_lock lock;
+    delete IntegrationInterface;
+    delete IntegrationInterfaceInstance;
 }
 // --------------------------
 
@@ -65,9 +70,10 @@ TPyComponent::~TPyComponent(void)
 // --------------------------
 void TPyComponent::PythonInitialize(void)
 {
-    Py_CUSTOM_BLOCK_THREADS
-    try
-    {
+   gil_lock lock;
+
+   try
+   {
         LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("Python init started..."));
         PythonInitialized=false;
 
@@ -86,7 +92,7 @@ void TPyComponent::PythonInitialize(void)
         if(!PyEval_ThreadsInitialized())
         {
          LogMessageEx(RDK_EX_FATAL,__FUNCTION__,std::string("Python Py_Initialize didn't called!"));
-         LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Python init fail"));
+         LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("Python init fail"));
          return;
         }
 
@@ -106,28 +112,29 @@ void TPyComponent::PythonInitialize(void)
 
         // экземпляр питоновского класса, через который активируется виртуальная среда и загружается модель
         // TODO: пусть до среды брать из конфига
-        IntegrationInterface = DetectorInterfaceModule.attr(PythonClassName->c_str());
-        if(!IntegrationInterface.is_none())
-         IntegrationInterfaceInstance = IntegrationInterface(); // DetectorEmbeddingInterface
+        (*IntegrationInterface) = DetectorInterfaceModule.attr(PythonClassName->c_str());
+        if(!IntegrationInterface->is_none())
+         (*IntegrationInterfaceInstance) = (*IntegrationInterface)(); // DetectorEmbeddingInterface
 
         PythonInitialized=APythonInitialize();
     }
     catch (py::error_already_set const &)
     {
         std::string perrorStr = parse_python_exception();
-        LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Python init fail: ")+perrorStr);
+        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("Python init fail: ")+perrorStr);
         PythonInitialized=false;
     }
     catch(...)
     {
         PythonInitialized=false;
-        LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Python init fail: Unhandled exception"));
+        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("Python init fail: Unhandled exception"));
     }
 
     if(PythonInitialized)
      LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("...Python init finished successful!"));
     else
-     LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("...Python init FAILED!"));
+     LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("...Python init FAILED!"));
+
 }
 
 // Восстановление настроек по умолчанию и сброс процесса счета
@@ -158,12 +165,14 @@ bool TPyComponent::AReset(void)
  return APyReset();
 }
 
+
 // Выполняет расчет этого объекта
-bool TPyComponent::ACalculate(void)
+bool TPyComponent::ABeforeCalculate(void)
 {
  if(!PythonInitialized)
-  return true;
- return APyCalculate();
+    return true;
+
+ return true;
 }
 // --------------------------
 

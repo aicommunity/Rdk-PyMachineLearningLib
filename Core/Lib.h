@@ -12,6 +12,8 @@
 #include "TPySegmentatorProtobuf.h"
 #include "TPySegmentatorUNet.h"
 #include "TPyClassifierTrainer.h"
+#include "TPyDetectorTrainer.h"
+#include "TPySegmenterTrainer.h"
 #endif
 
 namespace RDK {
@@ -26,8 +28,10 @@ public: // Методы
 // Конструкторы и деструкторы
 // --------------------------
 UPyMachineLearningLib(void);
+~UPyMachineLearningLib(void);
 // --------------------------
-
+PyGILState_STATE mGilState;     // сохранённое состояние GIL
+PyThreadState* mThreadState;    // сохранённое состояние основного потока
 // --------------------------
 // Методы заполенения бибилиотеки
 // --------------------------

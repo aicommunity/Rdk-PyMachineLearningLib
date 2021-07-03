@@ -13,13 +13,8 @@ namespace RDK {
 // --------------------------
 // Конструкторы и деструкторы
 // --------------------------
-TPySegmentator::TPySegmentator(void)
-: InputImage("InputImage",this),
-  ImageColorModel("ImageColorModel",this),
-  ClassColors("ClassColors", this),
-  OutputImage("DebugImage",this)
-
-
+TPySegmentator::TPySegmentator(void):
+  ImageColorModel("ImageColorModel",this)
 {
 
 }
@@ -79,40 +74,6 @@ bool TPySegmentator::APyReset2(void)
  return true;
 }
 
-// Выполняет расчет этого объекта
-bool TPySegmentator::APyCalculate(void)
-{
- if(!InputImage.IsConnected())
-  return true;
-
- if(ImageColorModel!=InputImage->GetColorModel())
- {
-     LogMessageEx(RDK_EX_WARNING, __FUNCTION__, std::string("Incorrect input image color model. Need "+sntoa(*ImageColorModel)+" got: ")+sntoa(InputImage->GetColorModel()));
-     return true;
- }
-
- ProcessedBmp=*InputImage;
-
- if(ProcessedBmp.GetData()==NULL)
-  return true;
-
- UBitmap &mask = (*OutputImage);
-
- try
- {
-  if(!Inference(ProcessedBmp, mask))
-  {
-   ; // TODO: Тут что то должно быть
-  }
- }
- catch (py::error_already_set const &)
- {
-  std::string perrorStr = parse_python_exception();
-  LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPySegmentator error: ")+perrorStr);
- }
-
- return true;
-}
 
 bool TPySegmentator::Inference(UBitmap &bmp, UBitmap &mask)
 {

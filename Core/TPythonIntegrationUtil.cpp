@@ -5,9 +5,11 @@
 #include <vector>
 #include <iostream>
 #include <boost/python/stl_iterator.hpp>
-
+#include "TPyComponent.h"
 namespace RDK {
     std::string parse_python_exception() {
+        gil_lock lock;
+
         PyObject *type_ptr = NULL, *value_ptr = NULL, *traceback_ptr = NULL;
         PyErr_Fetch(&type_ptr, &value_ptr, &traceback_ptr);
         std::string ret("Unfetchable Python error");
@@ -51,6 +53,7 @@ namespace RDK {
             ret += std::string(": Unparseable Python traceback");
         }
     }
+
     return ret;
 }
 
@@ -84,6 +87,24 @@ py::list stdvector2pylist(const std::vector<T>& v)
     {
         return std::vector<T>(py::stl_input_iterator<T>(iterable), py::stl_input_iterator<T>());
     }
+
+
+    gil_lock::gil_lock()
+    {
+        if(!PyGILState_Check())
+        {
+            state_=PyGILState_Ensure();
+        }
+    }
+
+    gil_lock::~gil_lock()
+    {
+        if(PyGILState_Check())
+        {
+            PyGILState_Release(state_);
+        }
+    }
+
 }
 
 #endif

@@ -35,11 +35,17 @@ TPyAggregateClassifier::TPyAggregateClassifier(void)
   AggrIdMatrix("AggrIdMatrix", this),
   PythonScriptFileName("PythonScriptFileName",this)
 {
+    IntegrationInterface = new boost::python::object;
+    IntegrationInterfaceInstance = new boost::python::object;
 }
 
 TPyAggregateClassifier::~TPyAggregateClassifier(void)
 {
+    gil_lock lock;
+    delete IntegrationInterface;
+    delete IntegrationInterfaceInstance;
 }
+
 // --------------------------
 
 
@@ -68,6 +74,7 @@ TPyAggregateClassifier* TPyAggregateClassifier::New(void)
 // --------------------------
 bool TPyAggregateClassifier::Initialize(void)
 {
+    gil_lock lock;
     try
     {
         LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("Python init started..."));
@@ -75,7 +82,7 @@ bool TPyAggregateClassifier::Initialize(void)
         if(!PyEval_ThreadsInitialized())
         {
          LogMessageEx(RDK_EX_FATAL,__FUNCTION__,std::string("Python Py_Initialize didn't called!"));
-         LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Python init fail"));
+         LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("Python init fail"));
          return false;
         }
 //        init_py();
@@ -92,12 +99,12 @@ bool TPyAggregateClassifier::Initialize(void)
         py::object ClassifierInterfaceModule = import("test_class",s,MainNamespace);
         // экземпл€р питоновского класса, через который активируетс€ виртуальна€ среда и загружаетс€ модель
         // TODO: пусть до среды брать из конфига
-        IntegrationInterface = ClassifierInterfaceModule.attr("ClassifierEmbeddingInterface");
-        if(!IntegrationInterface.is_none())
-            IntegrationInterfaceInstance = IntegrationInterface(); ///home/arnold/.virtualenvs/cv
+        (*IntegrationInterface) = ClassifierInterfaceModule.attr("ClassifierEmbeddingInterface");
+        if(!IntegrationInterface->is_none())
+            (*IntegrationInterfaceInstance) = (*IntegrationInterface)(); ///home/arnold/.virtualenvs/cv
 
         //boost::python::object rand_mod = boost::python::import("random");
-        //boost::python::object rand_func = rand_mod.attr("random");
+        //boost::python::object rand_func = rand_mod->attr("random");
         //boost::python::object rand2 = rand_func();
         //std::cout << boost::python::extract<int>(rand2) << std::endl;
 
@@ -108,12 +115,12 @@ bool TPyAggregateClassifier::Initialize(void)
     {
         Initialized = false;
         std::string perrorStr = parse_python_exception();
-        LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Python init fail: ")+perrorStr);
+        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("Python init fail: ")+perrorStr);
     }
     catch(...)
     {
         Initialized = false;
-        LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Python init fail: Undandled exception"));
+        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("Python init fail: Undandled exception"));
     }
  LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("...Python init finished successful!"));
  return true;
@@ -206,9 +213,10 @@ bool TPyAggregateClassifier::ACalculate(void)
   input_img.CopyTo(0,0,(*AggrRectsMatrix)(i, 0), (*AggrRectsMatrix)(i, 1), width, height, obj_rect);
 
   /// “ут считаем
+  gil_lock lock;
   try
   {
-   py::object retval = IntegrationInterfaceInstance.attr("classify")(obj_rect);
+   py::object retval = IntegrationInterfaceInstance->attr("classify")(obj_rect);
 
    object_cls = boost::python::extract<int>(retval);
   }

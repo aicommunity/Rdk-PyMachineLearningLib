@@ -1,7 +1,7 @@
-#ifndef RDK_TPyClassifierTrainerCPP
-#define RDK_TPyClassifierTrainerCPP
+#ifndef RDK_TPyDetectorTrainerCPP
+#define RDK_TPyDetectorTrainerCPP
 
-#include "TPyClassifierTrainer.h"
+#include "TPyDetectorTrainer.h"
 #include <iostream>
 #include <boost/filesystem.hpp>
 
@@ -11,23 +11,19 @@ namespace RDK {
 // --------------------------
 // Конструкторы и деструкторы
 // --------------------------
-TPyClassifierTrainer::TPyClassifierTrainer(void)
-: DatasetName("DatasetName",this),
-  CopySplittedImages("CopySplittedImages",this),
-  TestEqualVal("TestEqualVal",this),
-  ImageSize("ImageSize",this),
-  LearningRate("LearningRate",this),
-  BatchSizes("BatchSizes",this),
-  LayersToBeTrained("LayersToBeTrained",this),
-  Classes("Classes",this),
-  TrainLoss("TrainLoss",this),
-  TrainAcc("TrainAcc",this),
-  ValLoss("ValLoss",this),
-  ValAcc("ValAcc",this)
+TPyDetectorTrainer::TPyDetectorTrainer(void)
+: DatasetType("DatasetType",this),
+  Config("Config",this),
+  SavePredicted("SavePredicted",this),
+  Visualize("Visualize",this),
+  PaintGt("PaintGt",this),
+  LossNames("LossNames",this),
+  TrainLosses("TrainLosses",this),
+  ValLosses("ValLosses",this)
 {
 }
 
-TPyClassifierTrainer::~TPyClassifierTrainer(void)
+TPyDetectorTrainer::~TPyDetectorTrainer(void)
 {
 }
 // --------------------------
@@ -36,48 +32,44 @@ TPyClassifierTrainer::~TPyClassifierTrainer(void)
 // Системные методы управления объектом
 // --------------------------
 // Выделяет память для новой чистой копии объекта этого класса
-TPyClassifierTrainer* TPyClassifierTrainer::New(void)
+TPyDetectorTrainer* TPyDetectorTrainer::New(void)
 {
- return new TPyClassifierTrainer;
+ return new TPyDetectorTrainer;
 }
 // --------------------------
 
 // --------------------------
 // Скрытые методы управления счетом
 // --------------------------
-bool TPyClassifierTrainer::APythonInitialize(void)
+bool TPyDetectorTrainer::APythonInitialize(void)
 {
     return true;
 }
 
 // Восстановление настроек по умолчанию и сброс процесса счета
-bool TPyClassifierTrainer::APyDefault(void)
+bool TPyDetectorTrainer::APyDefault(void)
 {
-    PythonModuleName="classifier_interface_tf1";
-    PythonClassName="ClassificationInterface";
+    PythonModuleName="detection_train";
+    PythonClassName="DetectionInterface";
 
     // Общие параметры для всех тренеров
     TrainDataDir = {""};
     WorkingDir = "";
-    ArchitectureName= "MobileNet";
-    SplitRatio = {70,20,10};
+    ArchitectureName= "SqueezeDet";
+    SplitRatio = {70, 20, 10};
     SaveSplits = false;
     Epochs = 5;
-    Weights = "imagenet";
+    Weights = "";
     EarlyStop = 0;
     SavingInterval = 1;
     SaveBestOnly = false;
 
-    // Специфические параметры для обучения классификаторов
-    DatasetName = "dataset_ft";
-    CopySplittedImages = false;
-    TestEqualVal = false;
-    ImageSize = {224,224,3};
-    Epochs = 5;
-    LearningRate = 0.0002f;
-    BatchSizes = {4,2,1};
-    LayersToBeTrained = 0;
-    Classes = {};
+    // Специфические параметры для обучения детекторов
+    DatasetType = "";
+    Config = "";
+    SavePredicted = false;
+    Visualize = 0;
+    PaintGt = false;
 
 
     TrainingStatus = 0;
@@ -88,10 +80,9 @@ bool TPyClassifierTrainer::APyDefault(void)
     Epoch = 0;
     Progress = 0.0;
 
-    TrainAcc = 0.0;
-    TrainLoss = 0.0;
-    ValAcc = 0.0;
-    ValLoss = 0.0;
+    LossNames = {""};
+    ValLosses = {0.0};
+    TrainLosses = {0.0};
 
     return true;
 }
@@ -100,14 +91,14 @@ bool TPyClassifierTrainer::APyDefault(void)
 // после настройки параметров
 // Автоматически вызывает метод Reset() и выставляет Ready в true
 // в случае успешной сборки
-bool TPyClassifierTrainer::APyBuild(void)
+bool TPyDetectorTrainer::APyBuild(void)
 {
     return true;
 }
 
 
 // Выполняет расчет этого объекта
-bool TPyClassifierTrainer::ACalculate(void)
+bool TPyDetectorTrainer::ACalculate(void)
 {
     // Если питон не проинициализирован, то ничего не делаем. Надо чтобы нажали Reset для повторной попытки иницилизации
     if(!PythonInitialized)
@@ -116,7 +107,8 @@ bool TPyClassifierTrainer::ACalculate(void)
     try
     {   //Отключаем работу потоков питона (забираем GIL себе) для возмжности запуска функций
 
-        // Проверка статуса выполнения
+
+        // Проверка статуса обучения
         py::object train_status = IntegrationInterfaceInstance->attr("train_status")();
         TrainingStatus = boost::python::extract< int >(train_status);
 
@@ -143,10 +135,10 @@ bool TPyClassifierTrainer::ACalculate(void)
             Epoch = 0;
             Progress = 0.0;
 
-            TrainAcc = 0.0;
-            TrainLoss = 0.0;
-            ValAcc = 0.0;
-            ValLoss = 0.0;
+            LossNames = {""};
+            ValLosses = {0.0};
+            TrainLosses = {0.0};
+
         }
         // Успешное завершение обучения. После обработки в компоненте сбрасывается в 0
         // Сообщаем и сбрасываем статус в 0
@@ -155,7 +147,7 @@ bool TPyClassifierTrainer::ACalculate(void)
             //сброс на случай выставления извне
             StartTraining = false;
 
-            LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("Training completed correctly"));
+            LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("Training completed or stopped correctly"));
 
             // Сброс статуса
             TrainingStatus = 0;
@@ -165,11 +157,11 @@ bool TPyClassifierTrainer::ACalculate(void)
             Epoch = 0;
             Progress = 0.0;
 
-            TrainAcc = 0.0;
-            TrainLoss = 0.0;
-            ValAcc = 0.0;
-            ValLoss = 0.0;
+            LossNames = {""};
+            ValLosses = {0.0};
+            TrainLosses = {0.0};
         }
+
         // Если обучение/тестирование идет, опрашиваем геттеры
         if(TrainingStatus == 1 || TrainingStatus == 2)
         {
@@ -180,11 +172,36 @@ bool TPyClassifierTrainer::ACalculate(void)
             Epoch       = boost::python::extract< int >  (IntegrationInterfaceInstance->attr("get_epoch")());
             Progress    = boost::python::extract< float >(IntegrationInterfaceInstance->attr("get_progess")());
 
-            TrainAcc    = boost::python::extract< float >(IntegrationInterfaceInstance->attr("get_train_acc")());
-            TrainLoss   = boost::python::extract< float >(IntegrationInterfaceInstance->attr("get_train_loss")());
-            ValAcc      = boost::python::extract< float >(IntegrationInterfaceInstance->attr("get_val_acc")());
-            ValLoss     = boost::python::extract< float >(IntegrationInterfaceInstance->attr("get_val_loss")());
+            // Списки состояний ошибок
+            py::list loss_names   = boost::python::extract< py::list >(IntegrationInterfaceInstance->attr("get_loss_names")());
+            py::list val_losses   = boost::python::extract< py::list >(IntegrationInterfaceInstance->attr("get_val_losses")());
+            py::list train_losses = boost::python::extract< py::list >(IntegrationInterfaceInstance->attr("get_train_losses")());
 
+            // Извлекаем данные, если полученные списки не пустые
+            if(loss_names != py::list())
+            {
+                LossNames->clear();
+                for (int i = 0; i < py::len(loss_names); ++i)
+                {
+                    LossNames->push_back(boost::python::extract<std::string>(loss_names[i]));
+                }
+            }
+            if(val_losses != py::list())
+            {
+                ValLosses->clear();
+                for (int i = 0; i < py::len(val_losses); ++i)
+                {
+                    ValLosses->push_back(boost::python::extract<double>(val_losses[i]));
+                }
+            }
+            if(train_losses != py::list())
+            {
+                TrainLosses->clear();
+                for (int i = 0; i < py::len(train_losses); ++i)
+                {
+                    TrainLosses->push_back(boost::python::extract<double>(train_losses[i]));
+                }
+            }
 
             //Останавливаем обучение либо вообще всю функцию, если требуется
             if(StopTraining)
@@ -216,7 +233,7 @@ bool TPyClassifierTrainer::ACalculate(void)
                     return true;
                 }
 
-                // Проверки на допустимость входных аргументов
+                // Проверки на входные аргументы
                 if(!CheckInputParameters())
                 {
                     StartTraining = false;
@@ -228,57 +245,54 @@ bool TPyClassifierTrainer::ACalculate(void)
                 // Обнуление ненужных флагов
                 StopTraining = StopNow = false;
 
+
                 // Подготовка аргументов для функции обучения
 
                 // Перевод аргументов в нужные типы PyObject
+
+                // TODO здесь нужны изменения на стороне питона (пока что захардкожено)
                 py::list split_ratio;
-                    split_ratio.append(SplitRatio[0]);
-                    split_ratio.append(SplitRatio[1]);
-                    split_ratio.append(SplitRatio[2]);
+                    split_ratio.append(0.7);      //SplitRatio[0]);
+                    split_ratio.append(0.1);      //SplitRatio[1]);
+                    split_ratio.append(0.2);      //SplitRatio[2]);
 
-                py::list batch_sizes;
-                    batch_sizes.append(BatchSizes[0]);
-                    batch_sizes.append(BatchSizes[1]);
-                    batch_sizes.append(BatchSizes[2]);
-
-                py::list classes;
-                if(!Classes.empty())
-                {
-                    for(int i = 0; i < Classes.size(); i++)
-                    {
-                        classes.append(Classes[i]);
-                    }
-                }
 
                 //Заполнение словаря параметров ( именованные аргументы)
                 py::dict func_params;
 
-                func_params["working_dir"]          =   py::str(WorkingDir->c_str());
-                func_params["image_size"]           =   py::make_tuple(ImageSize[0],ImageSize[1],ImageSize[2]);
-                func_params["architecture"]         =   py::str(ArchitectureName->c_str());
-                func_params["dataset_name"]         =   py::str(DatasetName->c_str());
-                func_params["split_ratio"]          =   split_ratio;
-                func_params["save_splits"]          =   py::object(*SaveSplits);
-                func_params["copy_images"]          =   py::object(*CopySplittedImages);
-                func_params["test_equal_to_val"]    =   py::object(*TestEqualVal);
-                func_params["epochs"]               =   py::object(*Epochs);
-                func_params["learning_rate"]        =   py::object(*LearningRate);
-                func_params["batch_sizes"]          =   batch_sizes;
-                func_params["weights"]              =   py::object(Weights->c_str());
-                func_params["layers_to_be_trained"] =   *LayersToBeTrained ? py::object(*LayersToBeTrained) : py::str("default");
-                func_params["classes"]              =   classes;
-                func_params["early_stop"]           =   *EarlyStop ? py::object(*EarlyStop) : py::object(false);
-                func_params["preprocessing"]        =   py::object();
-                func_params["saving_interval"]      =   py::object(*SavingInterval);
-                func_params["save_best_only"]       =   py::object(*SaveBestOnly);
-                func_params["online_augmentation"]  =   py::dict();
+                func_params["weights"]          =   py::str(Weights->c_str());
+                func_params["epochs"]           =   py::object(*Epochs);
+                func_params["architecture"]     =   py::str(ArchitectureName->c_str());
+                func_params["split_ratio"]      =   split_ratio;
+                func_params["save_splits"]      =   py::object(*SaveSplits);
+                func_params["early_stop"]       =   *EarlyStop ? py::object(*EarlyStop) : py::object(false);
+                func_params["preprocessing"]    =   py::object();
+                func_params["saving_interval"]  =   py::object(*SavingInterval);
+                func_params["save_best_only"]   =   py::object(*SaveBestOnly);
+                func_params["augmentation"]     =   py::dict();
+                func_params["save_predicted"]   =   py::object(*SavePredicted);
+                func_params["visualize"]        =   (*Visualize == 0) ? py::object(false)     // если равен 0  - то передача false
+                                                    :( (*Visualize == -1) ? py::str("All")    // если равен -1 - то передача строки "All"
+                                                    :  py::object(*Visualize) );              // иначе передача числа целого типа
+                func_params["paint_gt"]         =   py::object(*PaintGt);
+
+
+                // Список папок нужных для обучения
+                py::list train_data_dirs;
+                for(int i = 0; i < TrainDataDir->size(); i++)
+                {
+                    train_data_dirs.append(py::str(TrainDataDir->at(i).c_str()));
+                }
 
                 // Позиционные аргументы
-                py::tuple data_dir_tuple = py::make_tuple(TrainDataDir->at(0).c_str());
+                py::tuple args_tuple = py::make_tuple(train_data_dirs,
+                                                      DatasetType->c_str(),
+                                                      WorkingDir->c_str(),
+                                                      Config->c_str());
 
-                //Запуск обучения, внутри функции питона функция обучения отпускается в отдельный поток
-                py::object retval = IntegrationInterfaceInstance->attr("classification_train")
-                                                                        (data_dir_tuple,
+                //Запуск обучения, внутри функции питона остоединение обучения в поток
+                py::object retval = IntegrationInterfaceInstance->attr("detection_train")
+                                                                        (args_tuple,
                                                                          func_params);
 
                 // Проверка на исключительный (практически невозможный) случай
@@ -302,7 +316,7 @@ bool TPyClassifierTrainer::ACalculate(void)
     catch (py::error_already_set const &)
     {
         std::string perrorStr = parse_python_exception();
-        LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPyClassifierTrainer error: ")+perrorStr);
+        LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPyDetectorTrainer error: ")+perrorStr);
         TrainingStatus = 0;
         StartTraining = false;
     }
@@ -317,7 +331,7 @@ bool TPyClassifierTrainer::ACalculate(void)
 }
 
 
-bool TPyClassifierTrainer::CheckInputParameters()
+bool TPyDetectorTrainer::CheckInputParameters()
 {
     if(TrainDataDir->empty() || TrainDataDir->at(0).empty())
     {
@@ -331,42 +345,40 @@ bool TPyClassifierTrainer::CheckInputParameters()
         return false;
     }
 
+    // Если нет слэша в конце - ставим
+    if(WorkingDir->back() != '/')
+    {
+        WorkingDir->push_back('/');
+    }
+
+
     if(ArchitectureName->empty())
     {
         LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("ArchitectureName is empty!"));
         return false;
     }
 
-    if(DatasetName->empty())
+    if(DatasetType->empty())
     {
-        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("DatasetName is empty!"));
+        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("DatasetType is empty!"));
         return false;
     }
+
 
     if(SplitRatio.size()!=3)
     {
         LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("SplitRatio must have 3 values!"));
         return false;
     }
-
-    if(ImageSize.size()!=3)
-    {
-        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("ImageSize must have 3 values!"));
-        return false;
-    }
-
-    if(BatchSizes.size()!=3)
-    {
-        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("BatchSizes must have 3 values!"));
-        return false;
-    }
-
+    // для дектектора не должна быть пустой
+/*
     //Проверка на непустую директорию WorkingDir
     if(!boost::filesystem::is_empty(WorkingDir->c_str()))
     {
         LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("WorkingDir isn't empty, it contains some files"));
         return false;
     }
+    */
     //TODO возможно нужны еще проверки на отриц.значения и проч.
     //TODO создавать WorkingDir при каких-либо условиях
     //TODO проверки на пути относительные и т.д.

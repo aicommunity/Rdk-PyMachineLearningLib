@@ -42,16 +42,26 @@ TPyObjectDetectorYolo* TPyObjectDetectorYolo::New(void)
 // --------------------------
 bool TPyObjectDetectorYolo::APythonInitialize(void)
 {
+    gil_lock lock;
     try
     {
         py::object initialize;
+
+        if(!UseFullPath)
+        {
+            *ConfigPathYOLO = GetEnvironment()->GetCurrentDataDir()+*ConfigPathYOLO;
+            if(*WeightsPathYOLO!="")
+            {
+                *WeightsPathYOLO = GetEnvironment()->GetCurrentDataDir()+*WeightsPathYOLO;
+            }
+        }
         switch(InitializationTypeYOLO)
         {
             case YOLOV2_INITTYPE:
-                initialize = IntegrationInterfaceInstance.attr("initialize_config")(*ConfigPathYOLO, *WeightsPathYOLO);
+                initialize = IntegrationInterfaceInstance->attr("initialize_config")(*ConfigPathYOLO, *WeightsPathYOLO);
             break;
             case YOLOV3_INITTYPE:
-                initialize = IntegrationInterfaceInstance.attr("initialize_config")(*ConfigPathYOLO);
+                initialize = IntegrationInterfaceInstance->attr("initialize_config")(*ConfigPathYOLO);
             break;
         default:
             LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Chosen initialization type not supported by selected detector interface file"));
@@ -72,12 +82,12 @@ bool TPyObjectDetectorYolo::APythonInitialize(void)
     catch (py::error_already_set const &)
     {
         std::string perrorStr = parse_python_exception();
-        LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Python init fail: ")+perrorStr);
+        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("Python init fail: ")+perrorStr);
         return false;
     }
     catch(...)
     {
-        LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Python init fail: Undandled exception"));
+        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("Python init fail: Undandled exception"));
         return false;
     }
 
@@ -110,12 +120,15 @@ bool TPyObjectDetectorYolo::APyReset2(void)
 // Выполняет обнаружение
 bool TPyObjectDetectorYolo::Detect(UBitmap &bmp, MDMatrix<double> &output_rects, MDMatrix<int> &output_classes, MDMatrix<double> &reliabilities)
 {
+    if(!PythonInitialized)
+        return false;
  // Тут считаем
  //std::vector<std::vector<double> > result;
+ gil_lock lock;
  try
  {
   //import_array();
-  py::object retval = IntegrationInterfaceInstance.attr("detect")(bmp);
+  py::object retval = IntegrationInterfaceInstance->attr("detect")(bmp);
 
   //std::vector<float> res = boost::python::extract<std::vector<float> >(retval);
   np::ndarray ndarr = boost::python::extract< np::ndarray  >(retval);

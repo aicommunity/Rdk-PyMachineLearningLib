@@ -59,6 +59,8 @@ private:
     PyEnsureGIL& operator=(const PyEnsureGIL&) = delete;
 };
 
+
+
 enum {
 	ARG_NONE = 0, ARG_MAT = 1, ARG_SCALAR = 2
 };

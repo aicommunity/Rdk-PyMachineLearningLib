@@ -4,17 +4,11 @@
 #include "TPythonIntegrationInclude.h"
 #include "TPythonIntegrationUtil.h"
 
-//кастомные дефайны для управления испонением потоков питона
-//оригинал Py_BLOCK_THREADS и Py_UNBLOCK_THREADS
-#define Py_CUSTOM_BLOCK_THREADS        if(_custom_save!=nullptr){PyEval_RestoreThread(_custom_save);\
-                                                                _custom_save=nullptr;}
-
-#define Py_CUSTOM_UNBLOCK_THREADS      if(_custom_save==nullptr){_custom_save = PyEval_SaveThread();}
 
 
 namespace RDK {
 
-class TPyComponent: public RDK::UNet
+class TPyComponent: virtual public RDK::UNet
 {
 public: // Свойства
 /// Имя файла выполняемого скрипта, лежащего относительно папки конфигурации
@@ -33,21 +27,22 @@ ULProperty<std::string, TPyComponent> PythonClassName;
 ULProperty<bool, TPyComponent> UseFullPath;
 
 protected: // Временные переменные
-//Состояние потока
-//Нужен чтобы отключать/включать исполнение потоков питона
-PyThreadState *_custom_save;
+
+//Нужен чтобы забирать/отдавать GIL
+PyGILState_STATE gil_state;
 
 /// Флаг взводится при успешной инициализации подсистемы питона
 bool PythonInitialized;
 
 /// Интерфейс 1
-boost::python::object IntegrationInterface;
+boost::python::object* IntegrationInterface;
 
 /// Интерфейс 2
-boost::python::object IntegrationInterfaceInstance;
+boost::python::object* IntegrationInterfaceInstance;
 
 /// Полный путь до имени скрипта
 std::string FullPythonScriptFileName;
+
 
 public: // Методы
 // --------------------------
@@ -92,8 +87,8 @@ virtual bool AReset(void);
 virtual bool APyReset(void)=0;
 
 // Выполняет расчет этого объекта
-virtual bool ACalculate(void);
-virtual bool APyCalculate(void)=0;
+virtual bool ABeforeCalculate(void);
+
 // --------------------------
 };
 

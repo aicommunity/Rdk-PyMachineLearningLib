@@ -41,11 +41,13 @@ TPySegmentatorUNet* TPySegmentatorUNet::New(void)
 // --------------------------
 bool TPySegmentatorUNet::APythonInitialize(void)
 {
+    if(!PythonInitialized)
+        return false;
+    gil_lock lock;
     try
     {
         py::object initialize;
-        initialize = IntegrationInterfaceInstance.attr("initialize_config")(GetEnvironment()->GetCurrentDataDir()+*WeightsPath);
-
+        initialize = IntegrationInterfaceInstance->attr("initialize_config")(GetEnvironment()->GetCurrentDataDir()+*WeightsPath);
 
         if(!initialize.is_none())
         {
@@ -61,12 +63,12 @@ bool TPySegmentatorUNet::APythonInitialize(void)
     catch (py::error_already_set const &)
     {
         std::string perrorStr = parse_python_exception();
-        LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Python init fail: ")+perrorStr);
+        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("Python init fail: ")+perrorStr);
         return false;
     }
     catch(...)
     {
-        LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Python init fail: Undandled exception"));
+        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("Python init fail: Undandled exception"));
         return false;
     }
 
@@ -100,9 +102,10 @@ bool TPySegmentatorUNet::APyReset2(void)
 // Выполняет обнаружение
 bool TPySegmentatorUNet::Inference(UBitmap &bmp, UBitmap &mask)
 {
+ gil_lock lock;
  try
  {
-  py::object retval = IntegrationInterfaceInstance.attr("inference")(bmp);
+  py::object retval = IntegrationInterfaceInstance->attr("inference")(bmp);
 
   cv::Mat res_grayscale = pbcvt::fromNDArrayToMat(retval.ptr());
 

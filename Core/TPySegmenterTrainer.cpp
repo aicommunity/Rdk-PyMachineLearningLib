@@ -1,7 +1,7 @@
-#ifndef RDK_TPyClassifierTrainerCPP
-#define RDK_TPyClassifierTrainerCPP
+#ifndef RDK_TPySegmenterTrainerCPP
+#define RDK_TPySegmenterTrainerCPP
 
-#include "TPyClassifierTrainer.h"
+#include "TPySegmenterTrainer.h"
 #include <iostream>
 #include <boost/filesystem.hpp>
 
@@ -11,23 +11,22 @@ namespace RDK {
 // --------------------------
 // Конструкторы и деструкторы
 // --------------------------
-TPyClassifierTrainer::TPyClassifierTrainer(void)
-: DatasetName("DatasetName",this),
-  CopySplittedImages("CopySplittedImages",this),
-  TestEqualVal("TestEqualVal",this),
-  ImageSize("ImageSize",this),
-  LearningRate("LearningRate",this),
-  BatchSizes("BatchSizes",this),
-  LayersToBeTrained("LayersToBeTrained",this),
+TPySegmenterTrainer::TPySegmenterTrainer(void)
+: Config("Config",this),
+  DatasetType("DatasetType",this),
+  DatasetName("DatasetName",this),
+  InputRes("InputRes",this),
   Classes("Classes",this),
-  TrainLoss("TrainLoss",this),
-  TrainAcc("TrainAcc",this),
+  BatchSize("BatchSize",this),
+  BatchesInEpoch("BatchesInEpoch",this),
+  TrainLoss("TestLoss",this),
+  TrainAcc("TestAcc",this),
   ValLoss("ValLoss",this),
   ValAcc("ValAcc",this)
 {
 }
 
-TPyClassifierTrainer::~TPyClassifierTrainer(void)
+TPySegmenterTrainer::~TPySegmenterTrainer(void)
 {
 }
 // --------------------------
@@ -36,62 +35,60 @@ TPyClassifierTrainer::~TPyClassifierTrainer(void)
 // Системные методы управления объектом
 // --------------------------
 // Выделяет память для новой чистой копии объекта этого класса
-TPyClassifierTrainer* TPyClassifierTrainer::New(void)
+TPySegmenterTrainer* TPySegmenterTrainer::New(void)
 {
- return new TPyClassifierTrainer;
+ return new TPySegmenterTrainer;
 }
 // --------------------------
 
 // --------------------------
 // Скрытые методы управления счетом
 // --------------------------
-bool TPyClassifierTrainer::APythonInitialize(void)
+bool TPySegmenterTrainer::APythonInitialize(void)
 {
     return true;
 }
 
 // Восстановление настроек по умолчанию и сброс процесса счета
-bool TPyClassifierTrainer::APyDefault(void)
+bool TPySegmenterTrainer::APyDefault(void)
 {
-    PythonModuleName="classifier_interface_tf1";
-    PythonClassName="ClassificationInterface";
+    PythonModuleName="segmentation_interface";
+    PythonClassName="SegmentationInterface";
 
     // Общие параметры для всех тренеров
     TrainDataDir = {""};
     WorkingDir = "";
-    ArchitectureName= "MobileNet";
-    SplitRatio = {70,20,10};
+    ArchitectureName= "";
+    SplitRatio = {70, 15, 15};
     SaveSplits = false;
     Epochs = 5;
-    Weights = "imagenet";
+    Weights = "";
     EarlyStop = 0;
     SavingInterval = 1;
     SaveBestOnly = false;
 
-    // Специфические параметры для обучения классификаторов
-    DatasetName = "dataset_ft";
-    CopySplittedImages = false;
-    TestEqualVal = false;
-    ImageSize = {224,224,3};
-    Epochs = 5;
-    LearningRate = 0.0002f;
-    BatchSizes = {4,2,1};
-    LayersToBeTrained = 0;
-    Classes = {};
+    // Специфические параметры для обучения сегментаторов
+    Config = "";
+    DatasetType = "";
+    DatasetName = "";
+    InputRes = {1024,512,3};
+    Classes = {"road", "sidewalk", "building", "wall", "fence", "pole",
+               "traffic light", "traffic sign", "vegetation", "terrain", "sky", "person",
+               "rider", "car", "truck", "bus", "train", "motocycle", "bicycle"};
+    BatchSize = 12;
+    BatchesInEpoch = 5;
 
 
     TrainingStatus = 0;
     StartTraining = false;
     StopTraining = false;
 
-
-    Epoch = 0;
+    Epoch    = 0;
     Progress = 0.0;
-
-    TrainAcc = 0.0;
     TrainLoss = 0.0;
-    ValAcc = 0.0;
-    ValLoss = 0.0;
+    TrainAcc  = 0.0;
+    ValLoss  = 0.0;
+    ValAcc   = 0.0;
 
     return true;
 }
@@ -100,14 +97,14 @@ bool TPyClassifierTrainer::APyDefault(void)
 // после настройки параметров
 // Автоматически вызывает метод Reset() и выставляет Ready в true
 // в случае успешной сборки
-bool TPyClassifierTrainer::APyBuild(void)
+bool TPySegmenterTrainer::APyBuild(void)
 {
     return true;
 }
 
 
 // Выполняет расчет этого объекта
-bool TPyClassifierTrainer::ACalculate(void)
+bool TPySegmenterTrainer::ACalculate(void)
 {
     // Если питон не проинициализирован, то ничего не делаем. Надо чтобы нажали Reset для повторной попытки иницилизации
     if(!PythonInitialized)
@@ -115,6 +112,7 @@ bool TPyClassifierTrainer::ACalculate(void)
     gil_lock lock;
     try
     {   //Отключаем работу потоков питона (забираем GIL себе) для возмжности запуска функций
+
 
         // Проверка статуса выполнения
         py::object train_status = IntegrationInterfaceInstance->attr("train_status")();
@@ -140,13 +138,12 @@ bool TPyClassifierTrainer::ACalculate(void)
             py::object res = IntegrationInterfaceInstance->attr("set_training_status_to_null")();
 
             // Сброс переменных состояний
-            Epoch = 0;
+            Epoch    = 0;
             Progress = 0.0;
-
-            TrainAcc = 0.0;
             TrainLoss = 0.0;
-            ValAcc = 0.0;
-            ValLoss = 0.0;
+            TrainAcc  = 0.0;
+            ValLoss  = 0.0;
+            ValAcc   = 0.0;
         }
         // Успешное завершение обучения. После обработки в компоненте сбрасывается в 0
         // Сообщаем и сбрасываем статус в 0
@@ -162,13 +159,12 @@ bool TPyClassifierTrainer::ACalculate(void)
             py::object res = IntegrationInterfaceInstance->attr("set_training_status_to_null")();
 
             // Сброс переменных состояний
-            Epoch = 0;
+            Epoch    = 0;
             Progress = 0.0;
-
-            TrainAcc = 0.0;
             TrainLoss = 0.0;
-            ValAcc = 0.0;
-            ValLoss = 0.0;
+            TrainAcc  = 0.0;
+            ValLoss  = 0.0;
+            ValAcc   = 0.0;
         }
         // Если обучение/тестирование идет, опрашиваем геттеры
         if(TrainingStatus == 1 || TrainingStatus == 2)
@@ -236,53 +232,71 @@ bool TPyClassifierTrainer::ACalculate(void)
                     split_ratio.append(SplitRatio[1]);
                     split_ratio.append(SplitRatio[2]);
 
-                py::list batch_sizes;
-                    batch_sizes.append(BatchSizes[0]);
-                    batch_sizes.append(BatchSizes[1]);
-                    batch_sizes.append(BatchSizes[2]);
-
                 py::list classes;
                 if(!Classes.empty())
                 {
                     for(int i = 0; i < Classes.size(); i++)
                     {
-                        classes.append(Classes[i]);
+                        classes.append(py::str(Classes[i].c_str()));
+                    }
+                }
+
+                py::list input_res;
+                if(!InputRes.empty())
+                {
+                    for(int i = 0; i < InputRes.size(); i++)
+                    {
+                        input_res.append(InputRes[i]);
                     }
                 }
 
                 //Заполнение словаря параметров ( именованные аргументы)
                 py::dict func_params;
 
-                func_params["working_dir"]          =   py::str(WorkingDir->c_str());
-                func_params["image_size"]           =   py::make_tuple(ImageSize[0],ImageSize[1],ImageSize[2]);
-                func_params["architecture"]         =   py::str(ArchitectureName->c_str());
-                func_params["dataset_name"]         =   py::str(DatasetName->c_str());
-                func_params["split_ratio"]          =   split_ratio;
-                func_params["save_splits"]          =   py::object(*SaveSplits);
-                func_params["copy_images"]          =   py::object(*CopySplittedImages);
-                func_params["test_equal_to_val"]    =   py::object(*TestEqualVal);
-                func_params["epochs"]               =   py::object(*Epochs);
-                func_params["learning_rate"]        =   py::object(*LearningRate);
-                func_params["batch_sizes"]          =   batch_sizes;
-                func_params["weights"]              =   py::object(Weights->c_str());
-                func_params["layers_to_be_trained"] =   *LayersToBeTrained ? py::object(*LayersToBeTrained) : py::str("default");
-                func_params["classes"]              =   classes;
-                func_params["early_stop"]           =   *EarlyStop ? py::object(*EarlyStop) : py::object(false);
-                func_params["preprocessing"]        =   py::object();
-                func_params["saving_interval"]      =   py::object(*SavingInterval);
-                func_params["save_best_only"]       =   py::object(*SaveBestOnly);
-                func_params["online_augmentation"]  =   py::dict();
+                func_params["working_dir"]      =   py::str(WorkingDir->c_str());
+                func_params["architecture"]     =   py::str(ArchitectureName->c_str());
+                func_params["dataset_name"]     =   py::str(DatasetName->c_str());
+                func_params["weights"]          =   py::str(Weights->c_str());
+                func_params["split_ratio"]      =   split_ratio;
+                func_params["input_res"]        =   input_res;
+                func_params["classes"]          =   classes;
+                func_params["batch_size"]       =   py::object(*BatchSize);
+                func_params["epochs"]           =   py::object(*Epochs);
+                func_params["batches_in_epoch"] =   py::object(*BatchesInEpoch);
+                func_params["saving_interval"]  =   py::object(*SavingInterval);
+                func_params["save_best_only"]   =   py::object(*SaveBestOnly);
 
+
+                // Список папок нужных для обучения
+                /*
+                py::object data_path;
+
+                if(TrainDataDir.size() == 1)
+                {
+                    data_path = py::str(TrainDataDir->at(0).c_str());
+                }
+                if(TrainDataDir.size() > 1)
+                {
+                    py::list train_data_dirs;
+                    for(int i = 0; i < TrainDataDir->size(); i++)
+                    {
+                        train_data_dirs.append(py::str(TrainDataDir->at(i).c_str()));
+                    }
+                    data_path = train_data_dirs;
+                }
+                */
                 // Позиционные аргументы
-                py::tuple data_dir_tuple = py::make_tuple(TrainDataDir->at(0).c_str());
+                py::tuple args_tuple = py::make_tuple(py::str(Config->c_str()),
+                                                      py::str(TrainDataDir->at(0).c_str()),
+                                                      py::str(DatasetType->c_str()));
 
                 //Запуск обучения, внутри функции питона функция обучения отпускается в отдельный поток
-                py::object retval = IntegrationInterfaceInstance->attr("classification_train")
-                                                                        (data_dir_tuple,
+                py::object retval = IntegrationInterfaceInstance->attr("segmentation_train")
+                                                                        (args_tuple,
                                                                          func_params);
 
                 // Проверка на исключительный (практически невозможный) случай
-                // Если после выполнения функции classification_train() сразу изменился TrainingStatus на -1
+                // Если после выполнения функции segmentation_train() сразу изменился TrainingStatus на -1
                 py::object train_status = IntegrationInterfaceInstance->attr("train_status")();
                 TrainingStatus = boost::python::extract< int >(train_status);
                 if(TrainingStatus == -1)
@@ -302,7 +316,7 @@ bool TPyClassifierTrainer::ACalculate(void)
     catch (py::error_already_set const &)
     {
         std::string perrorStr = parse_python_exception();
-        LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPyClassifierTrainer error: ")+perrorStr);
+        LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPySegmenterTrainer error: ")+perrorStr);
         TrainingStatus = 0;
         StartTraining = false;
     }
@@ -317,7 +331,7 @@ bool TPyClassifierTrainer::ACalculate(void)
 }
 
 
-bool TPyClassifierTrainer::CheckInputParameters()
+bool TPySegmenterTrainer::CheckInputParameters()
 {
     if(TrainDataDir->empty() || TrainDataDir->at(0).empty())
     {
@@ -331,15 +345,15 @@ bool TPyClassifierTrainer::CheckInputParameters()
         return false;
     }
 
+    // Если нет слэша в конце - ставим
+    if(WorkingDir->back() != '/')
+    {
+        WorkingDir->push_back('/');
+    }
+
     if(ArchitectureName->empty())
     {
         LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("ArchitectureName is empty!"));
-        return false;
-    }
-
-    if(DatasetName->empty())
-    {
-        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("DatasetName is empty!"));
         return false;
     }
 
@@ -349,24 +363,21 @@ bool TPyClassifierTrainer::CheckInputParameters()
         return false;
     }
 
-    if(ImageSize.size()!=3)
+    if(DatasetName->empty())
     {
-        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("ImageSize must have 3 values!"));
+        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("DatasetName is empty!"));
         return false;
     }
 
-    if(BatchSizes.size()!=3)
-    {
-        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("BatchSizes must have 3 values!"));
-        return false;
-    }
-
+    // для дектектора не должна быть пустой
+/*
     //Проверка на непустую директорию WorkingDir
     if(!boost::filesystem::is_empty(WorkingDir->c_str()))
     {
         LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("WorkingDir isn't empty, it contains some files"));
         return false;
     }
+    */
     //TODO возможно нужны еще проверки на отриц.значения и проч.
     //TODO создавать WorkingDir при каких-либо условиях
     //TODO проверки на пути относительные и т.д.
