@@ -1,9 +1,9 @@
 #ifndef RDK_TPyDetectorTrainerCPP
 #define RDK_TPyDetectorTrainerCPP
 
+#include <boost/filesystem.hpp>
 #include "TPyDetectorTrainer.h"
 #include <iostream>
-#include <boost/filesystem.hpp>
 
 namespace RDK {
 

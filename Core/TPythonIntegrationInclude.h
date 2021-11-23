@@ -13,7 +13,9 @@
 #endif
 
 //максимальное кол-во передаваемых параметров в функцию (перегруженный оператор () )
+#ifndef BOOST_PYTHON_MAX_ARITY
 #define BOOST_PYTHON_MAX_ARITY 21
+#endif
 
 #include <boost/python.hpp>
 #ifdef WIN32

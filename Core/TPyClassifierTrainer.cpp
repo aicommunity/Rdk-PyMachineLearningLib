@@ -1,9 +1,9 @@
 #ifndef RDK_TPyClassifierTrainerCPP
 #define RDK_TPyClassifierTrainerCPP
 
+#include <boost/filesystem.hpp>
 #include "TPyClassifierTrainer.h"
 #include <iostream>
-#include <boost/filesystem.hpp>
 
 namespace RDK {
 

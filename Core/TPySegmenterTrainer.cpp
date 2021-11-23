@@ -1,9 +1,9 @@
 #ifndef RDK_TPySegmenterTrainerCPP
 #define RDK_TPySegmenterTrainerCPP
 
+#include <boost/filesystem.hpp>
 #include "TPySegmenterTrainer.h"
 #include <iostream>
-#include <boost/filesystem.hpp>
 
 namespace RDK {
 

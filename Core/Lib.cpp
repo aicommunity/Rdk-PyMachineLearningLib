@@ -50,7 +50,7 @@ namespace np = boost::python::numpy;
     void init_py(){
 #endif
         if(Py_IsInitialized())
-            return NUMPY_IMPORT_ARRAY_RETVAL;
+            return NULL;
         Py_Initialize();
 //        if (!PyEval_ThreadsInitialized())
 //        {
@@ -60,7 +60,7 @@ namespace np = boost::python::numpy;
         import_array();
         np::initialize();
 
-        return NUMPY_IMPORT_ARRAY_RETVAL;
+        return NULL;
     }
 
 #endif

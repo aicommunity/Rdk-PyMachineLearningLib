@@ -1,9 +1,9 @@
 #ifndef RDK_TPyBaseTrainerCPP
 #define RDK_TPyBaseTrainerCPP
 
+#include <boost/filesystem.hpp>
 #include "TPyBaseTrainer.h"
 #include <iostream>
-#include <boost/filesystem.hpp>
 
 namespace RDK {
 
