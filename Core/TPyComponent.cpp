@@ -96,9 +96,6 @@ void TPyComponent::PythonInitialize(void)
          return;
         }
 
-        py::object MainModule = py::import("__main__");  // импортируем main-scope, см. https://docs.python.org/3/library/__main__.html
-        py::object MainNamespace = MainModule.attr("__dict__");  // извлекаем область имен
-
         // загрузка кода из файла в извлеченную область имен
         if(*UseFullPath)
         {
@@ -108,6 +105,13 @@ void TPyComponent::PythonInitialize(void)
         {
          FullPythonScriptFileName = GetEnvironment()->GetCurrentDataDir()+PythonScriptFileName->c_str();
         }
+
+        if(FullPythonScriptFileName.empty())
+         return;
+
+        py::object MainModule = py::import("__main__");  // импортируем main-scope, см. https://docs.python.org/3/library/__main__.html
+        py::object MainNamespace = MainModule.attr("__dict__");  // извлекаем область имен
+
         py::object DetectorInterfaceModule = import(*PythonModuleName,FullPythonScriptFileName,MainNamespace);
 
         // экземпл€р питоновского класса, через который активируетс€ виртуальна€ среда и загружаетс€ модель
