@@ -204,12 +204,12 @@ bool TPyUBitmapClassifier::ClassifyBitmap(UBitmap &bmp, MDVector<double> &output
             }
         }
 
-        if(max_conf<conf_thresh)
+        if(max_conf>=conf_thresh)
         {
-            is_classified=false;
+            is_classified=true;
         }
         else
-            is_classified=true;
+            is_classified=false;
 
         class_id = max_id;
 
