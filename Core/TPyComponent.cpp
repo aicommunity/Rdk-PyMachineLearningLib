@@ -74,7 +74,6 @@ void TPyComponent::PythonInitialize(void)
 
    try
    {
-        LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("Python init started..."));
         PythonInitialized=false;
 
         if(PythonModuleName->empty())
@@ -89,13 +88,6 @@ void TPyComponent::PythonInitialize(void)
          return;
         }
 
-        if(!PyEval_ThreadsInitialized())
-        {
-         LogMessageEx(RDK_EX_FATAL,__FUNCTION__,std::string("Python Py_Initialize didn't called!"));
-         LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("Python init fail"));
-         return;
-        }
-
         // загрузка кода из файла в извлеченную область имен
         if(*UseFullPath)
         {
@@ -107,7 +99,18 @@ void TPyComponent::PythonInitialize(void)
         }
 
         if(FullPythonScriptFileName.empty())
+        {
+//         LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("...Python init fail: FullPythonScriptFileName is empty"));
          return;
+        }
+
+        LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("Python init started..."));
+        if(!PyEval_ThreadsInitialized())
+        {
+         LogMessageEx(RDK_EX_FATAL,__FUNCTION__,std::string("Python Py_Initialize didn't called!"));
+         LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("Python init fail"));
+         return;
+        }
 
         py::object MainModule = py::import("__main__");  // импортируем main-scope, см. https://docs.python.org/3/library/__main__.html
         py::object MainNamespace = MainModule.attr("__dict__");  // извлекаем область имен
