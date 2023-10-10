@@ -112,6 +112,12 @@ bool TPyClassifierTrainer::ACalculate(void)
     // ≈сли питон не проинициализирован, то ничего не делаем. Ќадо чтобы нажали Reset дл€ повторной попытки иницилизации
     if(!PythonInitialized)
        return true;
+
+    if(*WorkingDir != Environment->GetCurrentDataDir()+"Results/")
+    {
+        WorkingDir = Environment->GetCurrentDataDir()+"Results/";
+    }
+
     gil_lock lock;
     try
     {   //ќтключаем работу потоков питона (забираем GIL себе) дл€ возмжности запуска функций
@@ -321,25 +327,19 @@ bool TPyClassifierTrainer::CheckInputParameters()
 {
     if(TrainDataDir->empty() || TrainDataDir->at(0).empty())
     {
-        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("TrainDataDir is empty!"));
-        return false;
-    }
-
-    if(WorkingDir->empty())
-    {
-        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("WorkingDir is empty!"));
+        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("TrainDataDir parameter is empty!"));
         return false;
     }
 
     if(ArchitectureName->empty())
     {
-        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("ArchitectureName is empty!"));
+        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("ArchitectureName parameter is empty!"));
         return false;
     }
 
     if(DatasetName->empty())
     {
-        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("DatasetName is empty!"));
+        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("DatasetName parameter is empty!"));
         return false;
     }
 
@@ -368,7 +368,6 @@ bool TPyClassifierTrainer::CheckInputParameters()
         return false;
     }
     //TODO возможно нужны еще проверки на отриц.значени€ и проч.
-    //TODO создавать WorkingDir при каких-либо услови€х
     //TODO проверки на пути относительные и т.д.
     return true;
 }

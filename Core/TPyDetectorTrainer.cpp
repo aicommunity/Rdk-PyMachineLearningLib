@@ -103,6 +103,12 @@ bool TPyDetectorTrainer::ACalculate(void)
     // Если питон не проинициализирован, то ничего не делаем. Надо чтобы нажали Reset для повторной попытки иницилизации
     if(!PythonInitialized)
        return true;
+
+    if(*WorkingDir != Environment->GetCurrentDataDir()+"Results/")
+    {
+        WorkingDir = Environment->GetCurrentDataDir()+"Results/";
+    }
+
     gil_lock lock;
     try
     {   //Отключаем работу потоков питона (забираем GIL себе) для возмжности запуска функций
@@ -295,8 +301,8 @@ bool TPyDetectorTrainer::ACalculate(void)
                                                                         (args_tuple,
                                                                          func_params);
 
-                // Проверка на исключительный (практически невозможный) случай
-                // Если после выполнения функции classification_train() сразу изменился TrainingStatus на -1
+                // Проверка на исключительный случай
+                // Если после выполнения функции detection_train() сразу изменился TrainingStatus на -1
                 py::object train_status = IntegrationInterfaceInstance->attr("train_status")();
                 TrainingStatus = boost::python::extract< int >(train_status);
                 if(TrainingStatus == -1)
@@ -335,32 +341,19 @@ bool TPyDetectorTrainer::CheckInputParameters()
 {
     if(TrainDataDir->empty() || TrainDataDir->at(0).empty())
     {
-        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("TrainDataDir is empty!"));
+        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("TrainDataDir parameter is empty!"));
         return false;
     }
-
-    if(WorkingDir->empty())
-    {
-        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("WorkingDir is empty!"));
-        return false;
-    }
-
-    // Если нет слэша в конце - ставим
-    if(WorkingDir->back() != '/')
-    {
-        WorkingDir->push_back('/');
-    }
-
 
     if(ArchitectureName->empty())
     {
-        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("ArchitectureName is empty!"));
+        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("ArchitectureName parameter is empty!"));
         return false;
     }
 
     if(DatasetType->empty())
     {
-        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("DatasetType is empty!"));
+        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("DatasetType parameter is empty!"));
         return false;
     }
 
@@ -370,17 +363,9 @@ bool TPyDetectorTrainer::CheckInputParameters()
         LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("SplitRatio must have 3 values!"));
         return false;
     }
-    // для дектектора не должна быть пустой
-/*
-    //Проверка на непустую директорию WorkingDir
-    if(!boost::filesystem::is_empty(WorkingDir->c_str()))
-    {
-        LogMessageEx(RDK_EX_ERROR,__FUNCTION__,std::string("WorkingDir isn't empty, it contains some files"));
-        return false;
-    }
-    */
+
     //TODO возможно нужны еще проверки на отриц.значения и проч.
-    //TODO создавать WorkingDir при каких-либо условиях
+
     //TODO проверки на пути относительные и т.д.
     return true;
 }
