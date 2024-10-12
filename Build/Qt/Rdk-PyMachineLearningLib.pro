@@ -22,7 +22,7 @@ include($$PWD/../../../../Rdk/Build/Lib/Qt/RdkDefines.pri)
 DEFINES += BOOST_PYTHON_STATIC_LIB
 DEFINES += BOOST_NUMPY_STATIC_LIB
 
-VERSION = $$system(hg parents --template '{rev}')
+VERSION = 0 # $$system(hg parents --template '{rev}')
 DEFINES += RDK_LIB_CVS_REVISION=$$VERSION
 
 INCLUDEPATH += $$PWD/../../../../Rdk/Deploy/Include
