@@ -22,9 +22,9 @@ namespace RDK {
         return NUMPY_IMPORT_ARRAY_RETVAL;
     }
 */
-// Методы
+// РњРµС‚РѕРґС‹
 // --------------------------
-// Конструкторы и деструкторы
+// РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂС‹ Рё РґРµСЃС‚СЂСѓРєС‚РѕСЂС‹
 // --------------------------  //DetectionClass("DetectionClass",this),
 TPyAggregateClassifier::TPyAggregateClassifier(void)
 : InputImage("InputImage",this),
@@ -50,19 +50,19 @@ TPyAggregateClassifier::~TPyAggregateClassifier(void)
 
 
 // ---------------------
-// Методы управления параметрами
+// РњРµС‚РѕРґС‹ СѓРїСЂР°РІР»РµРЅРёСЏ РїР°СЂР°РјРµС‚СЂР°РјРё
 // ---------------------
 // ---------------------
 
 // ---------------------
-// Методы управления переменными состояния
+// РњРµС‚РѕРґС‹ СѓРїСЂР°РІР»РµРЅРёСЏ РїРµСЂРµРјРµРЅРЅС‹РјРё СЃРѕСЃС‚РѕСЏРЅРёСЏ
 // ---------------------
 // ---------------------
 
 // --------------------------
-// Системные методы управления объектом
+// РЎРёСЃС‚РµРјРЅС‹Рµ РјРµС‚РѕРґС‹ СѓРїСЂР°РІР»РµРЅРёСЏ РѕР±СЉРµРєС‚РѕРј
 // --------------------------
-// Выделяет память для новой чистой копии объекта этого класса
+// Р’С‹РґРµР»СЏРµС‚ РїР°РјСЏС‚СЊ РґР»СЏ РЅРѕРІРѕР№ С‡РёСЃС‚РѕР№ РєРѕРїРёРё РѕР±СЉРµРєС‚Р° СЌС‚РѕРіРѕ РєР»Р°СЃСЃР°
 TPyAggregateClassifier* TPyAggregateClassifier::New(void)
 {
  return new TPyAggregateClassifier;
@@ -70,7 +70,7 @@ TPyAggregateClassifier* TPyAggregateClassifier::New(void)
 // --------------------------
 
 // --------------------------
-// Скрытые методы управления счетом
+// РЎРєСЂС‹С‚С‹Рµ РјРµС‚РѕРґС‹ СѓРїСЂР°РІР»РµРЅРёСЏ СЃС‡РµС‚РѕРј
 // --------------------------
 bool TPyAggregateClassifier::Initialize(void)
 {
@@ -88,17 +88,17 @@ bool TPyAggregateClassifier::Initialize(void)
 //        init_py();
 //        py::to_python_converter<cv::Mat, pbcvt::matToNDArrayBoostConverter>();
 //        py::to_python_converter<RDK::UBitmap, pbcvt::uBitmapToNDArrayBoostConverter>();
-        py::object MainModule = py::import("__main__");  // импортируем main-scope, см. https://docs.python.org/3/library/__main__.html
-        py::object MainNamespace = MainModule.attr("__dict__");  // извлекаем область имен
+        py::object MainModule = py::import("__main__");  // РёРјРїРѕСЂС‚РёСЂСѓРµРј main-scope, СЃРј. https://docs.python.org/3/library/__main__.html
+        py::object MainNamespace = MainModule.attr("__dict__");  // РёР·РІР»РµРєР°РµРј РѕР±Р»Р°СЃС‚СЊ РёРјРµРЅ
 
         //py::object pycv2 = py::import("cv2");
 
-        // TODO: путь для импорта файла брать из конфига"../../../../Libraries/Rdk-PyMachineLearningLib/PythonScripts/classifier_interface.py"
-        // загрузка кода из файла в извлеченную область имен
+        // TODO: РїСѓС‚СЊ РґР»СЏ РёРјРїРѕСЂС‚Р° С„Р°Р№Р»Р° Р±СЂР°С‚СЊ РёР· РєРѕРЅС„РёРіР°"../../../../Libraries/Rdk-PyMachineLearningLib/PythonScripts/classifier_interface.py"
+        // Р·Р°РіСЂСѓР·РєР° РєРѕРґР° РёР· С„Р°Р№Р»Р° РІ РёР·РІР»РµС‡РµРЅРЅСѓСЋ РѕР±Р»Р°СЃС‚СЊ РёРјРµРЅ
         std::string s = this->GetEnvironment()->GetCurrentDataDir()+*PythonScriptFileName;
         py::object ClassifierInterfaceModule = import("test_class",s,MainNamespace);
-        // экземпляр питоновского класса, через который активируется виртуальная среда и загружается модель
-        // TODO: пусть до среды брать из конфига
+        // СЌРєР·РµРјРїР»СЏСЂ РїРёС‚РѕРЅРѕРІСЃРєРѕРіРѕ РєР»Р°СЃСЃР°, С‡РµСЂРµР· РєРѕС‚РѕСЂС‹Р№ Р°РєС‚РёРІРёСЂСѓРµС‚СЃСЏ РІРёСЂС‚СѓР°Р»СЊРЅР°СЏ СЃСЂРµРґР° Рё Р·Р°РіСЂСѓР¶Р°РµС‚СЃСЏ РјРѕРґРµР»СЊ
+        // TODO: РїСѓСЃС‚СЊ РґРѕ СЃСЂРµРґС‹ Р±СЂР°С‚СЊ РёР· РєРѕРЅС„РёРіР°
         (*IntegrationInterface) = ClassifierInterfaceModule.attr("ClassifierEmbeddingInterface");
         if(!IntegrationInterface->is_none())
             (*IntegrationInterfaceInstance) = (*IntegrationInterface)(); ///home/arnold/.virtualenvs/cv
@@ -134,17 +134,17 @@ void TPyAggregateClassifier::AUnInit(void)
 {
 }
 
-// Восстановление настроек по умолчанию и сброс процесса счета
+// Р’РѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРёРµ РЅР°СЃС‚СЂРѕРµРє РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ Рё СЃР±СЂРѕСЃ РїСЂРѕС†РµСЃСЃР° СЃС‡РµС‚Р°
 bool TPyAggregateClassifier::ADefault(void)
 {
  Initialized=false;
  return true;
 }
 
-// Обеспечивает сборку внутренней структуры объекта
-// после настройки параметров
-// Автоматически вызывает метод Reset() и выставляет Ready в true
-// в случае успешной сборки
+// РћР±РµСЃРїРµС‡РёРІР°РµС‚ СЃР±РѕСЂРєСѓ РІРЅСѓС‚СЂРµРЅРЅРµР№ СЃС‚СЂСѓРєС‚СѓСЂС‹ РѕР±СЉРµРєС‚Р°
+// РїРѕСЃР»Рµ РЅР°СЃС‚СЂРѕР№РєРё РїР°СЂР°РјРµС‚СЂРѕРІ
+// РђРІС‚РѕРјР°С‚РёС‡РµСЃРєРё РІС‹Р·С‹РІР°РµС‚ РјРµС‚РѕРґ Reset() Рё РІС‹СЃС‚Р°РІР»СЏРµС‚ Ready РІ true
+// РІ СЃР»СѓС‡Р°Рµ СѓСЃРїРµС€РЅРѕР№ СЃР±РѕСЂРєРё
 bool TPyAggregateClassifier::ABuild(void)
 {
  if(IsInit())
@@ -152,7 +152,7 @@ bool TPyAggregateClassifier::ABuild(void)
  return true;
 }
 
-// Сброс процесса счета без потери настроек
+// РЎР±СЂРѕСЃ РїСЂРѕС†РµСЃСЃР° СЃС‡РµС‚Р° Р±РµР· РїРѕС‚РµСЂРё РЅР°СЃС‚СЂРѕРµРє
 bool TPyAggregateClassifier::AReset(void)
 {
  if(!Initialized)
@@ -160,7 +160,7 @@ bool TPyAggregateClassifier::AReset(void)
  return true;
 }
 
-// Выполняет расчет этого объекта
+// Р’С‹РїРѕР»РЅСЏРµС‚ СЂР°СЃС‡РµС‚ СЌС‚РѕРіРѕ РѕР±СЉРµРєС‚Р°
 bool TPyAggregateClassifier::ACalculate(void)
 {
  if(!Initialized)
@@ -191,7 +191,7 @@ bool TPyAggregateClassifier::ACalculate(void)
  Detections->Resize(AggrRectsMatrix->GetRows(), 6);
 
  RDK::UBitmap& input_img=*InputImage;
- //Пройти по всем агрегатам
+ //РџСЂРѕР№С‚Рё РїРѕ РІСЃРµРј Р°РіСЂРµРіР°С‚Р°Рј
  for(int i = 0; i < AggrRectsMatrix->GetRows(); ++i)
  {
   (*Detections)(i, 0) = (*AggrIdMatrix)(i, 0);
@@ -212,7 +212,7 @@ bool TPyAggregateClassifier::ACalculate(void)
   obj_rect.SetRes(width, height, ubmY8);
   input_img.CopyTo(0,0,(*AggrRectsMatrix)(i, 0), (*AggrRectsMatrix)(i, 1), width, height, obj_rect);
 
-  /// Тут считаем
+  /// РўСѓС‚ СЃС‡РёС‚Р°РµРј
   gil_lock lock;
   try
   {
@@ -249,7 +249,7 @@ bool TPyAggregateClassifier::ACalculate(void)
  //MDMatrix<double> &detection_reliability=*DetectionReliability;
 
 
- /// А теперь раскладываем результаты по выходам
+ /// Рђ С‚РµРїРµСЂСЊ СЂР°СЃРєР»Р°РґС‹РІР°РµРј СЂРµР·СѓР»СЊС‚Р°С‚С‹ РїРѕ РІС‹С…РѕРґР°Рј
 
 
 

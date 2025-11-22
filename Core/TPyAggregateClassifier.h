@@ -8,80 +8,80 @@ namespace RDK {
 
 class TPyAggregateClassifier: public RDK::UNet
 {
-public: // Свойства
-/// Входное изображение
-UPropertyInputData<UBitmap,TPyAggregateClassifier> InputImage;
+public: // 
+///  
+UProperty<UBitmap,TPyAggregateClassifier, ptPubParameter> InputImage;
 
-/// Входной файл
-ULProperty<std::string,TPyAggregateClassifier, ptPubParameter> PythonScriptFileName;
+///  
+UProperty<std::string,TPyAggregateClassifier, ptPubParameter> PythonScriptFileName;
 
-/// Входные матрицы с данными об обнаружениях
-/// строка матрицы содержит [Left Top Right Bottom] индексы и размеры симметричны с AggrIdMatrix
-UPropertyInputData<MDMatrix<int>, TPyAggregateClassifier, ptPubInput> AggrRectsMatrix;
+///      
+///    [Left Top Right Bottom]      AggrIdMatrix
+UProperty<MDMatrix<int>, TPyAggregateClassifier, ptPubInput> AggrRectsMatrix;
 
-/// строка матрицы содержит [AggrID] индексы и размеры симметричны с AggrRectsMatrix
-UPropertyInputData<MDMatrix<int>, TPyAggregateClassifier, ptPubInput> AggrIdMatrix;
+///    [AggrID]      AggrRectsMatrix
+UProperty<MDMatrix<int>, TPyAggregateClassifier, ptPubInput> AggrIdMatrix;
 
-/// Выходная матрица с рамками объектов
-UPropertyOutputData<MDMatrix<int>,TPyAggregateClassifier> Detections;
+///     
+UProperty<MDMatrix<int>,TPyAggregateClassifier> Detections;
 
-UPropertyOutputData<UBitmap,TPyAggregateClassifier> DebugImage;
+UProperty<UBitmap,TPyAggregateClassifier, ptPubParameter> DebugImage;
 
 boost::python::object* IntegrationInterface;
 boost::python::object* IntegrationInterfaceInstance;
 
-protected: // Переменные состояния
+protected: //  
 
 UGraphics Graph;
 UBitmap Canvas;
 bool Initialized;
 
-public: // Методы
+public: // 
 // --------------------------
-// Конструкторы и деструкторы
+//   
 // --------------------------
 TPyAggregateClassifier(void);
 virtual ~TPyAggregateClassifier(void);
 // --------------------------
 
 // ---------------------
-// Методы управления параметрами
+//   
 // ---------------------
 // ---------------------
 
 // ---------------------
-// Методы управления переменными состояния
+//    
 // ---------------------
 // ---------------------
 
 // --------------------------
-// Системные методы управления объектом
+//    
 // --------------------------
-// Выделяет память для новой чистой копии объекта этого класса
+//         
 virtual TPyAggregateClassifier* New(void);
 // --------------------------
 
 // --------------------------
-// Скрытые методы управления счетом
+//    
 // --------------------------
 protected:
 bool Initialize(void);
 virtual void AInit(void);
 virtual void AUnInit(void);
 
-// Восстановление настроек по умолчанию и сброс процесса счета
+//        
 virtual bool ADefault(void);
 
-// Обеспечивает сборку внутренней структуры объекта
-// после настройки параметров
-// Автоматически вызывает метод Reset() и выставляет Ready в true
-// в случае успешной сборки
+//     
+//   
+//    Reset()   Ready  true
+//    
 virtual bool ABuild(void);
 
-// Сброс процесса счета без потери настроек
+//      
 virtual bool AReset(void);
 
-// Выполняет расчет этого объекта
+//    
 virtual bool ACalculate(void);
 // --------------------------
 };

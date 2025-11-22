@@ -7,9 +7,9 @@
 
 namespace RDK {
 
-// Ìåòîäû
+// ÐœÐµÑ‚Ð¾Ð´Ñ‹
 // --------------------------
-// Êîíñòðóêòîðû è äåñòðóêòîðû
+// ÐšÐ¾Ð½ÑÑ‚Ñ€ÑƒÐºÑ‚Ð¾Ñ€Ñ‹ Ð¸ Ð´ÐµÑÑ‚Ñ€ÑƒÐºÑ‚Ð¾Ñ€Ñ‹
 // --------------------------
 TPyDetPredict::TPyDetPredict(void)
 : WorkingDir("WorkingDir",this),
@@ -29,9 +29,9 @@ TPyDetPredict::~TPyDetPredict(void)
 // --------------------------
 
 // --------------------------
-// Ñèñòåìíûå ìåòîäû óïðàâëåíèÿ îáúåêòîì
+// Ð¡Ð¸ÑÑ‚ÐµÐ¼Ð½Ñ‹Ðµ Ð¼ÐµÑ‚Ð¾Ð´Ñ‹ ÑƒÐ¿Ñ€Ð°Ð²Ð»ÐµÐ½Ð¸Ñ Ð¾Ð±ÑŠÐµÐºÑ‚Ð¾Ð¼
 // --------------------------
-// Âûäåëÿåò ïàìÿòü äëÿ íîâîé ÷èñòîé êîïèè îáúåêòà ýòîãî êëàññà
+// Ð’Ñ‹Ð´ÐµÐ»ÑÐµÑ‚ Ð¿Ð°Ð¼ÑÑ‚ÑŒ Ð´Ð»Ñ Ð½Ð¾Ð²Ð¾Ð¹ Ñ‡Ð¸ÑÑ‚Ð¾Ð¹ ÐºÐ¾Ð¿Ð¸Ð¸ Ð¾Ð±ÑŠÐµÐºÑ‚Ð° ÑÑ‚Ð¾Ð³Ð¾ ÐºÐ»Ð°ÑÑÐ°
 TPyDetPredict* TPyDetPredict::New(void)
 {
  return new TPyDetPredict;
@@ -39,14 +39,14 @@ TPyDetPredict* TPyDetPredict::New(void)
 // --------------------------
 
 // --------------------------
-// Ñêðûòûå ìåòîäû óïðàâëåíèÿ ñ÷åòîì
+// Ð¡ÐºÑ€Ñ‹Ñ‚Ñ‹Ðµ Ð¼ÐµÑ‚Ð¾Ð´Ñ‹ ÑƒÐ¿Ñ€Ð°Ð²Ð»ÐµÐ½Ð¸Ñ ÑÑ‡ÐµÑ‚Ð¾Ð¼
 // --------------------------
 bool TPyDetPredict::APythonInitialize(void)
 {
     return true;
 }
 
-// Âîññòàíîâëåíèå íàñòðîåê ïî óìîë÷àíèþ è ñáðîñ ïðîöåññà ñ÷åòà
+// Ð’Ð¾ÑÑÑ‚Ð°Ð½Ð¾Ð²Ð»ÐµÐ½Ð¸Ðµ Ð½Ð°ÑÑ‚Ñ€Ð¾ÐµÐº Ð¿Ð¾ ÑƒÐ¼Ð¾Ð»Ñ‡Ð°Ð½Ð¸ÑŽ Ð¸ ÑÐ±Ñ€Ð¾Ñ Ð¿Ñ€Ð¾Ñ†ÐµÑÑÐ° ÑÑ‡ÐµÑ‚Ð°
 bool TPyDetPredict::APyDefault(void)
 {
     PythonModuleName="detection_train";
@@ -65,45 +65,45 @@ bool TPyDetPredict::APyDefault(void)
     return true;
 }
 
-// Îáåñïå÷èâàåò ñáîðêó âíóòðåííåé ñòðóêòóðû îáúåêòà
-// ïîñëå íàñòðîéêè ïàðàìåòðîâ
-// Àâòîìàòè÷åñêè âûçûâàåò ìåòîä Reset() è âûñòàâëÿåò Ready â true
-// â ñëó÷àå óñïåøíîé ñáîðêè
+// ÐžÐ±ÐµÑÐ¿ÐµÑ‡Ð¸Ð²Ð°ÐµÑ‚ ÑÐ±Ð¾Ñ€ÐºÑƒ Ð²Ð½ÑƒÑ‚Ñ€ÐµÐ½Ð½ÐµÐ¹ ÑÑ‚Ñ€ÑƒÐºÑ‚ÑƒÑ€Ñ‹ Ð¾Ð±ÑŠÐµÐºÑ‚Ð°
+// Ð¿Ð¾ÑÐ»Ðµ Ð½Ð°ÑÑ‚Ñ€Ð¾Ð¹ÐºÐ¸ Ð¿Ð°Ñ€Ð°Ð¼ÐµÑ‚Ñ€Ð¾Ð²
+// ÐÐ²Ñ‚Ð¾Ð¼Ð°Ñ‚Ð¸Ñ‡ÐµÑÐºÐ¸ Ð²Ñ‹Ð·Ñ‹Ð²Ð°ÐµÑ‚ Ð¼ÐµÑ‚Ð¾Ð´ Reset() Ð¸ Ð²Ñ‹ÑÑ‚Ð°Ð²Ð»ÑÐµÑ‚ Ready Ð² true
+// Ð² ÑÐ»ÑƒÑ‡Ð°Ðµ ÑƒÑÐ¿ÐµÑˆÐ½Ð¾Ð¹ ÑÐ±Ð¾Ñ€ÐºÐ¸
 bool TPyDetPredict::APyBuild(void)
 {
     return true;
 }
 
 
-// Ñáðîñ ïðîöåññà ñ÷åòà áåç ïîòåðè íàñòðîåê
+// Ð¡Ð±Ñ€Ð¾Ñ Ð¿Ñ€Ð¾Ñ†ÐµÑÑÐ° ÑÑ‡ÐµÑ‚Ð° Ð±ÐµÐ· Ð¿Ð¾Ñ‚ÐµÑ€Ð¸ Ð½Ð°ÑÑ‚Ñ€Ð¾ÐµÐº
 bool TPyDetPredict::APyReset(void)
 {
     StopNow = false;
     StartPredict = false;
 
-    //Îñòàíîâêà îáó÷åíèÿ
+    //ÐžÑÑ‚Ð°Ð½Ð¾Ð²ÐºÐ° Ð¾Ð±ÑƒÑ‡ÐµÐ½Ð¸Ñ
     //
     Py_BLOCK_GIL
     try
     {
-        // Ïîñûëàåì êîìàíäó íà îñòàíîâêó ïîòîêà
+        // ÐŸÐ¾ÑÑ‹Ð»Ð°ÐµÐ¼ ÐºÐ¾Ð¼Ð°Ð½Ð´Ñƒ Ð½Ð° Ð¾ÑÑ‚Ð°Ð½Ð¾Ð²ÐºÑƒ Ð¿Ð¾Ñ‚Ð¾ÐºÐ°
         //IntegrationInterfaceInstance->attr("stop_now")();
 
         ThreadIsAlive = boost::python::extract<bool>(IntegrationInterfaceInstance->attr("get_thread_is_alive")());
 
-        // Ôëàã îñòàâíîêè ïîòîêà èìåííî â äàííîì ìåñòå
+        // Ð¤Ð»Ð°Ð³ Ð¾ÑÑ‚Ð°Ð²Ð½Ð¾ÐºÐ¸ Ð¿Ð¾Ñ‚Ð¾ÐºÐ° Ð¸Ð¼ÐµÐ½Ð½Ð¾ Ð² Ð´Ð°Ð½Ð½Ð¾Ð¼ Ð¼ÐµÑÑ‚Ðµ
         bool stopped = false;
 
-        // Æäåì ïîêà ïîòîê çàâåðøèòüñÿ
+        // Ð–Ð´ÐµÐ¼ Ð¿Ð¾ÐºÐ° Ð¿Ð¾Ñ‚Ð¾Ðº Ð·Ð°Ð²ÐµÑ€ÑˆÐ¸Ñ‚ÑŒÑÑ
         while(ThreadIsAlive)
         {
             stopped = true;
-            // Ïîñûëàåì êîìàíäó íà îñòàíîâêó ïîòîêà
+            // ÐŸÐ¾ÑÑ‹Ð»Ð°ÐµÐ¼ ÐºÐ¾Ð¼Ð°Ð½Ð´Ñƒ Ð½Ð° Ð¾ÑÑ‚Ð°Ð½Ð¾Ð²ÐºÑƒ Ð¿Ð¾Ñ‚Ð¾ÐºÐ°
             IntegrationInterfaceInstance->attr("stop_now")();
 
             //
             Py_UNBLOCK_GIL
-            // äàåì âîçìîæíîñòü ïîòîêó çàâåðøèòüñÿ
+            // Ð´Ð°ÐµÐ¼ Ð²Ð¾Ð·Ð¼Ð¾Ð¶Ð½Ð¾ÑÑ‚ÑŒ Ð¿Ð¾Ñ‚Ð¾ÐºÑƒ Ð·Ð°Ð²ÐµÑ€ÑˆÐ¸Ñ‚ÑŒÑÑ
             Sleep(100);
             //
             Py_BLOCK_GIL
@@ -129,10 +129,10 @@ bool TPyDetPredict::APyReset(void)
     return true;
 }
 
-// Âûïîëíÿåò ðàñ÷åò ýòîãî îáúåêòà
+// Ð’Ñ‹Ð¿Ð¾Ð»Ð½ÑÐµÑ‚ Ñ€Ð°ÑÑ‡ÐµÑ‚ ÑÑ‚Ð¾Ð³Ð¾ Ð¾Ð±ÑŠÐµÐºÑ‚Ð°
 bool TPyDetPredict::ACalculate(void)
 {
-    // Åñëè ïèòîí íå ïðîèíèöèàëèçèðîâàí, òî íè÷åãî íå äåëàåì. Íàäî ÷òîáû íàæàëè Reset äëÿ ïîâòîðíîé ïîïûòêè èíèöèëèçàöèè
+    // Ð•ÑÐ»Ð¸ Ð¿Ð¸Ñ‚Ð¾Ð½ Ð½Ðµ Ð¿Ñ€Ð¾Ð¸Ð½Ð¸Ñ†Ð¸Ð°Ð»Ð¸Ð·Ð¸Ñ€Ð¾Ð²Ð°Ð½, Ñ‚Ð¾ Ð½Ð¸Ñ‡ÐµÐ³Ð¾ Ð½Ðµ Ð´ÐµÐ»Ð°ÐµÐ¼. ÐÐ°Ð´Ð¾ Ñ‡Ñ‚Ð¾Ð±Ñ‹ Ð½Ð°Ð¶Ð°Ð»Ð¸ Reset Ð´Ð»Ñ Ð¿Ð¾Ð²Ñ‚Ð¾Ñ€Ð½Ð¾Ð¹ Ð¿Ð¾Ð¿Ñ‹Ñ‚ÐºÐ¸ Ð¸Ð½Ð¸Ñ†Ð¸Ð»Ð¸Ð·Ð°Ñ†Ð¸Ð¸
     if(!PythonInitialized)
        return true;
 
@@ -143,19 +143,19 @@ bool TPyDetPredict::ACalculate(void)
 
     gil_lock lock;
     try
-    {   //Îòêëþ÷àåì ðàáîòó ïîòîêîâ ïèòîíà (çàáèðàåì GIL ñåáå) äëÿ âîçìæíîñòè çàïóñêà ôóíêöèé
+    {   //ÐžÑ‚ÐºÐ»ÑŽÑ‡Ð°ÐµÐ¼ Ñ€Ð°Ð±Ð¾Ñ‚Ñƒ Ð¿Ð¾Ñ‚Ð¾ÐºÐ¾Ð² Ð¿Ð¸Ñ‚Ð¾Ð½Ð° (Ð·Ð°Ð±Ð¸Ñ€Ð°ÐµÐ¼ GIL ÑÐµÐ±Ðµ) Ð´Ð»Ñ Ð²Ð¾Ð·Ð¼Ð¶Ð½Ð¾ÑÑ‚Ð¸ Ð·Ð°Ð¿ÑƒÑÐºÐ° Ñ„ÑƒÐ½ÐºÑ†Ð¸Ð¹
 
-        // Ïðîâåðêà ñòàòóñà âûïîëíåíèÿ
+        // ÐŸÑ€Ð¾Ð²ÐµÑ€ÐºÐ° ÑÑ‚Ð°Ñ‚ÑƒÑÐ° Ð²Ñ‹Ð¿Ð¾Ð»Ð½ÐµÐ½Ð¸Ñ
         py::object train_status = IntegrationInterfaceInstance->attr("is_predicting")();
         PredictStatus = boost::python::extract< int >(train_status);
 
         ThreadIsAlive = boost::python::extract<bool>(IntegrationInterfaceInstance->attr("get_thread_is_alive")());
 
-        // Îøèáêà ïî âðåìÿ îáó÷åíèÿ (ñîîáùàåì è îáíóëÿåì ñòàòóñ)
-        // Ëèáî ïðàâèëüíî ñðàáîòàëî stop_now èëè stop_training
+        // ÐžÑˆÐ¸Ð±ÐºÐ° Ð¿Ð¾ Ð²Ñ€ÐµÐ¼Ñ Ð¾Ð±ÑƒÑ‡ÐµÐ½Ð¸Ñ (ÑÐ¾Ð¾Ð±Ñ‰Ð°ÐµÐ¼ Ð¸ Ð¾Ð±Ð½ÑƒÐ»ÑÐµÐ¼ ÑÑ‚Ð°Ñ‚ÑƒÑ)
+        // Ð›Ð¸Ð±Ð¾ Ð¿Ñ€Ð°Ð²Ð¸Ð»ÑŒÐ½Ð¾ ÑÑ€Ð°Ð±Ð¾Ñ‚Ð°Ð»Ð¾ stop_now Ð¸Ð»Ð¸ stop_training
         if(PredictStatus == -1)
         {
-            //ñáðîñ íà ñëó÷àé âûñòàâëåíèÿ èçâíå
+            //ÑÐ±Ñ€Ð¾Ñ Ð½Ð° ÑÐ»ÑƒÑ‡Ð°Ð¹ Ð²Ñ‹ÑÑ‚Ð°Ð²Ð»ÐµÐ½Ð¸Ñ Ð¸Ð·Ð²Ð½Ðµ
             StartPredict = false;
 
             py::object except_string = IntegrationInterfaceInstance->attr("get_error_string")();
@@ -164,30 +164,30 @@ bool TPyDetPredict::ACalculate(void)
 
             LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Exception or proper stop: ") + PyExceptionString);
 
-            // Ñáðîñ ñòàòóñà
+            // Ð¡Ð±Ñ€Ð¾Ñ ÑÑ‚Ð°Ñ‚ÑƒÑÐ°
             PredictStatus = 0;
             py::object res = IntegrationInterfaceInstance->attr("set_predicting_status_to_null")();
         }
-        // Óñïåøíîå çàâåðøåíèå îáó÷åíèÿ. Ïîñëå îáðàáîòêè â êîìïîíåíòå ñáðàñûâàåòñÿ â 0
-        // Ñîîáùàåì è ñáðàñûâàåì ñòàòóñ â 0
+        // Ð£ÑÐ¿ÐµÑˆÐ½Ð¾Ðµ Ð·Ð°Ð²ÐµÑ€ÑˆÐµÐ½Ð¸Ðµ Ð¾Ð±ÑƒÑ‡ÐµÐ½Ð¸Ñ. ÐŸÐ¾ÑÐ»Ðµ Ð¾Ð±Ñ€Ð°Ð±Ð¾Ñ‚ÐºÐ¸ Ð² ÐºÐ¾Ð¼Ð¿Ð¾Ð½ÐµÐ½Ñ‚Ðµ ÑÐ±Ñ€Ð°ÑÑ‹Ð²Ð°ÐµÑ‚ÑÑ Ð² 0
+        // Ð¡Ð¾Ð¾Ð±Ñ‰Ð°ÐµÐ¼ Ð¸ ÑÐ±Ñ€Ð°ÑÑ‹Ð²Ð°ÐµÐ¼ ÑÑ‚Ð°Ñ‚ÑƒÑ Ð² 0
         if(PredictStatus == 2)
         {
-            //ñáðîñ íà ñëó÷àé âûñòàâëåíèÿ èçâíå
+            //ÑÐ±Ñ€Ð¾Ñ Ð½Ð° ÑÐ»ÑƒÑ‡Ð°Ð¹ Ð²Ñ‹ÑÑ‚Ð°Ð²Ð»ÐµÐ½Ð¸Ñ Ð¸Ð·Ð²Ð½Ðµ
             StartPredict = false;
 
             LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("Prediction completed correctly"));
 
-            // Ñáðîñ ñòàòóñà
+            // Ð¡Ð±Ñ€Ð¾Ñ ÑÑ‚Ð°Ñ‚ÑƒÑÐ°
             PredictStatus = 0;
             py::object res = IntegrationInterfaceInstance->attr("set_predicting_status_to_null")();
         }
-        // Åñëè ïðåäñêàçàíèå èäåò, îïðàøèâàåì ãåòòåðû
+        // Ð•ÑÐ»Ð¸ Ð¿Ñ€ÐµÐ´ÑÐºÐ°Ð·Ð°Ð½Ð¸Ðµ Ð¸Ð´ÐµÑ‚, Ð¾Ð¿Ñ€Ð°ÑˆÐ¸Ð²Ð°ÐµÐ¼ Ð³ÐµÑ‚Ñ‚ÐµÑ€Ñ‹
         if(PredictStatus == 1)
         {
-            //ñáðîñ íà ñëó÷àé âûñòàâëåíèÿ èçâíå
+            //ÑÐ±Ñ€Ð¾Ñ Ð½Ð° ÑÐ»ÑƒÑ‡Ð°Ð¹ Ð²Ñ‹ÑÑ‚Ð°Ð²Ð»ÐµÐ½Ð¸Ñ Ð¸Ð·Ð²Ð½Ðµ
             StartPredict = false;
 
-            //Îñòàíàâëèâàåì ïðåäñêàçàíèå, åñëè òðåáóåòñÿ
+            //ÐžÑÑ‚Ð°Ð½Ð°Ð²Ð»Ð¸Ð²Ð°ÐµÐ¼ Ð¿Ñ€ÐµÐ´ÑÐºÐ°Ð·Ð°Ð½Ð¸Ðµ, ÐµÑÐ»Ð¸ Ñ‚Ñ€ÐµÐ±ÑƒÐµÑ‚ÑÑ
             if(StopNow)
             {
                 IntegrationInterfaceInstance->attr("stop_now")();
@@ -195,7 +195,7 @@ bool TPyDetPredict::ACalculate(void)
                 StopNow = false;
             }
         }
-        // Åñëè ïðåäñêàçàíèå íå èäåò è çàïóñê âîçìîæåí (ñòàòóñ 0)
+        // Ð•ÑÐ»Ð¸ Ð¿Ñ€ÐµÐ´ÑÐºÐ°Ð·Ð°Ð½Ð¸Ðµ Ð½Ðµ Ð¸Ð´ÐµÑ‚ Ð¸ Ð·Ð°Ð¿ÑƒÑÐº Ð²Ð¾Ð·Ð¼Ð¾Ð¶ÐµÐ½ (ÑÑ‚Ð°Ñ‚ÑƒÑ 0)
         else
         {
             if(StartPredict)
@@ -210,7 +210,7 @@ bool TPyDetPredict::ACalculate(void)
                     return true;
                 }
 
-                // Ïðîâåðêè íà äîïóñòèìîñòü âõîäíûõ àðãóìåíòîâ
+                // ÐŸÑ€Ð¾Ð²ÐµÑ€ÐºÐ¸ Ð½Ð° Ð´Ð¾Ð¿ÑƒÑÑ‚Ð¸Ð¼Ð¾ÑÑ‚ÑŒ Ð²Ñ…Ð¾Ð´Ð½Ñ‹Ñ… Ð°Ñ€Ð³ÑƒÐ¼ÐµÐ½Ñ‚Ð¾Ð²
                 if(!CheckInputParameters())
                 {
                     StartPredict = false;
@@ -219,11 +219,11 @@ bool TPyDetPredict::ACalculate(void)
 
                 LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("Prediction started"));
 
-                // Îáíóëåíèå íåíóæíûõ ôëàãîâ
+                // ÐžÐ±Ð½ÑƒÐ»ÐµÐ½Ð¸Ðµ Ð½ÐµÐ½ÑƒÐ¶Ð½Ñ‹Ñ… Ñ„Ð»Ð°Ð³Ð¾Ð²
                 StopNow = false;
 
 
-                //Çàïîëíåíèå ñëîâàðÿ ïàðàìåòðîâ ( èìåíîâàííûå àðãóìåíòû)
+                //Ð—Ð°Ð¿Ð¾Ð»Ð½ÐµÐ½Ð¸Ðµ ÑÐ»Ð¾Ð²Ð°Ñ€Ñ Ð¿Ð°Ñ€Ð°Ð¼ÐµÑ‚Ñ€Ð¾Ð² ( Ð¸Ð¼ÐµÐ½Ð¾Ð²Ð°Ð½Ð½Ñ‹Ðµ Ð°Ñ€Ð³ÑƒÐ¼ÐµÐ½Ñ‚Ñ‹)
                 py::dict func_params;
 
                 func_params["config"]       =   py::str(ConfigPath->c_str());
@@ -233,16 +233,16 @@ bool TPyDetPredict::ACalculate(void)
                 func_params["visualize"]    =   py::object(false);
 
 
-                // Ïîçèöèîííûå àðãóìåíòû
+                // ÐŸÐ¾Ð·Ð¸Ñ†Ð¸Ð¾Ð½Ð½Ñ‹Ðµ Ð°Ñ€Ð³ÑƒÐ¼ÐµÐ½Ñ‚Ñ‹
                 py::tuple data_dir_tuple = py::make_tuple();
 
-                //Çàïóñê îáó÷åíèÿ, âíóòðè ôóíêöèè ïèòîíà ôóíêöèÿ îáó÷åíèÿ îòïóñêàåòñÿ â îòäåëüíûé ïîòîê
+                //Ð—Ð°Ð¿ÑƒÑÐº Ð¾Ð±ÑƒÑ‡ÐµÐ½Ð¸Ñ, Ð²Ð½ÑƒÑ‚Ñ€Ð¸ Ñ„ÑƒÐ½ÐºÑ†Ð¸Ð¸ Ð¿Ð¸Ñ‚Ð¾Ð½Ð° Ñ„ÑƒÐ½ÐºÑ†Ð¸Ñ Ð¾Ð±ÑƒÑ‡ÐµÐ½Ð¸Ñ Ð¾Ñ‚Ð¿ÑƒÑÐºÐ°ÐµÑ‚ÑÑ Ð² Ð¾Ñ‚Ð´ÐµÐ»ÑŒÐ½Ñ‹Ð¹ Ð¿Ð¾Ñ‚Ð¾Ðº
                 py::object retval = IntegrationInterfaceInstance->attr("predict_from_folder")
                                                                       (data_dir_tuple,
                                                                        func_params);
 
-                // Ïðîâåðêà íà èñêëþ÷èòåëüíûé ñëó÷àé
-                // Åñëè ïîñëå âûïîëíåíèÿ ôóíêöèè predict_from_folder() ñðàçó èçìåíèëñÿ TrainingStatus íà -1
+                // ÐŸÑ€Ð¾Ð²ÐµÑ€ÐºÐ° Ð½Ð° Ð¸ÑÐºÐ»ÑŽÑ‡Ð¸Ñ‚ÐµÐ»ÑŒÐ½Ñ‹Ð¹ ÑÐ»ÑƒÑ‡Ð°Ð¹
+                // Ð•ÑÐ»Ð¸ Ð¿Ð¾ÑÐ»Ðµ Ð²Ñ‹Ð¿Ð¾Ð»Ð½ÐµÐ½Ð¸Ñ Ñ„ÑƒÐ½ÐºÑ†Ð¸Ð¸ predict_from_folder() ÑÑ€Ð°Ð·Ñƒ Ð¸Ð·Ð¼ÐµÐ½Ð¸Ð»ÑÑ TrainingStatus Ð½Ð° -1
                 py::object train_status = IntegrationInterfaceInstance->attr("train_status")();
                 PredictStatus = boost::python::extract< int >(train_status);
                 if(PredictStatus == -1)

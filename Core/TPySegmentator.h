@@ -11,48 +11,48 @@ namespace RDK {
 
 class TPySegmentator: public USegmentatorBase, public TPyComponent
 {
-public: // Свойства
+public: // 
 
 
-/// Целое число, определяющее цветовую модель, на которую рассчитана сеть
-/// ubmRGB24=3 - цветное изображение
-/// umbY8=400 - черно-белое изображение
-ULProperty<int,TPySegmentator, ptPubParameter> ImageColorModel;
+///  ,   ,    
+/// ubmRGB24=3 -  
+/// umbY8=400 - - 
+UProperty<int,TPySegmentator, ptPubParameter> ImageColorModel;
 
 
-protected: // Временные переменные
+protected: //  
 UGraphics Graph;
 
 
-public: // Методы
+public: // 
 // --------------------------
-// Конструкторы и деструкторы
+//   
 // --------------------------
 TPySegmentator(void);
 virtual ~TPySegmentator(void);
 // --------------------------
 
 // --------------------------
-// Скрытые методы управления счетом
+//    
 // --------------------------
 protected:
 
-// Восстановление настроек по умолчанию и сброс процесса счета
+//        
 virtual bool APyDefault(void);
 virtual bool APyDefault2(void);
 
-// Обеспечивает сборку внутренней структуры объекта
-// после настройки параметров
-// Автоматически вызывает метод Reset() и выставляет Ready в true
-// в случае успешной сборки
+//     
+//   
+//    Reset()   Ready  true
+//    
 virtual bool APyBuild(void);
 virtual bool APyBuild2(void);
 
-// Сброс процесса счета без потери настроек
+//      
 virtual bool APyReset(void);
 virtual bool APyReset2(void);
 
-// Выполняет расчет этого объекта
+//    
 virtual bool Inference(UBitmap &bmp, UBitmap &mask);
 // --------------------------
 };

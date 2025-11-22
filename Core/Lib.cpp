@@ -73,35 +73,35 @@ namespace np = boost::python::numpy;
 
 namespace RDK {
 
-/// Флаг, сигнализирующий что питон-подсистема была инициализирована
+/// Р¤Р»Р°Рі, СЃРёРіРЅР°Р»РёР·РёСЂСѓСЋС‰РёР№ С‡С‚Рѕ РїРёС‚РѕРЅ-РїРѕРґСЃРёСЃС‚РµРјР° Р±С‹Р»Р° РёРЅРёС†РёР°Р»РёР·РёСЂРѕРІР°РЅР°
 bool UPyMachineLearningLib::PythonInitFlag(false);
 
 UPyMachineLearningLib PyMachineLearningLib;
 
 // --------------------------
-// Конструкторы и деструкторы
+// РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂС‹ Рё РґРµСЃС‚СЂСѓРєС‚РѕСЂС‹
 // --------------------------
 UPyMachineLearningLib::UPyMachineLearningLib(void)
  : ULibrary("PyMachineLearningLib","1.0", GetGlobalVersion())
 {
  PythonInit();
- mGilState = PyGILState_Ensure();     // забираем себе GIL сразу для настройки многопоточности
- mThreadState = PyEval_SaveThread();  // сохраняем состояние главного потока и отпускаем GIL
+ mGilState = PyGILState_Ensure();     // Р·Р°Р±РёСЂР°РµРј СЃРµР±Рµ GIL СЃСЂР°Р·Сѓ РґР»СЏ РЅР°СЃС‚СЂРѕР№РєРё РјРЅРѕРіРѕРїРѕС‚РѕС‡РЅРѕСЃС‚Рё
+ mThreadState = PyEval_SaveThread();  // СЃРѕС…СЂР°РЅСЏРµРј СЃРѕСЃС‚РѕСЏРЅРёРµ РіР»Р°РІРЅРѕРіРѕ РїРѕС‚РѕРєР° Рё РѕС‚РїСѓСЃРєР°РµРј GIL
 }
 
 UPyMachineLearningLib::~UPyMachineLearningLib(void)
 {
-    PyEval_RestoreThread( mThreadState );   // восстанавливаем состояние главного потока и забираем себе GIL
-    //PyGILState_Release( mGilState );        // отпускаем блокировку GIL с сохранённым состоянием
+    PyEval_RestoreThread( mThreadState );   // РІРѕСЃСЃС‚Р°РЅР°РІР»РёРІР°РµРј СЃРѕСЃС‚РѕСЏРЅРёРµ РіР»Р°РІРЅРѕРіРѕ РїРѕС‚РѕРєР° Рё Р·Р°Р±РёСЂР°РµРј СЃРµР±Рµ GIL
+    //PyGILState_Release( mGilState );        // РѕС‚РїСѓСЃРєР°РµРј Р±Р»РѕРєРёСЂРѕРІРєСѓ GIL СЃ СЃРѕС…СЂР°РЅС‘РЅРЅС‹Рј СЃРѕСЃС‚РѕСЏРЅРёРµРј
     //mGilState = PyGILState_Ensure();
     //Py_Finalize();
 }
 // --------------------------
 
 // --------------------------
-// Методы заполенения бибилиотеки
+// РњРµС‚РѕРґС‹ Р·Р°РїРѕР»РµРЅРµРЅРёСЏ Р±РёР±РёР»РёРѕС‚РµРєРё
 // --------------------------
-/// Однократная инициализация python-подистемы
+/// РћРґРЅРѕРєСЂР°С‚РЅР°СЏ РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ python-РїРѕРґРёСЃС‚РµРјС‹
 void UPyMachineLearningLib::PythonInit(void)
 {
 #ifdef RDK_USE_PYTHON
@@ -109,7 +109,7 @@ void UPyMachineLearningLib::PythonInit(void)
  {
      try
      {
-      init_py(); // Вызывать только из главного потока приложения!!!
+      init_py(); // Р’С‹Р·С‹РІР°С‚СЊ С‚РѕР»СЊРєРѕ РёР· РіР»Р°РІРЅРѕРіРѕ РїРѕС‚РѕРєР° РїСЂРёР»РѕР¶РµРЅРёСЏ!!!
 
      }
      catch(...)
@@ -124,8 +124,8 @@ void UPyMachineLearningLib::PythonInit(void)
 #endif
 }
 
-// Заполняет массив ClassSamples готовыми экземплярами образцов и их именами.
-// Не требуется предварительная очистка массива и уборка памяти.
+// Р—Р°РїРѕР»РЅСЏРµС‚ РјР°СЃСЃРёРІ ClassSamples РіРѕС‚РѕРІС‹РјРё СЌРєР·РµРјРїР»СЏСЂР°РјРё РѕР±СЂР°Р·С†РѕРІ Рё РёС… РёРјРµРЅР°РјРё.
+// РќРµ С‚СЂРµР±СѓРµС‚СЃСЏ РїСЂРµРґРІР°СЂРёС‚РµР»СЊРЅР°СЏ РѕС‡РёСЃС‚РєР° РјР°СЃСЃРёРІР° Рё СѓР±РѕСЂРєР° РїР°РјСЏС‚Рё.
 void UPyMachineLearningLib::CreateClassSamples(UStorage *storage)
 {
 #ifdef RDK_USE_PYTHON
