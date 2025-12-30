@@ -16,9 +16,9 @@ namespace np = boost::numpy;
 
 namespace RDK {
 
-// Методы
+// РњРµС‚РѕРґС‹
 // --------------------------
-// Конструкторы и деструкторы
+// РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂС‹ Рё РґРµСЃС‚СЂСѓРєС‚РѕСЂС‹
 // --------------------------
 TPythonIntegration::TPythonIntegration(void)
 : Param1("Param1",this),
@@ -38,19 +38,19 @@ TPythonIntegration::~TPythonIntegration(void)
 
 
 // ---------------------
-// Методы управления параметрами
+// РњРµС‚РѕРґС‹ СѓРїСЂР°РІР»РµРЅРёСЏ РїР°СЂР°РјРµС‚СЂР°РјРё
 // ---------------------
 // ---------------------
 
 // ---------------------
-// Методы управления переменными состояния
+// РњРµС‚РѕРґС‹ СѓРїСЂР°РІР»РµРЅРёСЏ РїРµСЂРµРјРµРЅРЅС‹РјРё СЃРѕСЃС‚РѕСЏРЅРёСЏ
 // ---------------------
 // ---------------------
 
 // --------------------------
-// Системные методы управления объектом
+// РЎРёСЃС‚РµРјРЅС‹Рµ РјРµС‚РѕРґС‹ СѓРїСЂР°РІР»РµРЅРёСЏ РѕР±СЉРµРєС‚РѕРј
 // --------------------------
-// Выделяет память для новой чистой копии объекта этого класса
+// Р’С‹РґРµР»СЏРµС‚ РїР°РјСЏС‚СЊ РґР»СЏ РЅРѕРІРѕР№ С‡РёСЃС‚РѕР№ РєРѕРїРёРё РѕР±СЉРµРєС‚Р° СЌС‚РѕРіРѕ РєР»Р°СЃСЃР°
 TPythonIntegration* TPythonIntegration::New(void)
 {
  return new TPythonIntegration;
@@ -71,7 +71,7 @@ TPythonIntegration* TPythonIntegration::New(void)
     }
 
 // --------------------------
-// Скрытые методы управления счетом
+// РЎРєСЂС‹С‚С‹Рµ РјРµС‚РѕРґС‹ СѓРїСЂР°РІР»РµРЅРёСЏ СЃС‡РµС‚РѕРј
 // --------------------------
 void TPythonIntegration::AInit(void)
 {
@@ -90,7 +90,7 @@ void TPythonIntegration::AInit(void)
     catch (py::error_already_set const &)
     {
         std::string perrorStr = RDK::parse_python_exception();
-        // TODO: логировать и выдавать ошибку с прекращением программы
+        // TODO: Р»РѕРіРёСЂРѕРІР°С‚СЊ Рё РІС‹РґР°РІР°С‚СЊ РѕС€РёР±РєСѓ СЃ РїСЂРµРєСЂР°С‰РµРЅРёРµРј РїСЂРѕРіСЂР°РјРјС‹
         std::cout << "Error occured:" << std::endl << perrorStr << std::endl;
         std::cout << "Python init fail" << std::endl;
     }*/
@@ -100,17 +100,17 @@ void TPythonIntegration::AInit(void)
         init_py();
         py::to_python_converter<cv::Mat, pbcvt::matToNDArrayBoostConverter>();
         py::to_python_converter<RDK::UBitmap, pbcvt::uBitmapToNDArrayBoostConverter>();
-        py::object MainModule = py::import("__main__");  // импортируем main-scope, см. https://docs.python.org/3/library/__main__.html
-        py::object MainNamespace = MainModule.attr("__dict__");  // извлекаем область имен
+        py::object MainModule = py::import("__main__");  // РёРјРїРѕСЂС‚РёСЂСѓРµРј main-scope, СЃРј. https://docs.python.org/3/library/__main__.html
+        py::object MainNamespace = MainModule.attr("__dict__");  // РёР·РІР»РµРєР°РµРј РѕР±Р»Р°СЃС‚СЊ РёРјРµРЅ
 
         //py::object pycv2 = py::import("cv2");
 
-        // TODO: путь для импорта файла брать из конфига"../../../../Libraries/Rdk-PyMachineLearningLib/PythonScripts/classifier_interface.py"
-        // загрузка кода из файла в извлеченную область имен
+        // TODO: РїСѓС‚СЊ РґР»СЏ РёРјРїРѕСЂС‚Р° С„Р°Р№Р»Р° Р±СЂР°С‚СЊ РёР· РєРѕРЅС„РёРіР°"../../../../Libraries/Rdk-PyMachineLearningLib/PythonScripts/classifier_interface.py"
+        // Р·Р°РіСЂСѓР·РєР° РєРѕРґР° РёР· С„Р°Р№Р»Р° РІ РёР·РІР»РµС‡РµРЅРЅСѓСЋ РѕР±Р»Р°СЃС‚СЊ РёРјРµРЅ
         std::string s = (*InputFile);
         py::object ClassifierInterfaceModule = import("test_class",s,MainNamespace);
-        // экземпляр питоновского класса, через который активируется виртуальная среда и загружается модель
-        // TODO: пусть до среды брать из конфига
+        // СЌРєР·РµРјРїР»СЏСЂ РїРёС‚РѕРЅРѕРІСЃРєРѕРіРѕ РєР»Р°СЃСЃР°, С‡РµСЂРµР· РєРѕС‚РѕСЂС‹Р№ Р°РєС‚РёРІРёСЂСѓРµС‚СЃСЏ РІРёСЂС‚СѓР°Р»СЊРЅР°СЏ СЃСЂРµРґР° Рё Р·Р°РіСЂСѓР¶Р°РµС‚СЃСЏ РјРѕРґРµР»СЊ
+        // TODO: РїСѓСЃС‚СЊ РґРѕ СЃСЂРµРґС‹ Р±СЂР°С‚СЊ РёР· РєРѕРЅС„РёРіР°
         IntegrationInterface = ClassifierInterfaceModule.attr("ClassifierEmbeddingInterface");
         if(!IntegrationInterface.is_none())
             IntegrationInterfaceInstance = IntegrationInterface(); ///home/arnold/.virtualenvs/cv
@@ -125,7 +125,7 @@ void TPythonIntegration::AInit(void)
     catch (py::error_already_set const &)
     {
         std::string perrorStr = parse_python_exception();
-        // TODO: логировать и выдавать ошибку с прекращением программы
+        // TODO: Р»РѕРіРёСЂРѕРІР°С‚СЊ Рё РІС‹РґР°РІР°С‚СЊ РѕС€РёР±РєСѓ СЃ РїСЂРµРєСЂР°С‰РµРЅРёРµРј РїСЂРѕРіСЂР°РјРјС‹
         std::cout << "Error occured:" << std::endl << perrorStr << std::endl;
         std::cout << "Python init fail" << std::endl;
     }
@@ -136,29 +136,29 @@ void TPythonIntegration::AUnInit(void)
 {
 }
 
-// Восстановление настроек по умолчанию и сброс процесса счета
+// Р’РѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРёРµ РЅР°СЃС‚СЂРѕРµРє РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ Рё СЃР±СЂРѕСЃ РїСЂРѕС†РµСЃСЃР° СЃС‡РµС‚Р°
 bool TPythonIntegration::ADefault(void)
 {
  Param1=0;
  return true;
 }
 
-// Обеспечивает сборку внутренней структуры объекта
-// после настройки параметров
-// Автоматически вызывает метод Reset() и выставляет Ready в true
-// в случае успешной сборки
+// РћР±РµСЃРїРµС‡РёРІР°РµС‚ СЃР±РѕСЂРєСѓ РІРЅСѓС‚СЂРµРЅРЅРµР№ СЃС‚СЂСѓРєС‚СѓСЂС‹ РѕР±СЉРµРєС‚Р°
+// РїРѕСЃР»Рµ РЅР°СЃС‚СЂРѕР№РєРё РїР°СЂР°РјРµС‚СЂРѕРІ
+// РђРІС‚РѕРјР°С‚РёС‡РµСЃРєРё РІС‹Р·С‹РІР°РµС‚ РјРµС‚РѕРґ Reset() Рё РІС‹СЃС‚Р°РІР»СЏРµС‚ Ready РІ true
+// РІ СЃР»СѓС‡Р°Рµ СѓСЃРїРµС€РЅРѕР№ СЃР±РѕСЂРєРё
 bool TPythonIntegration::ABuild(void)
 {
  return true;
 }
 
-// Сброс процесса счета без потери настроек
+// РЎР±СЂРѕСЃ РїСЂРѕС†РµСЃСЃР° СЃС‡РµС‚Р° Р±РµР· РїРѕС‚РµСЂРё РЅР°СЃС‚СЂРѕРµРє
 bool TPythonIntegration::AReset(void)
 {
  return true;
 }
 
-// Выполняет расчет этого объекта
+// Р’С‹РїРѕР»РЅСЏРµС‚ СЂР°СЃС‡РµС‚ СЌС‚РѕРіРѕ РѕР±СЉРµРєС‚Р°
 bool TPythonIntegration::ACalculate(void)
 {
  if(!InputImage.IsConnected())
@@ -174,9 +174,9 @@ bool TPythonIntegration::ACalculate(void)
  MDMatrix<int> &detection_class=*DetectionClass;
  MDMatrix<double> &detection_reliability=*DetectionReliability;
 
- /// Тут считаем
+ /// РўСѓС‚ СЃС‡РёС‚Р°РµРј
 
- /// А теперь раскладываем результаты по выходам
+ /// Рђ С‚РµРїРµСЂСЊ СЂР°СЃРєР»Р°РґС‹РІР°РµРј СЂРµР·СѓР»СЊС‚Р°С‚С‹ РїРѕ РІС‹С…РѕРґР°Рј
  try
  {
     py::object retval = IntegrationInterfaceInstance.attr("classify")(input_img);
@@ -187,7 +187,7 @@ bool TPythonIntegration::ACalculate(void)
  catch (py::error_already_set const &)
  {
     std::string perrorStr = parse_python_exception();
-    // TODO: логировать
+    // TODO: Р»РѕРіРёСЂРѕРІР°С‚СЊ
     std::cout << "Error occured:" << std::endl << perrorStr << std::endl;
  }
 

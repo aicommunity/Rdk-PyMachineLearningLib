@@ -11,9 +11,9 @@
 
 namespace RDK {
 
-// Методы
+// РњРµС‚РѕРґС‹
 // --------------------------
-// Конструкторы и деструкторы
+// РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂС‹ Рё РґРµСЃС‚СЂСѓРєС‚РѕСЂС‹
 // --------------------------  //DetectionClass("DetectionClass",this),
 TPyUBitmapClassifier::TPyUBitmapClassifier(void)
 : ImageColorModel("ImageColorModel",this),
@@ -29,9 +29,9 @@ TPyUBitmapClassifier::~TPyUBitmapClassifier(void)
 // --------------------------
 
 // --------------------------
-// Системные методы управления объектом
+// РЎРёСЃС‚РµРјРЅС‹Рµ РјРµС‚РѕРґС‹ СѓРїСЂР°РІР»РµРЅРёСЏ РѕР±СЉРµРєС‚РѕРј
 // --------------------------
-// Выделяет память для новой чистой копии объекта этого класса
+// Р’С‹РґРµР»СЏРµС‚ РїР°РјСЏС‚СЊ РґР»СЏ РЅРѕРІРѕР№ С‡РёСЃС‚РѕР№ РєРѕРїРёРё РѕР±СЉРµРєС‚Р° СЌС‚РѕРіРѕ РєР»Р°СЃСЃР°
 TPyUBitmapClassifier* TPyUBitmapClassifier::New(void)
 {
  return new TPyUBitmapClassifier;
@@ -39,7 +39,7 @@ TPyUBitmapClassifier* TPyUBitmapClassifier::New(void)
 // --------------------------
 
 // --------------------------
-// Скрытые методы управления счетом
+// РЎРєСЂС‹С‚С‹Рµ РјРµС‚РѕРґС‹ СѓРїСЂР°РІР»РµРЅРёСЏ СЃС‡РµС‚РѕРј
 // --------------------------
 bool TPyUBitmapClassifier::APythonInitialize(void)
 {
@@ -81,7 +81,7 @@ bool TPyUBitmapClassifier::APythonInitialize(void)
     return true;
 }
 
-// Восстановление настроек по умолчанию и сброс процесса счета
+// Р’РѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРёРµ РЅР°СЃС‚СЂРѕРµРє РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ Рё СЃР±СЂРѕСЃ РїСЂРѕС†РµСЃСЃР° СЃС‡РµС‚Р°
 bool TPyUBitmapClassifier::APyDefault(void)
 {
  PythonModuleName="classifier_interface";
@@ -91,16 +91,16 @@ bool TPyUBitmapClassifier::APyDefault(void)
  return true;
 }
 
-// Обеспечивает сборку внутренней структуры объекта
-// после настройки параметров
-// Автоматически вызывает метод Reset() и выставляет Ready в true
-// в случае успешной сборки
+// РћР±РµСЃРїРµС‡РёРІР°РµС‚ СЃР±РѕСЂРєСѓ РІРЅСѓС‚СЂРµРЅРЅРµР№ СЃС‚СЂСѓРєС‚СѓСЂС‹ РѕР±СЉРµРєС‚Р°
+// РїРѕСЃР»Рµ РЅР°СЃС‚СЂРѕР№РєРё РїР°СЂР°РјРµС‚СЂРѕРІ
+// РђРІС‚РѕРјР°С‚РёС‡РµСЃРєРё РІС‹Р·С‹РІР°РµС‚ РјРµС‚РѕРґ Reset() Рё РІС‹СЃС‚Р°РІР»СЏРµС‚ Ready РІ true
+// РІ СЃР»СѓС‡Р°Рµ СѓСЃРїРµС€РЅРѕР№ СЃР±РѕСЂРєРё
 bool TPyUBitmapClassifier::APyBuild(void)
 {
  return true;
 }
 
-// Сброс процесса счета без потери настроек
+// РЎР±СЂРѕСЃ РїСЂРѕС†РµСЃСЃР° СЃС‡РµС‚Р° Р±РµР· РїРѕС‚РµСЂРё РЅР°СЃС‚СЂРѕРµРє
 bool TPyUBitmapClassifier::APyReset(void)
 {
  ClassificationTime=0.0;
@@ -110,7 +110,7 @@ bool TPyUBitmapClassifier::APyReset(void)
 }
 
 
-/// Обрабатывает одно изображение
+/// РћР±СЂР°Р±Р°С‚С‹РІР°РµС‚ РѕРґРЅРѕ РёР·РѕР±СЂР°Р¶РµРЅРёРµ
 bool TPyUBitmapClassifier::ClassifyBitmap(UBitmap &bmp, MDVector<double> &output_confidences, double conf_thresh, int &class_id, bool &is_classified)
 {
     if(!PythonInitialized)
@@ -146,7 +146,7 @@ bool TPyUBitmapClassifier::ClassifyBitmap(UBitmap &bmp, MDVector<double> &output
     }
 
     int object_cls = -1;
-    /// Тут считаем
+    /// РўСѓС‚ СЃС‡РёС‚Р°РµРј
     try
     {
         clock_t start = clock();
@@ -183,7 +183,7 @@ bool TPyUBitmapClassifier::ClassifyBitmap(UBitmap &bmp, MDVector<double> &output
             }
         }
 
-        //Если не совпадает то ничего не записываем и выдать ошибку!
+        //Р•СЃР»Рё РЅРµ СЃРѕРІРїР°РґР°РµС‚ С‚Рѕ РЅРёС‡РµРіРѕ РЅРµ Р·Р°РїРёСЃС‹РІР°РµРј Рё РІС‹РґР°С‚СЊ РѕС€РёР±РєСѓ!
         if(result.size() != NumClasses)
         {
             LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("TPyUBitmapClassifier error: NumClasses "+sntoa(*NumClasses)+" not equals to returned confidences count "+sntoa(result.size())));

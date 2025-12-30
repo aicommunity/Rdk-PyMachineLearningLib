@@ -10,90 +10,90 @@ namespace RDK {
 
 class TPySegmenterTrainer: public TPyBaseTrainer
 {
-public: // Свойства  
+public: //   
 
-    // в TrainDataDir 2 пути:
-    //      "basedir_ann" - путь к аннотациям базы
-    //      "basedir_img" - путь к изображениям базы
-
-
-/// Путь к конфигурационному файлу
-ULProperty<std::string, TPySegmenterTrainer> Config;
-
-/// Тип базы из возможных значений: "txt_data", "split_data", "not_split_data".
-ULProperty<std::string, TPySegmenterTrainer> DatasetType;
-
-/// Имя набора данных для сохранения в файле конфига и названии весовых коэффициентов
-ULProperty<std::string, TPySegmenterTrainer> DatasetName;
-
-/// Размер, на котором будут обучаться изображения, формат: [height,width,channels].
-ULProperty<std::vector<int>, TPySegmenterTrainer> InputRes;
-
-/// Названия классов
-ULProperty<std::vector<std::string>, TPySegmenterTrainer> Classes;
-
-/// Количество изображений в батче
-ULProperty<int, TPySegmenterTrainer> BatchSize;
-
-/// Количество батчей в эпохе
-ULProperty<int, TPySegmenterTrainer> BatchesInEpoch;
+    //  TrainDataDir 2 :
+    //      "basedir_ann" -    
+    //      "basedir_img" -    
 
 
-// Переменные состояния
-/// Ошибка на обучающем подмножестве
-ULProperty<float, TPyBaseTrainer, ptPubState> TrainLoss;
+///    
+UProperty<std::string, TPySegmenterTrainer, ptPubParameter> Config;
 
-/// Точность на обучающем подмножестве
-ULProperty<float, TPyBaseTrainer, ptPubState> TrainAcc;
+///     : "txt_data", "split_data", "not_split_data".
+UProperty<std::string, TPySegmenterTrainer, ptPubParameter> DatasetType;
 
-/// Ошибка на валидационном подмножестве
-ULProperty<float, TPyBaseTrainer, ptPubState> ValLoss;
+///            
+UProperty<std::string, TPySegmenterTrainer, ptPubParameter> DatasetName;
 
-/// Точность на валидационном подмножестве
-ULProperty<float, TPyBaseTrainer, ptPubState> ValAcc;
+/// ,     , : [height,width,channels].
+UProperty<std::vector<int>, TPySegmenterTrainer> InputRes;
 
-protected: // Временные переменные
+///  
+UProperty<std::vector<std::string>, TPySegmenterTrainer> Classes;
+
+///    
+UProperty<int, TPySegmenterTrainer, ptPubParameter> BatchSize;
+
+///    
+UProperty<int, TPySegmenterTrainer, ptPubParameter> BatchesInEpoch;
+
+
+//  
+///    
+UProperty<float, TPyBaseTrainer, ptPubState> TrainLoss;
+
+///    
+UProperty<float, TPyBaseTrainer, ptPubState> TrainAcc;
+
+///    
+UProperty<float, TPyBaseTrainer, ptPubState> ValLoss;
+
+///    
+UProperty<float, TPyBaseTrainer, ptPubState> ValAcc;
+
+protected: //  
 
 
 
-public: // Методы
+public: // 
 // --------------------------
-// Конструкторы и деструкторы
+//   
 // --------------------------
 TPySegmenterTrainer(void);
 virtual ~TPySegmenterTrainer(void);
 // --------------------------
 
 // --------------------------
-// Системные методы управления объектом
+//    
 // --------------------------
-// Выделяет память для новой чистой копии объекта этого класса
+//         
 virtual TPySegmenterTrainer* New(void);
 // --------------------------
 
 // --------------------------
-// Скрытые методы управления счетом
+//    
 // --------------------------
 protected:
 bool APythonInitialize(void);
 
-// Восстановление настроек по умолчанию и сброс процесса счета
+//        
 virtual bool APyDefault(void);
 
-// Обеспечивает сборку внутренней структуры объекта
-// после настройки параметров
-// Автоматически вызывает метод Reset() и выставляет Ready в true
-// в случае успешной сборки
+//     
+//   
+//    Reset()   Ready  true
+//    
 virtual bool APyBuild(void);
 
-// Сброс процесса счета без потери настроек
+//      
 //virtual bool APyReset(void);
 
-// Выполняет расчет этого объекта
+//    
 virtual bool ACalculate(void);
 
 
-// Проверяет входные параметры перед запуском python-функции
+//      python-
 virtual bool CheckInputParameters();
 // --------------------------
 };

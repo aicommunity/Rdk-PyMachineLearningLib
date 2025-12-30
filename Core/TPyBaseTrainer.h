@@ -6,86 +6,86 @@
 
 namespace RDK {
 
-/// Абстрактный базовый класс компонентов обучения нейронных сетей разных типов
+///         
 class TPyBaseTrainer: public TPyComponent
 {
-public: // Свойства
+public: // 
 
-// Базовые параметры для всех тренеров
-/// Папка с изображениями для обучения (может быть несколько путей)
-ULProperty<std::vector<std::string>, TPyBaseTrainer> TrainDataDir;
+//     
+///      (   )
+UProperty<std::vector<std::string>, TPyBaseTrainer> TrainDataDir;
 
-/// Директория, куда сохранится перераспредленный датасет, также веса метрики, графики, матрица ошибок и проч.
-ULProperty<std::string, TPyBaseTrainer> WorkingDir;
+/// ,    ,   , ,    .
+UProperty<std::string, TPyBaseTrainer, ptPubParameter> WorkingDir;
 
-/// Имя архитектуры нейронной сети
-ULProperty<std::string, TPyBaseTrainer> ArchitectureName;
+///    
+UProperty<std::string, TPyBaseTrainer, ptPubParameter> ArchitectureName;
 
-/// Параметры разбиения выборки [percent_train, percent_val, percent_test]
-/// если используется основная директория (без разбиения на train val test, по умолчанию [0.7, 0.2, 0.1])
-ULProperty<std::vector<int>, TPyBaseTrainer> SplitRatio;
+///    [percent_train, percent_val, percent_test]
+///     (   train val test,   [0.7, 0.2, 0.1])
+UProperty<std::vector<int>, TPyBaseTrainer> SplitRatio;
 
-/// Сохранять ли текстовые файлы разбиений
-ULProperty<bool, TPyBaseTrainer> SaveSplits;
+///     
+UProperty<bool, TPyBaseTrainer, ptPubParameter> SaveSplits;
 
-/// Кол-во эпох для обучения
-ULProperty<int, TPyBaseTrainer> Epochs;
+/// -   
+UProperty<int, TPyBaseTrainer, ptPubParameter> Epochs;
 
-/// Начальные веса (путь либо название)
-ULProperty<std::string, TPyBaseTrainer> Weights;
+///   (  )
+UProperty<std::string, TPyBaseTrainer, ptPubParameter> Weights;
 
-/// Число, равное параметру patience
-/// (количество эпох, которое может быть проведено без улучшения значения функции потерь, до остановки обучения) 
-ULProperty<int, TPyBaseTrainer> EarlyStop;
+/// ,   patience
+/// ( ,         ,   ) 
+UProperty<int, TPyBaseTrainer, ptPubParameter> EarlyStop;
 
-/// Интервал сохранения весов (в случае варианта для tf 1.* - n эпох) (в случае варианта tf 2.* - n батчей)
-ULProperty<int, TPyBaseTrainer> SavingInterval;
+///    (    tf 1.* - n ) (   tf 2.* - n )
+UProperty<int, TPyBaseTrainer, ptPubParameter> SavingInterval;
 
-/// Cохранять ли только лучшую модель по параметру val_loss
-ULProperty<bool, TPyBaseTrainer> SaveBestOnly;
+/// C       val_loss
+UProperty<bool, TPyBaseTrainer, ptPubParameter> SaveBestOnly;
 
-// Управляющие обучением параметры (и информационные)
-/// Флаг включения обучения
-// обучение начнется при StartTraining=true и TrainingInProgress=0
-ULProperty<bool, TPyBaseTrainer> StartTraining;
+//    ( )
+///   
+//    StartTraining=true  TrainingInProgress=0
+UProperty<bool, TPyBaseTrainer, ptPubParameter> StartTraining;
 
-/// Флаг остановки обучения
-// останавливает обучение и делает тест, если прошло больше одной эпохи, потом функция завершается
-ULProperty<bool, TPyBaseTrainer> StopTraining;
+///   
+//     ,     ,   
+UProperty<bool, TPyBaseTrainer, ptPubParameter> StopTraining;
 
-/// Флаг остановки обучения (закончит без тестов)
-ULProperty<bool, TPyBaseTrainer> StopNow;
+///    (  )
+UProperty<bool, TPyBaseTrainer, ptPubParameter> StopNow;
 
-/// Статус обучения
-// -1 - ошибка (исключение внутри потока питона) либо успешное преждевременное завершение (stop_training, stop_now)).
-// После обработки в компоненте сбрасывается в 0
-// 0 - ничего не происходит (можно запускать обучение)
-// 1 - обучение
-// 2 - тестирование после обучения
-// 3 - успешное завершение обучения. После обработки статус сбрасывается в 0
-ULProperty<int, TPyBaseTrainer, ptPubState> TrainingStatus;
+///  
+// -1 -  (   )     (stop_training, stop_now)).
+//       0
+// 0 -    (  )
+// 1 - 
+// 2 -   
+// 3 -   .      0
+UProperty<int, TPyBaseTrainer, ptPubState> TrainingStatus;
 
-/// Текущее состояния потока обучение/тестировани и т.д.
-// true  - поток исполняется
-// false - поток не исполянется
-ULProperty<bool, TPyBaseTrainer, ptPubState> ThreadIsAlive;
-
-
-// Перменные состояния
-/// Текущая эпоха
-ULProperty<int, TPyBaseTrainer, ptPubState> Epoch;
-
-/// Текущий прогресс
-ULProperty<float, TPyBaseTrainer, ptPubState> Progress;
+///    /  ..
+// true  -  
+// false -   
+UProperty<bool, TPyBaseTrainer, ptPubState> ThreadIsAlive;
 
 
-protected: // Временные переменные
+//  
+///  
+UProperty<int, TPyBaseTrainer, ptPubState> Epoch;
+
+///  
+UProperty<float, TPyBaseTrainer, ptPubState> Progress;
+
+
+protected: //  
 
 
 
-public: // Методы
+public: // 
 // --------------------------
-// Конструкторы и деструкторы
+//   
 // --------------------------
 TPyBaseTrainer(void);
 virtual ~TPyBaseTrainer(void);
@@ -94,28 +94,28 @@ virtual ~TPyBaseTrainer(void);
 // --------------------------
 
 // --------------------------
-// Скрытые методы управления счетом
+//    
 // --------------------------
 protected:
 virtual bool APythonInitialize(void);
 
-// Восстановление настроек по умолчанию и сброс процесса счета
+//        
 virtual bool APyDefault(void);
 
-// Обеспечивает сборку внутренней структуры объекта
-// после настройки параметров
-// Автоматически вызывает метод Reset() и выставляет Ready в true
-// в случае успешной сборки
+//     
+//   
+//    Reset()   Ready  true
+//    
 virtual bool APyBuild(void);
 
-// Сброс процесса счета без потери настроек
+//      
 virtual bool APyReset(void) final;
 
-// Выполняет расчет этого объекта
+//    
 virtual bool ACalculate(void);
 
 
-// Проверяет входные параметры перед запуском python-функции
+//      python-
 virtual bool CheckInputParameters() = 0;
 // --------------------------
 };

@@ -7,9 +7,9 @@
 
 namespace RDK {
 
-// Методы
+// РњРµС‚РѕРґС‹
 // --------------------------
-// Конструкторы и деструкторы
+// РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂС‹ Рё РґРµСЃС‚СЂСѓРєС‚РѕСЂС‹
 // --------------------------
 TPyDetectorTrainer::TPyDetectorTrainer(void)
 : DatasetType("DatasetType",this),
@@ -29,9 +29,9 @@ TPyDetectorTrainer::~TPyDetectorTrainer(void)
 // --------------------------
 
 // --------------------------
-// Системные методы управления объектом
+// РЎРёСЃС‚РµРјРЅС‹Рµ РјРµС‚РѕРґС‹ СѓРїСЂР°РІР»РµРЅРёСЏ РѕР±СЉРµРєС‚РѕРј
 // --------------------------
-// Выделяет память для новой чистой копии объекта этого класса
+// Р’С‹РґРµР»СЏРµС‚ РїР°РјСЏС‚СЊ РґР»СЏ РЅРѕРІРѕР№ С‡РёСЃС‚РѕР№ РєРѕРїРёРё РѕР±СЉРµРєС‚Р° СЌС‚РѕРіРѕ РєР»Р°СЃСЃР°
 TPyDetectorTrainer* TPyDetectorTrainer::New(void)
 {
  return new TPyDetectorTrainer;
@@ -39,20 +39,20 @@ TPyDetectorTrainer* TPyDetectorTrainer::New(void)
 // --------------------------
 
 // --------------------------
-// Скрытые методы управления счетом
+// РЎРєСЂС‹С‚С‹Рµ РјРµС‚РѕРґС‹ СѓРїСЂР°РІР»РµРЅРёСЏ СЃС‡РµС‚РѕРј
 // --------------------------
 bool TPyDetectorTrainer::APythonInitialize(void)
 {
     return true;
 }
 
-// Восстановление настроек по умолчанию и сброс процесса счета
+// Р’РѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРёРµ РЅР°СЃС‚СЂРѕРµРє РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ Рё СЃР±СЂРѕСЃ РїСЂРѕС†РµСЃСЃР° СЃС‡РµС‚Р°
 bool TPyDetectorTrainer::APyDefault(void)
 {
     PythonModuleName="detection_train";
     PythonClassName="DetectionInterface";
 
-    // Общие параметры для всех тренеров
+    // РћР±С‰РёРµ РїР°СЂР°РјРµС‚СЂС‹ РґР»СЏ РІСЃРµС… С‚СЂРµРЅРµСЂРѕРІ
     TrainDataDir = {""};
     WorkingDir = "";
     ArchitectureName= "SqueezeDet";
@@ -64,7 +64,7 @@ bool TPyDetectorTrainer::APyDefault(void)
     SavingInterval = 1;
     SaveBestOnly = false;
 
-    // Специфические параметры для обучения детекторов
+    // РЎРїРµС†РёС„РёС‡РµСЃРєРёРµ РїР°СЂР°РјРµС‚СЂС‹ РґР»СЏ РѕР±СѓС‡РµРЅРёСЏ РґРµС‚РµРєС‚РѕСЂРѕРІ
     DatasetType = "";
     Config = "";
     SavePredicted = false;
@@ -87,20 +87,20 @@ bool TPyDetectorTrainer::APyDefault(void)
     return true;
 }
 
-// Обеспечивает сборку внутренней структуры объекта
-// после настройки параметров
-// Автоматически вызывает метод Reset() и выставляет Ready в true
-// в случае успешной сборки
+// РћР±РµСЃРїРµС‡РёРІР°РµС‚ СЃР±РѕСЂРєСѓ РІРЅСѓС‚СЂРµРЅРЅРµР№ СЃС‚СЂСѓРєС‚СѓСЂС‹ РѕР±СЉРµРєС‚Р°
+// РїРѕСЃР»Рµ РЅР°СЃС‚СЂРѕР№РєРё РїР°СЂР°РјРµС‚СЂРѕРІ
+// РђРІС‚РѕРјР°С‚РёС‡РµСЃРєРё РІС‹Р·С‹РІР°РµС‚ РјРµС‚РѕРґ Reset() Рё РІС‹СЃС‚Р°РІР»СЏРµС‚ Ready РІ true
+// РІ СЃР»СѓС‡Р°Рµ СѓСЃРїРµС€РЅРѕР№ СЃР±РѕСЂРєРё
 bool TPyDetectorTrainer::APyBuild(void)
 {
     return true;
 }
 
 
-// Выполняет расчет этого объекта
+// Р’С‹РїРѕР»РЅСЏРµС‚ СЂР°СЃС‡РµС‚ СЌС‚РѕРіРѕ РѕР±СЉРµРєС‚Р°
 bool TPyDetectorTrainer::ACalculate(void)
 {
-    // Если питон не проинициализирован, то ничего не делаем. Надо чтобы нажали Reset для повторной попытки иницилизации
+    // Р•СЃР»Рё РїРёС‚РѕРЅ РЅРµ РїСЂРѕРёРЅРёС†РёР°Р»РёР·РёСЂРѕРІР°РЅ, С‚Рѕ РЅРёС‡РµРіРѕ РЅРµ РґРµР»Р°РµРј. РќР°РґРѕ С‡С‚РѕР±С‹ РЅР°Р¶Р°Р»Рё Reset РґР»СЏ РїРѕРІС‚РѕСЂРЅРѕР№ РїРѕРїС‹С‚РєРё РёРЅРёС†РёР»РёР·Р°С†РёРё
     if(!PythonInitialized)
        return true;
 
@@ -111,20 +111,20 @@ bool TPyDetectorTrainer::ACalculate(void)
 
     gil_lock lock;
     try
-    {   //Отключаем работу потоков питона (забираем GIL себе) для возмжности запуска функций
+    {   //РћС‚РєР»СЋС‡Р°РµРј СЂР°Р±РѕС‚Сѓ РїРѕС‚РѕРєРѕРІ РїРёС‚РѕРЅР° (Р·Р°Р±РёСЂР°РµРј GIL СЃРµР±Рµ) РґР»СЏ РІРѕР·РјР¶РЅРѕСЃС‚Рё Р·Р°РїСѓСЃРєР° С„СѓРЅРєС†РёР№
 
 
-        // Проверка статуса обучения
+        // РџСЂРѕРІРµСЂРєР° СЃС‚Р°С‚СѓСЃР° РѕР±СѓС‡РµРЅРёСЏ
         py::object train_status = IntegrationInterfaceInstance->attr("train_status")();
         TrainingStatus = boost::python::extract< int >(train_status);
 
         ThreadIsAlive = boost::python::extract<bool>(IntegrationInterfaceInstance->attr("get_thread_is_alive")());
 
-        // Ошибка по время обучения (сообщаем и обнуляем статус)
-        // Либо правильно сработало stop_now или stop_training
+        // РћС€РёР±РєР° РїРѕ РІСЂРµРјСЏ РѕР±СѓС‡РµРЅРёСЏ (СЃРѕРѕР±С‰Р°РµРј Рё РѕР±РЅСѓР»СЏРµРј СЃС‚Р°С‚СѓСЃ)
+        // Р›РёР±Рѕ РїСЂР°РІРёР»СЊРЅРѕ СЃСЂР°Р±РѕС‚Р°Р»Рѕ stop_now РёР»Рё stop_training
         if(TrainingStatus == -1)
         {
-            //сброс на случай выставления извне
+            //СЃР±СЂРѕСЃ РЅР° СЃР»СѓС‡Р°Р№ РІС‹СЃС‚Р°РІР»РµРЅРёСЏ РёР·РІРЅРµ
             StartTraining = false;
 
             py::object except_string = IntegrationInterfaceInstance->attr("get_error_string")();
@@ -133,11 +133,11 @@ bool TPyDetectorTrainer::ACalculate(void)
 
             LogMessageEx(RDK_EX_WARNING,__FUNCTION__,std::string("Exception or proper stop: ") + PyExceptionString);
 
-            // Сброс статуса
+            // РЎР±СЂРѕСЃ СЃС‚Р°С‚СѓСЃР°
             TrainingStatus = 0;
             py::object res = IntegrationInterfaceInstance->attr("set_training_status_to_null")();
 
-            // Сброс переменных состояний
+            // РЎР±СЂРѕСЃ РїРµСЂРµРјРµРЅРЅС‹С… СЃРѕСЃС‚РѕСЏРЅРёР№
             Epoch = 0;
             Progress = 0.0;
 
@@ -146,20 +146,20 @@ bool TPyDetectorTrainer::ACalculate(void)
             TrainLosses = {0.0};
 
         }
-        // Успешное завершение обучения. После обработки в компоненте сбрасывается в 0
-        // Сообщаем и сбрасываем статус в 0
+        // РЈСЃРїРµС€РЅРѕРµ Р·Р°РІРµСЂС€РµРЅРёРµ РѕР±СѓС‡РµРЅРёСЏ. РџРѕСЃР»Рµ РѕР±СЂР°Р±РѕС‚РєРё РІ РєРѕРјРїРѕРЅРµРЅС‚Рµ СЃР±СЂР°СЃС‹РІР°РµС‚СЃСЏ РІ 0
+        // РЎРѕРѕР±С‰Р°РµРј Рё СЃР±СЂР°СЃС‹РІР°РµРј СЃС‚Р°С‚СѓСЃ РІ 0
         if(TrainingStatus == 3)
         {
-            //сброс на случай выставления извне
+            //СЃР±СЂРѕСЃ РЅР° СЃР»СѓС‡Р°Р№ РІС‹СЃС‚Р°РІР»РµРЅРёСЏ РёР·РІРЅРµ
             StartTraining = false;
 
             LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("Training completed or stopped correctly"));
 
-            // Сброс статуса
+            // РЎР±СЂРѕСЃ СЃС‚Р°С‚СѓСЃР°
             TrainingStatus = 0;
             py::object res = IntegrationInterfaceInstance->attr("set_training_status_to_null")();
 
-            // Сброс переменных состояний
+            // РЎР±СЂРѕСЃ РїРµСЂРµРјРµРЅРЅС‹С… СЃРѕСЃС‚РѕСЏРЅРёР№
             Epoch = 0;
             Progress = 0.0;
 
@@ -168,22 +168,22 @@ bool TPyDetectorTrainer::ACalculate(void)
             TrainLosses = {0.0};
         }
 
-        // Если обучение/тестирование идет, опрашиваем геттеры
+        // Р•СЃР»Рё РѕР±СѓС‡РµРЅРёРµ/С‚РµСЃС‚РёСЂРѕРІР°РЅРёРµ РёРґРµС‚, РѕРїСЂР°С€РёРІР°РµРј РіРµС‚С‚РµСЂС‹
         if(TrainingStatus == 1 || TrainingStatus == 2)
         {
-            //сброс на случай выставления извне
+            //СЃР±СЂРѕСЃ РЅР° СЃР»СѓС‡Р°Р№ РІС‹СЃС‚Р°РІР»РµРЅРёСЏ РёР·РІРЅРµ
             StartTraining = false;
 
-            //Запуск геттеров для получения информации о состоянии выполнения
+            //Р—Р°РїСѓСЃРє РіРµС‚С‚РµСЂРѕРІ РґР»СЏ РїРѕР»СѓС‡РµРЅРёСЏ РёРЅС„РѕСЂРјР°С†РёРё Рѕ СЃРѕСЃС‚РѕСЏРЅРёРё РІС‹РїРѕР»РЅРµРЅРёСЏ
             Epoch       = boost::python::extract< int >  (IntegrationInterfaceInstance->attr("get_epoch")());
             Progress    = boost::python::extract< float >(IntegrationInterfaceInstance->attr("get_progess")());
 
-            // Списки состояний ошибок
+            // РЎРїРёСЃРєРё СЃРѕСЃС‚РѕСЏРЅРёР№ РѕС€РёР±РѕРє
             py::list loss_names   = boost::python::extract< py::list >(IntegrationInterfaceInstance->attr("get_loss_names")());
             py::list val_losses   = boost::python::extract< py::list >(IntegrationInterfaceInstance->attr("get_val_losses")());
             py::list train_losses = boost::python::extract< py::list >(IntegrationInterfaceInstance->attr("get_train_losses")());
 
-            // Извлекаем данные, если полученные списки не пустые
+            // РР·РІР»РµРєР°РµРј РґР°РЅРЅС‹Рµ, РµСЃР»Рё РїРѕР»СѓС‡РµРЅРЅС‹Рµ СЃРїРёСЃРєРё РЅРµ РїСѓСЃС‚С‹Рµ
             if(loss_names != py::list())
             {
                 LossNames->clear();
@@ -209,7 +209,7 @@ bool TPyDetectorTrainer::ACalculate(void)
                 }
             }
 
-            //Останавливаем обучение либо вообще всю функцию, если требуется
+            //РћСЃС‚Р°РЅР°РІР»РёРІР°РµРј РѕР±СѓС‡РµРЅРёРµ Р»РёР±Рѕ РІРѕРѕР±С‰Рµ РІСЃСЋ С„СѓРЅРєС†РёСЋ, РµСЃР»Рё С‚СЂРµР±СѓРµС‚СЃСЏ
             if(StopTraining)
             {
                 IntegrationInterfaceInstance->attr("stop_training")();
@@ -224,7 +224,7 @@ bool TPyDetectorTrainer::ACalculate(void)
                 StopNow = false;
             }
         }
-        // Если обучение не идет и запуск возможен (статус 0)
+        // Р•СЃР»Рё РѕР±СѓС‡РµРЅРёРµ РЅРµ РёРґРµС‚ Рё Р·Р°РїСѓСЃРє РІРѕР·РјРѕР¶РµРЅ (СЃС‚Р°С‚СѓСЃ 0)
         else
         {
             if(StartTraining)
@@ -239,7 +239,7 @@ bool TPyDetectorTrainer::ACalculate(void)
                     return true;
                 }
 
-                // Проверки на входные аргументы
+                // РџСЂРѕРІРµСЂРєРё РЅР° РІС…РѕРґРЅС‹Рµ Р°СЂРіСѓРјРµРЅС‚С‹
                 if(!CheckInputParameters())
                 {
                     StartTraining = false;
@@ -248,22 +248,22 @@ bool TPyDetectorTrainer::ACalculate(void)
 
                 LogMessageEx(RDK_EX_INFO,__FUNCTION__,std::string("Training started"));
 
-                // Обнуление ненужных флагов
+                // РћР±РЅСѓР»РµРЅРёРµ РЅРµРЅСѓР¶РЅС‹С… С„Р»Р°РіРѕРІ
                 StopTraining = StopNow = false;
 
 
-                // Подготовка аргументов для функции обучения
+                // РџРѕРґРіРѕС‚РѕРІРєР° Р°СЂРіСѓРјРµРЅС‚РѕРІ РґР»СЏ С„СѓРЅРєС†РёРё РѕР±СѓС‡РµРЅРёСЏ
 
-                // Перевод аргументов в нужные типы PyObject
+                // РџРµСЂРµРІРѕРґ Р°СЂРіСѓРјРµРЅС‚РѕРІ РІ РЅСѓР¶РЅС‹Рµ С‚РёРїС‹ PyObject
 
-                // TODO здесь нужны изменения на стороне питона (пока что захардкожено)
+                // TODO Р·РґРµСЃСЊ РЅСѓР¶РЅС‹ РёР·РјРµРЅРµРЅРёСЏ РЅР° СЃС‚РѕСЂРѕРЅРµ РїРёС‚РѕРЅР° (РїРѕРєР° С‡С‚Рѕ Р·Р°С…Р°СЂРґРєРѕР¶РµРЅРѕ)
                 py::list split_ratio;
                     split_ratio.append(0.7);      //SplitRatio[0]);
                     split_ratio.append(0.1);      //SplitRatio[1]);
                     split_ratio.append(0.2);      //SplitRatio[2]);
 
 
-                //Заполнение словаря параметров ( именованные аргументы)
+                //Р—Р°РїРѕР»РЅРµРЅРёРµ СЃР»РѕРІР°СЂСЏ РїР°СЂР°РјРµС‚СЂРѕРІ ( РёРјРµРЅРѕРІР°РЅРЅС‹Рµ Р°СЂРіСѓРјРµРЅС‚С‹)
                 py::dict func_params;
 
                 func_params["weights"]          =   py::str(Weights->c_str());
@@ -277,32 +277,32 @@ bool TPyDetectorTrainer::ACalculate(void)
                 func_params["save_best_only"]   =   py::object(*SaveBestOnly);
                 func_params["augmentation"]     =   py::dict();
                 func_params["save_predicted"]   =   py::object(*SavePredicted);
-                func_params["visualize"]        =   (*Visualize == 0) ? py::object(false)     // если равен 0  - то передача false
-                                                    :( (*Visualize == -1) ? py::str("All")    // если равен -1 - то передача строки "All"
-                                                    :  py::object(*Visualize) );              // иначе передача числа целого типа
+                func_params["visualize"]        =   (*Visualize == 0) ? py::object(false)     // РµСЃР»Рё СЂР°РІРµРЅ 0  - С‚Рѕ РїРµСЂРµРґР°С‡Р° false
+                                                    :( (*Visualize == -1) ? py::str("All")    // РµСЃР»Рё СЂР°РІРµРЅ -1 - С‚Рѕ РїРµСЂРµРґР°С‡Р° СЃС‚СЂРѕРєРё "All"
+                                                    :  py::object(*Visualize) );              // РёРЅР°С‡Рµ РїРµСЂРµРґР°С‡Р° С‡РёСЃР»Р° С†РµР»РѕРіРѕ С‚РёРїР°
                 func_params["paint_gt"]         =   py::object(*PaintGt);
 
 
-                // Список папок нужных для обучения
+                // РЎРїРёСЃРѕРє РїР°РїРѕРє РЅСѓР¶РЅС‹С… РґР»СЏ РѕР±СѓС‡РµРЅРёСЏ
                 py::list train_data_dirs;
                 for(int i = 0; i < TrainDataDir->size(); i++)
                 {
                     train_data_dirs.append(py::str(TrainDataDir->at(i).c_str()));
                 }
 
-                // Позиционные аргументы
+                // РџРѕР·РёС†РёРѕРЅРЅС‹Рµ Р°СЂРіСѓРјРµРЅС‚С‹
                 py::tuple args_tuple = py::make_tuple(train_data_dirs,
                                                       DatasetType->c_str(),
                                                       WorkingDir->c_str(),
                                                       Config->c_str());
 
-                //Запуск обучения, внутри функции питона остоединение обучения в поток
+                //Р—Р°РїСѓСЃРє РѕР±СѓС‡РµРЅРёСЏ, РІРЅСѓС‚СЂРё С„СѓРЅРєС†РёРё РїРёС‚РѕРЅР° РѕСЃС‚РѕРµРґРёРЅРµРЅРёРµ РѕР±СѓС‡РµРЅРёСЏ РІ РїРѕС‚РѕРє
                 py::object retval = IntegrationInterfaceInstance->attr("detection_train")
                                                                         (args_tuple,
                                                                          func_params);
 
-                // Проверка на исключительный случай
-                // Если после выполнения функции detection_train() сразу изменился TrainingStatus на -1
+                // РџСЂРѕРІРµСЂРєР° РЅР° РёСЃРєР»СЋС‡РёС‚РµР»СЊРЅС‹Р№ СЃР»СѓС‡Р°Р№
+                // Р•СЃР»Рё РїРѕСЃР»Рµ РІС‹РїРѕР»РЅРµРЅРёСЏ С„СѓРЅРєС†РёРё detection_train() СЃСЂР°Р·Сѓ РёР·РјРµРЅРёР»СЃСЏ TrainingStatus РЅР° -1
                 py::object train_status = IntegrationInterfaceInstance->attr("train_status")();
                 TrainingStatus = boost::python::extract< int >(train_status);
                 if(TrainingStatus == -1)
@@ -364,9 +364,9 @@ bool TPyDetectorTrainer::CheckInputParameters()
         return false;
     }
 
-    //TODO возможно нужны еще проверки на отриц.значения и проч.
+    //TODO РІРѕР·РјРѕР¶РЅРѕ РЅСѓР¶РЅС‹ РµС‰Рµ РїСЂРѕРІРµСЂРєРё РЅР° РѕС‚СЂРёС†.Р·РЅР°С‡РµРЅРёСЏ Рё РїСЂРѕС‡.
 
-    //TODO проверки на пути относительные и т.д.
+    //TODO РїСЂРѕРІРµСЂРєРё РЅР° РїСѓС‚Рё РѕС‚РЅРѕСЃРёС‚РµР»СЊРЅС‹Рµ Рё С‚.Рґ.
     return true;
 }
 

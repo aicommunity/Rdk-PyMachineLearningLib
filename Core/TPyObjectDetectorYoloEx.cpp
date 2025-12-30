@@ -9,9 +9,9 @@
 namespace RDK {
 
 
-// Методы
+// РњРµС‚РѕРґС‹
 // --------------------------
-// Конструкторы и деструкторы
+// РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂС‹ Рё РґРµСЃС‚СЂСѓРєС‚РѕСЂС‹
 // --------------------------
 TPyObjectDetectorYoloEx::TPyObjectDetectorYoloEx(void)
 : ModelPathYOLO("ModelPathYOLO",this),
@@ -44,14 +44,14 @@ TPyObjectDetectorYoloEx::~TPyObjectDetectorYoloEx(void)
 
 
 // ---------------------
-// Методы управления параметрами
+// РњРµС‚РѕРґС‹ СѓРїСЂР°РІР»РµРЅРёСЏ РїР°СЂР°РјРµС‚СЂР°РјРё
 // ---------------------
 // ---------------------
 
 // --------------------------
-// Системные методы управления объектом
+// РЎРёСЃС‚РµРјРЅС‹Рµ РјРµС‚РѕРґС‹ СѓРїСЂР°РІР»РµРЅРёСЏ РѕР±СЉРµРєС‚РѕРј
 // --------------------------
-// Выделяет память для новой чистой копии объекта этого класса
+// Р’С‹РґРµР»СЏРµС‚ РїР°РјСЏС‚СЊ РґР»СЏ РЅРѕРІРѕР№ С‡РёСЃС‚РѕР№ РєРѕРїРёРё РѕР±СЉРµРєС‚Р° СЌС‚РѕРіРѕ РєР»Р°СЃСЃР°
 TPyObjectDetectorYoloEx* TPyObjectDetectorYoloEx::New(void)
 {
  return new TPyObjectDetectorYoloEx;
@@ -59,7 +59,7 @@ TPyObjectDetectorYoloEx* TPyObjectDetectorYoloEx::New(void)
 // --------------------------
 
 // --------------------------
-// Скрытые методы управления счетом
+// РЎРєСЂС‹С‚С‹Рµ РјРµС‚РѕРґС‹ СѓРїСЂР°РІР»РµРЅРёСЏ СЃС‡РµС‚РѕРј
 // --------------------------
 bool TPyObjectDetectorYoloEx::APythonInitialize(void)
 {
@@ -122,17 +122,17 @@ bool TPyObjectDetectorYoloEx::APythonInitialize(void)
     return true;
 }
 
-// Восстановление настроек по умолчанию и сброс процесса счета
+// Р’РѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРёРµ РЅР°СЃС‚СЂРѕРµРє РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ Рё СЃР±СЂРѕСЃ РїСЂРѕС†РµСЃСЃР° СЃС‡РµС‚Р°
 bool TPyObjectDetectorYoloEx::APyDefault2(void)
 {
  NumTargetClassesYOLO=0;
  NumChangeClassesYOLO=0;
  return true;
 }
-// Обеспечивает сборку внутренней структуры объекта
-// после настройки параметров
-// Автоматически вызывает метод Reset() и выставляет Ready в true
-// в случае успешной сборки
+// РћР±РµСЃРїРµС‡РёРІР°РµС‚ СЃР±РѕСЂРєСѓ РІРЅСѓС‚СЂРµРЅРЅРµР№ СЃС‚СЂСѓРєС‚СѓСЂС‹ РѕР±СЉРµРєС‚Р°
+// РїРѕСЃР»Рµ РЅР°СЃС‚СЂРѕР№РєРё РїР°СЂР°РјРµС‚СЂРѕРІ
+// РђРІС‚РѕРјР°С‚РёС‡РµСЃРєРё РІС‹Р·С‹РІР°РµС‚ РјРµС‚РѕРґ Reset() Рё РІС‹СЃС‚Р°РІР»СЏРµС‚ Ready РІ true
+// РІ СЃР»СѓС‡Р°Рµ СѓСЃРїРµС€РЅРѕР№ СЃР±РѕСЂРєРё
 bool TPyObjectDetectorYoloEx::APyBuild2(void)
 {
 
@@ -163,18 +163,18 @@ bool TPyObjectDetectorYoloEx::APyBuild2(void)
  return true;
 }
 
-// Сброс процесса счета без потери настроек
+// РЎР±СЂРѕСЃ РїСЂРѕС†РµСЃСЃР° СЃС‡РµС‚Р° Р±РµР· РїРѕС‚РµСЂРё РЅР°СЃС‚СЂРѕРµРє
 bool TPyObjectDetectorYoloEx::APyReset2(void)
 {
  return true;
 }
 
-// Выполняет обнаружение
+// Р’С‹РїРѕР»РЅСЏРµС‚ РѕР±РЅР°СЂСѓР¶РµРЅРёРµ
 bool TPyObjectDetectorYoloEx::Detect(UBitmap &bmp, MDMatrix<double> &output_rects, MDMatrix<int> &output_classes, MDMatrix<double> &reliabilities)
 {
     if(!PythonInitialized)
         return false;
- /// Тут считаем
+ /// РўСѓС‚ СЃС‡РёС‚Р°РµРј
  gil_lock lock;
 // std::vector<std::vector<double> > result;
  try

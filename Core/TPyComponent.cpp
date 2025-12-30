@@ -9,9 +9,9 @@
 
 namespace RDK {
 
-// Методы
+// РњРµС‚РѕРґС‹
 // --------------------------
-// Конструкторы и деструкторы
+// РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂС‹ Рё РґРµСЃС‚СЂСѓРєС‚РѕСЂС‹
 // --------------------------
 TPyComponent::TPyComponent(void)
 : PythonScriptFileName("PythonScriptFileName",this,&TPyComponent::SetPythonScriptFileName),
@@ -29,7 +29,7 @@ TPyComponent::TPyComponent(void)
 // --------------------------
 
 // ---------------------
-// Методы управления параметрами
+// РњРµС‚РѕРґС‹ СѓРїСЂР°РІР»РµРЅРёСЏ РїР°СЂР°РјРµС‚СЂР°РјРё
 // ---------------------
 bool TPyComponent::SetPythonScriptFileName(const std::string& path)
 {
@@ -66,7 +66,7 @@ TPyComponent::~TPyComponent(void)
 // --------------------------
 
 // --------------------------
-// Скрытые методы управления счетом
+// РЎРєСЂС‹С‚С‹Рµ РјРµС‚РѕРґС‹ СѓРїСЂР°РІР»РµРЅРёСЏ СЃС‡РµС‚РѕРј
 // --------------------------
 void TPyComponent::PythonInitialize(void)
 {
@@ -88,7 +88,7 @@ void TPyComponent::PythonInitialize(void)
          return;
         }
 
-        // загрузка кода из файла в извлеченную область имен
+        // Р·Р°РіСЂСѓР·РєР° РєРѕРґР° РёР· С„Р°Р№Р»Р° РІ РёР·РІР»РµС‡РµРЅРЅСѓСЋ РѕР±Р»Р°СЃС‚СЊ РёРјРµРЅ
         if(*UseFullPath)
         {
          FullPythonScriptFileName = PythonScriptFileName->c_str();
@@ -112,13 +112,13 @@ void TPyComponent::PythonInitialize(void)
          return;
         }
 
-        py::object MainModule = py::import("__main__");  // импортируем main-scope, см. https://docs.python.org/3/library/__main__.html
-        py::object MainNamespace = MainModule.attr("__dict__");  // извлекаем область имен
+        py::object MainModule = py::import("__main__");  // РёРјРїРѕСЂС‚РёСЂСѓРµРј main-scope, СЃРј. https://docs.python.org/3/library/__main__.html
+        py::object MainNamespace = MainModule.attr("__dict__");  // РёР·РІР»РµРєР°РµРј РѕР±Р»Р°СЃС‚СЊ РёРјРµРЅ
 
         py::object DetectorInterfaceModule = import(*PythonModuleName,FullPythonScriptFileName,MainNamespace);
 
-        // экземпляр питоновского класса, через который активируется виртуальная среда и загружается модель
-        // TODO: пусть до среды брать из конфига
+        // СЌРєР·РµРјРїР»СЏСЂ РїРёС‚РѕРЅРѕРІСЃРєРѕРіРѕ РєР»Р°СЃСЃР°, С‡РµСЂРµР· РєРѕС‚РѕСЂС‹Р№ Р°РєС‚РёРІРёСЂСѓРµС‚СЃСЏ РІРёСЂС‚СѓР°Р»СЊРЅР°СЏ СЃСЂРµРґР° Рё Р·Р°РіСЂСѓР¶Р°РµС‚СЃСЏ РјРѕРґРµР»СЊ
+        // TODO: РїСѓСЃС‚СЊ РґРѕ СЃСЂРµРґС‹ Р±СЂР°С‚СЊ РёР· РєРѕРЅС„РёРіР°
         (*IntegrationInterface) = DetectorInterfaceModule.attr(PythonClassName->c_str());
         if(!IntegrationInterface->is_none())
          (*IntegrationInterfaceInstance) = (*IntegrationInterface)(); // DetectorEmbeddingInterface
@@ -144,7 +144,7 @@ void TPyComponent::PythonInitialize(void)
 
 }
 
-// Восстановление настроек по умолчанию и сброс процесса счета
+// Р’РѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРёРµ РЅР°СЃС‚СЂРѕРµРє РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ Рё СЃР±СЂРѕСЃ РїСЂРѕС†РµСЃСЃР° СЃС‡РµС‚Р°
 bool TPyComponent::ADefault(void)
 {
  PythonInitialized=false;
@@ -152,10 +152,10 @@ bool TPyComponent::ADefault(void)
  return APyDefault();
 }
 
-// Обеспечивает сборку внутренней структуры объекта
-// после настройки параметров
-// Автоматически вызывает метод Reset() и выставляет Ready в true
-// в случае успешной сборки
+// РћР±РµСЃРїРµС‡РёРІР°РµС‚ СЃР±РѕСЂРєСѓ РІРЅСѓС‚СЂРµРЅРЅРµР№ СЃС‚СЂСѓРєС‚СѓСЂС‹ РѕР±СЉРµРєС‚Р°
+// РїРѕСЃР»Рµ РЅР°СЃС‚СЂРѕР№РєРё РїР°СЂР°РјРµС‚СЂРѕРІ
+// РђРІС‚РѕРјР°С‚РёС‡РµСЃРєРё РІС‹Р·С‹РІР°РµС‚ РјРµС‚РѕРґ Reset() Рё РІС‹СЃС‚Р°РІР»СЏРµС‚ Ready РІ true
+// РІ СЃР»СѓС‡Р°Рµ СѓСЃРїРµС€РЅРѕР№ СЃР±РѕСЂРєРё
 bool TPyComponent::ABuild(void)
 {
  if(IsInit())
@@ -164,7 +164,7 @@ bool TPyComponent::ABuild(void)
  return APyBuild();
 }
 
-// Сброс процесса счета без потери настроек
+// РЎР±СЂРѕСЃ РїСЂРѕС†РµСЃСЃР° СЃС‡РµС‚Р° Р±РµР· РїРѕС‚РµСЂРё РЅР°СЃС‚СЂРѕРµРє
 bool TPyComponent::AReset(void)
 {
  if(!PythonInitialized)
@@ -173,7 +173,7 @@ bool TPyComponent::AReset(void)
 }
 
 
-// Выполняет расчет этого объекта
+// Р’С‹РїРѕР»РЅСЏРµС‚ СЂР°СЃС‡РµС‚ СЌС‚РѕРіРѕ РѕР±СЉРµРєС‚Р°
 bool TPyComponent::ABeforeCalculate(void)
 {
  if(!PythonInitialized)

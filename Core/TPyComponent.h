@@ -10,50 +10,50 @@ namespace RDK {
 
 class TPyComponent: virtual public RDK::UNet
 {
-public: // Свойства
-/// Имя файла выполняемого скрипта, лежащего относительно папки конфигурации
-ULProperty<std::string, TPyComponent> PythonScriptFileName;
+public: // 
+///    ,    
+UProperty<std::string, TPyComponent, ptPubParameter> PythonScriptFileName;
 
 /// Deprecated: PythonScriptPath == PythonScriptFileName
-//ULProperty<std::string, TPyComponent> PythonScriptPath;
+//UProperty<std::string, TPyComponent, ptPubParameter> PythonScriptPath;
 
-/// Имя питон-модуля
-ULProperty<std::string, TPyComponent> PythonModuleName;
+///  -
+UProperty<std::string, TPyComponent, ptPubParameter> PythonModuleName;
 
-/// Имя питон-класса
-ULProperty<std::string, TPyComponent> PythonClassName;
+///  -
+UProperty<std::string, TPyComponent, ptPubParameter> PythonClassName;
 
-/// Использовать путь к файлу "как есть". Вкл по умолчанию, надо переключать для старых проектов
-ULProperty<bool, TPyComponent> UseFullPath;
+///     " ".   ,     
+UProperty<bool, TPyComponent, ptPubParameter> UseFullPath;
 
-protected: // Временные переменные
+protected: //  
 
-//Нужен чтобы забирать/отдавать GIL
+//  / GIL
 PyGILState_STATE gil_state;
 
-/// Флаг взводится при успешной инициализации подсистемы питона
+///       
 bool PythonInitialized;
 
-/// Интерфейс 1
+///  1
 boost::python::object* IntegrationInterface;
 
-/// Интерфейс 2
+///  2
 boost::python::object* IntegrationInterfaceInstance;
 
-/// Полный путь до имени скрипта
+///     
 std::string FullPythonScriptFileName;
 
 
-public: // Методы
+public: // 
 // --------------------------
-// Конструкторы и деструкторы
+//   
 // --------------------------
 TPyComponent(void);
 virtual ~TPyComponent(void);
 // --------------------------
 
 // ---------------------
-// Методы управления параметрами
+//   
 // ---------------------
 bool SetPythonScriptFileName(const std::string& path);
 //bool SetPythonClassifierScriptPath(const std::string& path);
@@ -62,31 +62,31 @@ bool SetPythonClassName(const std::string& path);
 // ---------------------
 
 // --------------------------
-// Скрытые методы управления счетом
+//    
 // --------------------------
 protected:
 virtual void PythonInitialize(void);
 
-/// Обязательно возвращает true если успешно завершился
-/// и false в случае неудачи!
+///   true   
+///  false   !
 virtual bool APythonInitialize(void)=0;
 
-// Восстановление настроек по умолчанию и сброс процесса счета
+//        
 virtual bool ADefault(void);
 virtual bool APyDefault(void)=0;
 
-// Обеспечивает сборку внутренней структуры объекта
-// после настройки параметров
-// Автоматически вызывает метод Reset() и выставляет Ready в true
-// в случае успешной сборки
+//     
+//   
+//    Reset()   Ready  true
+//    
 virtual bool ABuild(void);
 virtual bool APyBuild(void)=0;
 
-// Сброс процесса счета без потери настроек
+//      
 virtual bool AReset(void);
 virtual bool APyReset(void)=0;
 
-// Выполняет расчет этого объекта
+//    
 virtual bool ABeforeCalculate(void);
 
 // --------------------------
