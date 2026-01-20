@@ -24,10 +24,10 @@ sequenceDiagram
 
 ```mermaid
 flowchart TB
-    TPyComponent[TPyComponent<br/>Базовый компонент]
-    TPyClassifier[TPyClassifierTrainer<br/>Обучение классификатора]
-    TPyDetector[TPyObjectDetector<br/>Детектор объектов]
-    TPySegmentator[TPySegmentator<br/>Сегментатор]
+    TPyComponent["TPyComponent (Базовый_компонент)"]
+    TPyClassifier["TPyClassifierTrainer (Обучение)"]
+    TPyDetector["TPyObjectDetector (Детектор)"]
+    TPySegmentator["TPySegmentator (Сегментатор)"]
     PythonLib[Python ML Libraries]
     
     TPyComponent --> TPyClassifier
@@ -88,6 +88,24 @@ flowchart TB
 Rdk-PyMachineLearningLib provides a bridge between C++ Rdk code and Python machine learning libraries.
 
 ### Component Architecture
+
+```mermaid
+flowchart TB
+    TPyComponent_EN["TPyComponent (Base)"]
+    TPyClassifier_EN["TPyClassifierTrainer (Training)"]
+    TPyDetector_EN["TPyObjectDetector (Detection)"]
+    TPySegmentator_EN["TPySegmentator (Segmentation)"]
+    PythonLib_EN["Python ML Libraries"]
+    
+    TPyComponent_EN --> TPyClassifier_EN
+    TPyComponent_EN --> TPyDetector_EN
+    TPyComponent_EN --> TPySegmentator_EN
+    TPyClassifier_EN --> PythonLib_EN
+    TPyDetector_EN --> PythonLib_EN
+    TPySegmentator_EN --> PythonLib_EN
+```
+
+The flowchart reflects the main idea: C++ components manage the engine lifecycle and data exchange, while heavy ML logic runs inside Python (models, inference, postprocessing). The bridge layer (`TPythonIntegration` / `TPythonIntegrationUtil`) handles interpreter setup, module loading and function calls.
 
 ### Main Modules
 
