@@ -55,7 +55,6 @@ YOLO детектор объектов.
 
 ### См. также
 
-- [Reports/08-ML-Libraries.md](../../../Reports/08-ML-Libraries.md) - детальное описание ML библиотек
 - Исходный код: `Libraries/Rdk-PyMachineLearningLib/Core/`
 
 ---
@@ -115,5 +114,4 @@ Python integration.
 
 ### See Also
 
-- [Reports/08-ML-Libraries.md](../../../Reports/08-ML-Libraries.md) - detailed ML libraries description
 - Source code: `Libraries/Rdk-PyMachineLearningLib/Core/`

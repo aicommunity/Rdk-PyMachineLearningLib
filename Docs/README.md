@@ -16,8 +16,8 @@
 
 ### Связь с корневой документацией
 
-Для обзорной информации см.:
-- [Docs/Libraries/Rdk-PyMachineLearningLib.md](../../Docs/Libraries/Rdk-PyMachineLearningLib.md) - обзор библиотеки
+Для обзорной информации см. корневую документацию проекта:
+- `Docs/Libraries/Rdk-PyMachineLearningLib.md` - обзор библиотеки (в корневом репозитории)
 
 ### Детальная документация
 
@@ -43,8 +43,8 @@ The library includes components for:
 
 ### Link to Root Documentation
 
-For overview information see:
-- [Docs/Libraries/Rdk-PyMachineLearningLib.md](../../Docs/Libraries/Rdk-PyMachineLearningLib.md) - library overview
+For overview information see root project documentation:
+- `Docs/Libraries/Rdk-PyMachineLearningLib.md` - library overview (in root repository)
 
 ### Detailed Documentation
 
