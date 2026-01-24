@@ -14,6 +14,21 @@
 - Сегментации изображений (UNet, Protobuf)
 - Обучения моделей
 
+### Быстрый старт
+
+#### Детекция объектов с YOLO
+
+```cpp
+// Создание детектора YOLO
+auto detector = storage->CreateComponent<TPyObjectDetectorYolo>("YOLO");
+detector->ModelPath = "yolo.weights";
+detector->ConfigPath = "yolo.cfg";
+detector->InputImage.AttachTo(&source->OutputImage);
+detector->Build();
+detector->Calculate();
+auto detections = detector->Detections();
+```
+
 ### Связь с корневой документацией
 
 Для обзорной информации см. корневую документацию проекта:
@@ -24,6 +39,7 @@
 - [Architecture.md](Architecture.md) - архитектура библиотеки
 - [Usage-Examples.md](Usage-Examples.md) - примеры использования
 - [API-Overview.md](API-Overview.md) - обзор API
+- [Component-Catalog.md](Component-Catalog.md) - каталог компонентов
 
 ---
 
@@ -41,6 +57,21 @@ The library includes components for:
 - Image segmentation (UNet, Protobuf)
 - Model training
 
+### Quick Start
+
+#### Object Detection with YOLO
+
+```cpp
+// Create YOLO detector
+auto detector = storage->CreateComponent<TPyObjectDetectorYolo>("YOLO");
+detector->ModelPath = "yolo.weights";
+detector->ConfigPath = "yolo.cfg";
+detector->InputImage.AttachTo(&source->OutputImage);
+detector->Build();
+detector->Calculate();
+auto detections = detector->Detections();
+```
+
 ### Link to Root Documentation
 
 For overview information see root project documentation:
@@ -51,3 +82,4 @@ For overview information see root project documentation:
 - [Architecture.md](Architecture.md) - library architecture
 - [Usage-Examples.md](Usage-Examples.md) - usage examples
 - [API-Overview.md](API-Overview.md) - API overview
+- [Component-Catalog.md](Component-Catalog.md) - component catalog
